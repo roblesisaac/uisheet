@@ -551,13 +551,13 @@ global.fax = new Chain({
       this.phaxio  = new Phaxio(process.env.PHAXIOKEY, process.env.PHAXIOSECRET);
       var self = this;
       this.phaxio.faxes.create({
-        to: this._body.to,
-        content_url: "https://google.com"
+        to: self._body.to,
+        content_url: self._body.content
       }).then(function(fax) {
         self.fax = fax;
         self.next(fax);
       }).catch(function(err){
-        self.errror(err);
+        self.error(err);
       });
     },
     getFaxInfo: function() {
