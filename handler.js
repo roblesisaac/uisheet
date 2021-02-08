@@ -424,7 +424,7 @@ global.db = new Chain({
     updateItem: function() {
       if(!this.id) return this.error("<(-_-)> ID, every update must have.");
       var self = this;
-      this.model.findByIdAndUpdate(this.id, this._body, { new: true }, function(err, data){
+      this.model.findByIdAndUpdate(this.id, this._body.to, { new: true }, function(err, data){
         if(err) return self.error(err);
         self.next(data);
       });
@@ -546,18 +546,16 @@ global.db = new Chain({
   ]
 });
 global.fax = new Chain({
-  input: {
-    phaxio: new Phaxio(process.env.PHAXIOKEY, process.env.PHAXIOSECRET)
-  },
   steps: {
     createFax: function() {
+      this.phaxio  = new Phaxio(process.env.PHAXIOKEY, process.env.PHAXIOSECRET);
       var self = this;
       this.phaxio.faxes.create({
-        to: "+1234567890",
+        to: this._body.to,
         content_url: "https://google.com"
       }).then(function(fax) {
         self.fax = fax;
-        self.next();
+        self.next(fax);
       }).catch(function(err){
         self.errror(err);
       });
