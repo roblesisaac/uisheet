@@ -2,6 +2,10 @@ service: uisheet
 
 custom:
   bucket: uisheet
+  webpack:
+    includeModules:
+      forceInclude:
+        - sib-api-v3-sdk
   customDomain:
     domainName: www.exhaustbarn.com
     basePath: ''
@@ -14,8 +18,8 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: us-west-1
-  memorySize: 128 # set the maximum memory of the Lambdas in Megabytes
-  timeout: 30 # the timeout is 10 seconds (default is 6 seconds)
+  memorySize: 128
+  timeout: 30
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -44,8 +48,6 @@ provider:
     BTPRIVATE: ${file(./variables.json):BT.PRIVATE}
     BTTOKEN: ${file(./variables.json):BT.TOKEN}
     BUCKET: ${self:custom.bucket}
-    PHAXIOKEY: ${file(./variables.json):PHAXIO.KEY}
-    PHAXIOSECRET: ${file(./variables.json):PHAXIO.SECRET}
 
 package:
   individually: true
