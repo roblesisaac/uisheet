@@ -426,10 +426,7 @@ global.db = new Chain({
       var self = this;
       this.model.findByIdAndUpdate(this.id, this._body, { new: true }, function(err, data){
         if(err) return self.error(err);
-        self.next({
-          message: "test1",
-          data: data
-        });
+        self.next(data);
       });
     },
     userIsAuthorOfSite: function(author) {
