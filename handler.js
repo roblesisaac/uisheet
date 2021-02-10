@@ -424,9 +424,12 @@ global.db = new Chain({
     updateItem: function() {
       if(!this.id) return this.error("<(-_-)> ID, every update must have.");
       var self = this;
-      this.model.findByIdAndUpdate(this.id, this._body.to, { new: true }, function(err, data){
+      this.model.findByIdAndUpdate(this.id, this._body, { new: true }, function(err, data){
         if(err) return self.error(err);
-        self.next(data);
+        self.next({
+          message: "test1",
+          data: data
+        });
       });
     },
     userIsAuthorOfSite: function(author) {
