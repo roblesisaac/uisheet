@@ -67,19 +67,19 @@ global.braintree = new Chain({
   steps: {
     chargeCard: function() {
       var self = this,
-          payload = this._body,
-          saleObj = {
-            amount: payload.amount,
-            paymentMethodNonce: payload.nonce,
-            customer: payload.customer,
-            billing: payload.billing,
-            deviceData: payload.deviceData,
-            shipping: payload.shipping,
-            options: {
-              submitForSettlement: true
-            }
-          };
-      this.gateway.transaction.sale(saleObj, function (err, result) {
+          payload = this._body;
+      this.saleObj = {
+        amount: payload.amount,
+        paymentMethodNonce: payload.nonce,
+        customer: payload.customer,
+        billing: payload.billing,
+        deviceData: payload.deviceData,
+        shipping: payload.shipping,
+        options: {
+          submitForSettlement: true
+        }
+      };
+      this.gateway.transaction.sale(this.saleObj, function (err, result) {
         if (result) {
           self.next(result);
         } else {
@@ -95,6 +95,20 @@ global.braintree = new Chain({
         });
       });  
     },
+    customerHasntBeenSaved: function() {
+      this.next(!this._body.customerId);
+    },
+    fetchCustomer: function() {
+      var self = this;
+      this.gateway.customer.find(this._body.customerId, function(err, customer) {
+        if(err) {
+          self.error(err);
+          return;
+        }
+        
+        self.next(customer);
+      });
+    },
     initGateway: function() {
       this.gateway = braintree.connect({
         environment: braintree.Environment.Sandbox,
@@ -104,6 +118,18 @@ global.braintree = new Chain({
       });
       this.next();
     },
+    saveCustomer: function() {
+      var self = this,
+          customer = this._body.customer;
+      // customer.paymentMethodNonce = this._body.nonce;
+      this.gateway.customer.create(customer, function (err, result) {
+        if(err) {
+          self.error(err);
+          return;
+        }
+        self.next(result);
+      });
+    },
     toBrainMethod: function() {
       this.next(this.brainMethod || "getClientToken");
     }
@@ -112,8 +138,12 @@ global.braintree = new Chain({
     "initGateway",
     {
       switch: "toBrainMethod",
+      getCustomer: "fetchCustomer",
       getClientToken: "clientToken",
-      charge: "chargeCard"
+      charge: [
+        "chargeCard",
+        { if: "customerHasntBeenSaved", true: "saveCustomer" }
+      ]
     }
   ]
 });
