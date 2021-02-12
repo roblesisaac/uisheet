@@ -15,7 +15,8 @@ const userSchema = new mongoose.Schema({
     lastName: String,
     password: String,
     referral: String,
-    params: {}
+    params: {},
+    brainId: String
 });
 
 userSchema.pre('save', function (next) {
