@@ -65,21 +65,49 @@ global.braintree = new Chain({
     };
   },
   steps: {
-    chargeCard: function() {
-      var self = this,
-          payload = this._body;
-      this.saleObj = {
-        amount: payload.amount,
-        paymentMethodNonce: payload.nonce,
-        customer: payload.customer,
-        billing: payload.billing,
-        deviceData: payload.deviceData,
-        shipping: payload.shipping,
-        options: {
-          submitForSettlement: true
+    buildPaymentObj: function() {
+      var payload = this._body,
+          payment = {},
+          validProps = [
+            "amount",
+            "paymentMethodNonce",
+            "customer",
+            "billing",
+            "deviceData",
+            "shipping",
+            "options",
+            "customerId"
+          ],
+          replace = {
+            nonce: "paymentMethodNonce"
+          };
+          
+      for(var prop in payload) {
+        if(validProps.includes(prop)) {
+          payment[prop] = payload[prop];
+        } else if(replace[prop]) {
+          payment[replace[prop]] = payload[prop];
         }
-      };
-      this.gateway.transaction.sale(this.saleObj, function (err, result) {
+      }
+      
+      this.payment = payment;
+      this.next();
+      // this.paymentObject = {
+      //   amount: payload.amount,
+      //   paymentMethodNonce: payload.nonce,
+      //   customer: payload.customer,
+      //   billing: payload.billing,
+      //   deviceData: payload.deviceData,
+      //   shipping: payload.shipping,
+      //   options: {
+      //     storeInVaultOnSuccess: true,
+      //     submitForSettlement: true
+      //   }
+      // };
+    },
+    chargeCard: function() {
+      var self = this;
+      this.gateway.transaction.sale(this.payment, function (err, result) {
         if (result) {
           self.next(result);
         } else {
@@ -95,18 +123,12 @@ global.braintree = new Chain({
         });
       });  
     },
-    customerHasntBeenSaved: function() {
-      this.next(!this._body.customerId);
-    },
     fetchCustomer: function() {
       var self = this;
+      this._body.customer = this._body.customer || {};
       this.gateway.customer.find(this._body.customerId, function(err, customer) {
-        if(err) {
-          self.error(err);
-          return;
-        }
-        
-        self.next(customer);
+        self.customer = err ? false : customer;
+        self.next(self.customer);
       });
     },
     initGateway: function() {
@@ -119,9 +141,20 @@ global.braintree = new Chain({
       this.next();
     },
     saveCustomer: function() {
+      // this.gateway.transaction.sale({
+      //   amount: "10.00",
+      //   paymentMethodNonce: nonceFromTheClient,
+      //   customer: {
+      //     id: "aCustomerId"
+      //   },
+      //   options: {
+      //     storeInVaultOnSuccess: true
+      //   }
+      // }, (err, result) => {
+      // });      
+      
       var self = this,
           customer = this._body.customer;
-      // customer.paymentMethodNonce = this._body.nonce;
       this.gateway.customer.create(customer, function (err, result) {
         if(err) {
           self.error(err);
@@ -141,8 +174,8 @@ global.braintree = new Chain({
       getCustomer: "fetchCustomer",
       getClientToken: "clientToken",
       charge: [
-        "chargeCard",
-        { if: "customerHasntBeenSaved", true: "saveCustomer" }
+        "buildPaymentObj",
+        "chargeCard"  
       ]
     }
   ]
