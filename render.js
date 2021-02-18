@@ -48,8 +48,9 @@ module.exports = function(page, props) {
   <script src="${windowLocation}/scripts/data"></script>
   <script src="${windowLocation}/scripts/js"></script>
 
+  <script defer src="https://js.braintreegateway.com/web/3.72.0/js/client.min.js"></script>
+  <script defer src="https://js.braintreegateway.com/web/3.72.0/js/data-collector.min.js"></script>
   <script defer src="https://js.braintreegateway.com/web/dropin/1.26.0/js/dropin.min.js"></script>
-  <script defer src="https://js.braintreegateway.com/web/3.65.0/js/data-collector.min.js"></script>
 </html>
   `;
 };
