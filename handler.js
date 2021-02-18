@@ -92,18 +92,6 @@ global.braintree = new Chain({
       
       this.payment = payment;
       this.next();
-      // this.paymentObject = {
-      //   amount: payload.amount,
-      //   paymentMethodNonce: payload.nonce,
-      //   customer: payload.customer,
-      //   billing: payload.billing,
-      //   deviceData: payload.deviceData,
-      //   shipping: payload.shipping,
-      //   options: {
-      //     storeInVaultOnSuccess: true,
-      //     submitForSettlement: true
-      //   }
-      // };
     },
     chargeCard: function() {
       var self = this;
@@ -117,7 +105,7 @@ global.braintree = new Chain({
     },
     clientToken: function() {
       var self = this;
-      this.gateway.clientToken.generate({}, function (err, response) {
+      this.gateway.clientToken.generate(this._body, function (err, response) {
         self.next({
           token: response.clientToken
         });
