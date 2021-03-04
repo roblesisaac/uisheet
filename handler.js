@@ -3,6 +3,7 @@
 try {
 const AWS = require("aws-sdk");
 const braintree = require("braintree");
+const busboy = require("busboy");
 const s3 = new AWS.S3();
 const mime = require("mime");
 const Utils = require("./scripts/utils");
@@ -115,8 +116,7 @@ global.braintree = new Chain({
       var self = this;
       this._body.customer = this._body.customer || {};
       this.gateway.customer.find(this._body.customerId, function(err, customer) {
-        self.customer = err ? false : customer;
-        self.next(self.customer);
+        self.next(customer || {id: false});
       });
     },
     initGateway: function() {
@@ -129,18 +129,6 @@ global.braintree = new Chain({
       this.next();
     },
     saveCustomer: function() {
-      // this.gateway.transaction.sale({
-      //   amount: "10.00",
-      //   paymentMethodNonce: nonceFromTheClient,
-      //   customer: {
-      //     id: "aCustomerId"
-      //   },
-      //   options: {
-      //     storeInVaultOnSuccess: true
-      //   }
-      // }, (err, result) => {
-      // });      
-      
       var self = this,
           customer = this._body.customer;
       this.gateway.customer.create(customer, function (err, result) {
@@ -303,8 +291,40 @@ global.db = new Chain({
       this.error("<(-_-)> Permission from site author, you must have.");
     },
     bulkImport: function() {
-      var self = this;
-      this.model.insertMany(this._body, function(err, doc) {
+      // var contentType = this._headers["Content-Type"] || this._headers["content-type"],
+      //     bb = new busboy({ headers: { "content-type": contentType }}),
+      //     self = this;
+      
+      // // this.next({
+      // //   message: "hi"
+      // // });
+      
+      // bb.on("file", function (fieldname, file, filename, encoding, mimetype) {
+      //   file
+      //   .on("data", function(data) {
+      //     self.next("data");
+      //   })
+      //   .on("end", function() {
+      //     // self.next("end");
+      //   });
+      // })
+      // .on("field", function(fieldname, val) {
+      //   // self.next("field");
+      // })
+      // .on("finish", function () {
+      //   // self.next("finish");
+      // })
+      // .on("error", function(err) {
+      //   // self.error(err);
+      // });
+    
+      // bb.end(self._body);
+      
+      var self = this,
+          mOptions = {
+            ordered: false
+          };
+      this.model.insertMany(this._body, mOptions, function(err, doc) {
         if(err) return self.error(err);
         self.next();
       });
@@ -1298,6 +1318,7 @@ global.schema = new Chain({
         "boolean": Boolean,
         "array": Array,
         "{}": Object,
+        "lowercase": { type: String, lowercase: true },
         "obj": Object,
         "object": Object,
         "wild": Object
@@ -1306,13 +1327,16 @@ global.schema = new Chain({
   },
   steps: {
     convertToFuncion: function() {
-      if(!this.value) return this.next();
-      var convert;
-      if(typeof this.value.toLowerCase == "function") {
-       convert = this.types[this.value.toLowerCase()]; 
-      } else {
-        convert = this.types[typeof this.value];
+      if(!this.value) {
+        this.obj[this.key] = String;
+        this.stringSchema = "string";
+        return;
       }
+      var keyName = typeof this.value == "string"
+                    ? this.value.toLowerCase()
+                    : "string",
+          convert = this.types[keyName];
+      this.stringSchema[this.key] = keyName;
       this.obj[this.key] = convert || String;
       this.next();
     },
@@ -1566,9 +1590,8 @@ global.serve = new Chain({
       this.next(!!res.statusCode);
     },
     itDoesntHaveFormatting: function(res) {
-      res = res || {};
-      var hasId = !!res._id; // if it hasId it doesnt have formatting
-      this.next(hasId || (!res.type && !res.headers));
+      var hasId = res && !!res._id; // if it hasId it doesnt have formatting
+      this.next(hasId || !res || (!res.type && !res.headers));
     },
     renderVariables: function(res) {
       for(var key in res.data) {
@@ -1695,6 +1718,9 @@ global.signup = new Chain({
 });
 global.sib = new Chain({
   steps: {
+    alertNeedNumber: function() {
+      this.error("<(-_-)> Missing phone number, you are.");
+    },
     alertNeedRecipient: function() {
       this.error("<(-_-)> Recipient for email, you must include");
     },
@@ -1704,6 +1730,18 @@ global.sib = new Chain({
       
       this.apiKey = this.defaultClient.authentications["api-key"];
       this.apiKey.apiKey = process.env.SIB;
+      this.next();
+    },
+    buildSmsInstance: function() {
+      this.apiInstance = new this.SibApiV3Sdk.TransactionalSMSApi();
+      this.sendTransacSms = new this.SibApiV3Sdk.SendTransacSms();
+      this.next();
+    },
+    buildSmsParams: function() {
+      var body = this._body;
+      this.sendTransacSms.sender = body.from;
+      this.sendTransacSms.recipient = body.to;
+      this.sendTransacSms.content = body.message;
       this.next();
     },
     buildSibParams: function() {
@@ -1723,6 +1761,27 @@ global.sib = new Chain({
       this.sendSmtpEmail = new this.SibApiV3Sdk.SendSmtpEmail();
       this.next();
     },
+    contactSave: function() {
+      var createContact = new this.SibApiV3Sdk.CreateContact(),
+          self = this;
+      
+      createContact = this._body;
+      this.apiInstance.createContact(createContact).then(function(data) {
+        self.next({
+          body: self._body,
+          response: data
+        });
+      }, function(error) {
+        self.error(error);
+      });
+    },
+    createContactInstance: function() {
+      this.apiInstance = new this.SibApiV3Sdk.ContactsApi();
+      this.next();
+    },
+    missingNumber: function() {
+      this.next(!this._body.to);
+    },
     missingSibRecipient: function() {
       this.next(!this._body.email);
     },
@@ -1738,38 +1797,6 @@ global.sib = new Chain({
           error: "<(-_-)>" + error
         });
       });
-    }
-  },
-  instruct: {
-    switch: "toRouteMethod",
-    post: [
-      { if: "missingSibRecipient", true: "alertNeedRecipient" },
-      "BuildSibApi",
-      "buildEmailInstance",
-      "buildSibParams",
-      "sendSibEmail"  
-    ]
-  }
-});
-global.sibSms = new Chain({
-  steps: {
-    alertNeedNumber: function() {
-      this.error("<(-_-)> Missing phone number, you are.");
-    },
-    buildSmsInstance: function() {
-      this.apiInstance = new this.SibApiV3Sdk.TransactionalSMSApi();
-      this.sendTransacSms = new this.SibApiV3Sdk.SendTransacSms();
-      this.next();
-    },
-    buildSmsParams: function() {
-      var body = this._body;
-      this.sendTransacSms.sender = body.from;
-      this.sendTransacSms.recipient = body.to;
-      this.sendTransacSms.content = body.message;
-      this.next();
-    },
-    missingNumber: function() {
-      this.next(!this._body.to);
     },
     sendSms: function() {
       var self = this;
@@ -1778,17 +1805,32 @@ global.sibSms = new Chain({
       }, function(error) {
         self.error(error);
       });
+    },
+    toSibMethod: function() {
+      this.next(this._arg1);
     }
   },
   instruct: {
-    switch: "toRouteMethod",
-    post: [
+    switch: "toSibMethod",
+    createContact: [
+      "BuildSibApi",
+      "createContactInstance",
+      "contactSave"
+    ],
+    email: [
+      { if: "missingSibRecipient", true: "alertNeedRecipient" },
+      "BuildSibApi",
+      "buildEmailInstance",
+      "buildSibParams",
+      "sendSibEmail"  
+    ],
+    sms: [
       { if: "missingNumber", true: "alertNeedNumber"},
       "BuildSibApi",
       "buildSmsInstance",
       "buildSmsParams",
       "sendSms"
-      ]
+    ]
   }
 });
 global.smartsheet = new Chain({
