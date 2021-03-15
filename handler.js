@@ -323,10 +323,23 @@ global.db = new Chain({
       var self = this,
           mOptions = {
             ordered: false
-          };
+          },
+          sheet = this.sheet;
+          
       this.model.insertMany(this._body, mOptions, function(err, doc) {
-        if(err) return self.error(err);
-        self.next();
+        if(err) {
+          sheet.uploadStatus.errors.push({
+            count: self._body.length,
+            id: "testId"
+          });
+        } else {
+          sheet.uploadStatus.currentCount+=self._body.length;
+        }
+      });
+          
+      this.next({
+        message: "testing",
+        sheet: this.sheet
       });
     },
     bulkImportCompleted: function() {
@@ -436,6 +449,13 @@ global.db = new Chain({
         self.next(data);
       });
     },
+    getCount: function() {
+      var self = this;
+      this.model.countDocuments(this.filter, function(err, count){
+        if(err) return self.error(err);
+        self.next(count);
+      });
+    },
     hasNewPassword: function() {
       this.next(!!this._body.newPassword);
     },
@@ -448,6 +468,9 @@ global.db = new Chain({
     },
     isANativeOption: function() {
       this.next(Object.keys(this.nativeOptions).indexOf(this.key) > -1);
+    },
+    isDbCount: function() {
+      this.next(this.id=="count" || this.id == "length");
     },
     keyValueIsRegex: function() {
       var firstIsSlash = this.value.charAt(0) == "/",
@@ -521,6 +544,7 @@ global.db = new Chain({
             ]
           }  
         ],
+        { if: "isDbCount", true: ["getCount", "serve"] },
         {
           if: "hasId",
           true: "findById",
@@ -578,7 +602,7 @@ global.db = new Chain({
           if: "moreThanOneItem",
           true: [
             "bulkImport",
-            "bulkImportCompleted"
+            // "bulkImportCompleted"
           ],
           false: [
             "postItem",
