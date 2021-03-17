@@ -326,21 +326,23 @@ global.db = new Chain({
           },
           sheet = this.sheet;
           
-      this.model.insertMany(this._body, mOptions, function(err, doc) {
-        if(err) {
-          sheet.uploadStatus.errors.push({
-            count: self._body.length,
-            id: "testId"
-          });
-        } else {
-          sheet.uploadStatus.currentCount+=self._body.length;
-        }
+      this._context.done(null, {
+        statusCode: 200,
+        body: JSON.stringify("Uploading " + this._body.length + "items"),
+        headers: { 
+          "Access-Control-Allow-Origin": "*",
+		      "Cache-Control": "no-cache"
+        },
       });
           
-      this.next({
-        message: "testing",
-        sheet: this.sheet
-      });
+      // this.next({
+      //   message: "Uploading " + this._body.length + "items",
+      //   body: this._body.length
+      // });
+      
+      self.model.insertMany(self._body, mOptions);
+          
+
     },
     bulkImportCompleted: function() {
       this.next("<(-_-)> Imported " + this._body.length + " items to " + this.sheetName + ", you have.");
