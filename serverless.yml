@@ -23,11 +23,6 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - lambda:InvokeFunction
-      Resource:
-        - "*" 
-    - Effect: Allow
-      Action:
         - s3:ListBucket
         - s3:GetObject
         - s3:GetObjectAcl
