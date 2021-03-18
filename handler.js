@@ -324,19 +324,11 @@ global.db = new Chain({
           });
           
       lambda.invoke({
-        FunctionName: "bulk",
-        InvocationType: "Event",
-        Payload: JSON.stringify({})
+        FunctionName: "uisheet-dev-bulk",
+        Payload: JSON.stringify({}),
+        InvocationType: "Event"
       }, function(error, response) {
         var r = JSON.parse(response.Payload);
-      });
-      
-      var newSheet = {
-            name: "bulkCreated",
-            siteId:"5d040cd9d1e17100079b8500"
-          };
-          
-      models.sheets.create(newSheet, function(err, data){
       });
           
       this.next({
@@ -2169,8 +2161,13 @@ module.exports.bulk = function(event, context, callback) {
               name: "bulkCreated",
               siteId:"5d040cd9d1e17100079b8500"
             };
-        // models.sheets.create(newSheet, function(err, data){
-        // });
+        models.sheets.create(newSheet, function(err, data){
+          if(err) {
+            console.log(err);
+          } else {
+            
+          }
+        });
       }
     },
     instruct: [
