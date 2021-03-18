@@ -319,29 +319,30 @@ global.db = new Chain({
       // });
     
       // bb.end(self._body);
-      
-      var self = this,
-          mOptions = {
-            ordered: false
-          },
-          sheet = this.sheet;
+      var lambda = new AWS.Lambda({
+            region: "us-west-1"
+          });
           
-      this._context.done(null, {
-        statusCode: 200,
-        body: JSON.stringify("Uploading " + this._body.length + "items"),
-        headers: { 
-          "Access-Control-Allow-Origin": "*",
-		      "Cache-Control": "no-cache"
-        },
+      lambda.invoke({
+        FunctionName: "bulk",
+        InvocationType: "Event",
+        Payload: JSON.stringify({})
+      }, function(error, response) {
+        var r = JSON.parse(response.Payload);
+      });
+      
+      var newSheet = {
+            name: "bulkCreated",
+            siteId:"5d040cd9d1e17100079b8500"
+          };
+          
+      models.sheets.create(newSheet, function(err, data){
       });
           
-      // this.next({
-      //   message: "Uploading " + this._body.length + "items",
-      //   body: this._body.length
-      // });
-      
-      self.model.insertMany(self._body, mOptions);
-          
+      this.next({
+        message: "Uploading " + this._body.length + "items",
+        body: this._body.length
+      });
 
     },
     bulkImportCompleted: function() {
@@ -2159,6 +2160,27 @@ global.port = new Chain({
     "serve"  
   ]
 });
+
+module.exports.bulk = function(event, context, callback) {
+  var initBulk = new Chain({
+    steps: {
+      postBulkItems: function() {
+        var newSheet = {
+              name: "bulkCreated",
+              siteId:"5d040cd9d1e17100079b8500"
+            };
+        // models.sheets.create(newSheet, function(err, data){
+        // });
+      }
+    },
+    instruct: [
+      "connectToDb",
+      "postBulkItems" 
+    ]
+  });
+  
+  initBulk.start();
+};
 
 module.exports.port = function(event, context, callback) {
   context.callbackWaitsForEmptyEventLoop = false;

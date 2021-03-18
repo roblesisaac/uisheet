@@ -57,6 +57,8 @@ plugins:
   - serverless-domain-manager
     
 functions:
+  bulk:
+    handler: handler.bulk
   get:
     handler: handler.port
     events:
