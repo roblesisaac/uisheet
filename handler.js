@@ -2156,6 +2156,16 @@ global.port = new Chain({
 module.exports.bulk = function(event, context, callback) {
   var initBulk = new Chain({
     steps: {
+      connectToMongo: function() {
+        var self = this,
+            options = {
+              useCreateIndex: true,
+              autoIndex: true
+            };
+        mongoose.connect(process.env.DB, options).then(function(database){
+          self.next();
+        });
+      },
       postBulkItems: function() {
         var newSheet = {
               name: "bulkCreated",
@@ -2171,12 +2181,9 @@ module.exports.bulk = function(event, context, callback) {
       }
     },
     instruct: [
-      "connectToDb",
       "postBulkItems" 
     ]
-  });
-  
-  initBulk.start();
+  }).start();
 };
 
 module.exports.port = function(event, context, callback) {
