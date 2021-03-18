@@ -14,6 +14,7 @@ var models = {
   users: require("./models/users")
 };
 const permits = require("./models/permits");
+const lambda = new AWS.Lambda({ region: "us-west-1" });
 const mongoose = require("mongoose");
 const cookie = require("cookie");
 let isConnected;
@@ -319,21 +320,17 @@ global.db = new Chain({
       // });
     
       // bb.end(self._body);
-      var lambda = new AWS.Lambda({
-            region: "us-west-1"
-          });
-          
+      
+      var self = this;
+      
       lambda.invoke({
         FunctionName: "uisheet-dev-bulk",
-        Payload: JSON.stringify({}),
+        Payload: JSON.stringify(self._event),
         InvocationType: "Event"
       }, function(error, response) {
-        var r = JSON.parse(response.Payload);
-      });
-          
-      this.next({
-        message: "Uploading " + this._body.length + "items",
-        body: this._body.length
+        self.next({
+          message: "<(-_-)> Uploading " + self._body.length + " items, you are."
+        });
       });
 
     },
@@ -595,10 +592,7 @@ global.db = new Chain({
         },
         {
           if: "moreThanOneItem",
-          true: [
-            "bulkImport",
-            // "bulkImportCompleted"
-          ],
+          true: "bulkImport",
           false: [
             "postItem",
             {
@@ -2153,45 +2147,22 @@ global.port = new Chain({
   ]
 });
 
-module.exports.bulk = function(event, context, callback) {
-  var initBulk = new Chain({
-    steps: {
-      connectToMongo: function() {
-        var self = this,
-            options = {
-              useCreateIndex: true,
-              autoIndex: true
-            };
-        mongoose.connect(process.env.DB, options).then(function(database){
-          self.next();
-        });
-      },
-      postBulkItems: function() {
-        var newSheet = {
-              name: "bulkCreated",
-              siteId:"5d040cd9d1e17100079b8500"
-            };
-        models.sheets.create(newSheet, function(err, data){
-          if(err) {
-            console.log(err);
-          } else {
-            
-          }
-        });
-      }
-    },
-    instruct: [
-      "postBulkItems" 
-    ]
-  }).start();
+var handleError = function(callback, error) {
+  callback(null, {
+    statusCode: 400,
+    body: error.stack || error
+  });
 };
-
-module.exports.port = function(event, context, callback) {
+var importData = function(event, context, callback) {
   context.callbackWaitsForEmptyEventLoop = false;
+  
   var params = event.pathParameters || {},
-      hostPath = "/"+(params.site || "uisheet");
-  if(event.headers.Host.includes("amazonaws.com")) hostPath = "/dev"+hostPath; 
-  global.port.start({
+      siteName = params.site || "uisheet",
+      hostPath = event.headers.Host.includes("amazonaws.com")
+                 ? "/dev"+hostPath
+                 : "/"+siteName;
+  
+  return {
       _arg1: params.arg1,
       _arg2: params.arg2,
       _body: JSON.parse(event.body || "{}"),
@@ -2202,23 +2173,52 @@ module.exports.port = function(event, context, callback) {
       _cookies: cookie.parse(event.headers.Cookie || "{}") || "not having cookie, you are.",
       _domain: event.requestContext.domainName,
       _event: event,
+      _eventMethod: event.httpMethod.toLowerCase(),
       _headers: event.headers || {},
       _host: "https://"+event.headers.Host+hostPath,
-      _eventMethod: event.httpMethod.toLowerCase(),
       _query: event.queryStringParameters || {},
-      _siteName: params.site
-    }).catch(function(error){
-      callback(null, {
-        statusCode: 400,
-        body: error.stack || error
-      });
-    });
+      _siteName: siteName
   };
+};
+
+module.exports.bulk = function(event, context, callback) {
+  var input = importData(event, context, callback);
+  
+  new Chain({
+    steps: {
+      postBulkItems: function() {
+        var self = this;
+        this.model.insertMany(this._body, function(err, doc) {
+          if(err) return self.error(err);
+          self.next("Success");
+        });
+      }
+    },
+    instruct: [
+      "connectToDb",
+      { if: "usingCustomDomain", true: "getSiteName" },
+      { if: "userHasCookies", true: "loadUser" },
+      "lookupSiteInDb",
+      "getUsersPermitsForSite",
+      "getSheetForEachPermit",    
+      "model",
+      "postBulkItems",
+      "serve"
+    ]
+  }).start(input).catch(function(error){
+    handleError(callback, error);
+  });
+};
+
+module.exports.port = function(event, context, callback) {
+  var input = importData(event, context, callback);
+  
+  global.port.start(input).catch(function(error){
+    handleError(callback, error);
+  });
+};
 } catch (e) {
   module.exports.port = function(event, context, callback) {
-    callback(null, {
-      statusCode: 400,
-      body: e.stack || e
-    });    
+    handleError(callback, e);   
   };
 }
