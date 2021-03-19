@@ -19,7 +19,6 @@ provider:
   runtime: nodejs12.x
   region: us-west-1
   memorySize: 128
-  timeout: 30
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -67,6 +66,7 @@ functions:
     timeout: 900
   get:
     handler: handler.port
+    timeout: 30
     events:
       - http:
           method: any
