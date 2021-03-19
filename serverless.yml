@@ -64,6 +64,7 @@ plugins:
 functions:
   bulk:
     handler: handler.bulk
+    timeout: 900
   get:
     handler: handler.port
     events:
