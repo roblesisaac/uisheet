@@ -329,7 +329,9 @@ global.db = new Chain({
         InvocationType: "Event"
       }, function(error, response) {
         self.next({
-          message: "<(-_-)> Uploading " + self._body.length + " items, you are."
+          message: "<(-_-)> Uploading " + self._body.length + " items, you are.",
+          response: response,
+          error: error
         });
       });
 
@@ -441,6 +443,17 @@ global.db = new Chain({
         self.next(data);
       });
     },
+    getDistinctItems: function() {
+      var self = this,
+          _distinct = this.filter._distinct;
+          
+      delete this.filter._distinct;
+          
+      this.model.distinct(_distinct, this.filter, function (err, data) {
+        if(err) return self.error(err);
+        self.next(data);
+      });
+    },
     getCount: function() {
       var self = this;
       this.model.countDocuments(this.filter, function(err, count){
@@ -463,6 +476,9 @@ global.db = new Chain({
     },
     isDbCount: function() {
       this.next(this.id=="count" || this.id == "length");
+    },
+    isDistinct: function() {
+      this.next(!!this.filter._distinct);
     },
     keyValueIsRegex: function() {
       var firstIsSlash = this.value.charAt(0) == "/",
@@ -548,7 +564,11 @@ global.db = new Chain({
                 switch: "toCaveats",
                 sites: "getAllUserSites"
               },
-              false: "getAllItems"
+              false: {
+                if: "isDistinct",
+                true: "getDistinctItems",
+                false: "getAllItems"
+              }
             }
           ]
         }
@@ -2163,21 +2183,21 @@ var importData = function(event, context, callback) {
                  : "/"+siteName;
   
   return {
-      _arg1: params.arg1,
-      _arg2: params.arg2,
-      _body: JSON.parse(event.body || "{}"),
-      _callback: callback,
-      _chain: params.chain,
-      _context: context,
-      _cookie: event.headers.Cookie || "not having cookie, you are.",
-      _cookies: cookie.parse(event.headers.Cookie || "{}") || "not having cookie, you are.",
-      _domain: event.requestContext.domainName,
-      _event: event,
-      _eventMethod: event.httpMethod.toLowerCase(),
-      _headers: event.headers || {},
-      _host: "https://"+event.headers.Host+hostPath,
-      _query: event.queryStringParameters || {},
-      _siteName: siteName
+    _arg1: params.arg1,
+    _arg2: params.arg2,
+    _body: JSON.parse(event.body || "{}"),
+    _callback: callback,
+    _chain: params.chain,
+    _context: context,
+    _cookie: event.headers.Cookie || "not having cookie, you are.",
+    _cookies: cookie.parse(event.headers.Cookie || "{}") || "not having cookie, you are.",
+    _domain: event.requestContext.domainName,
+    _event: event,
+    _eventMethod: event.httpMethod.toLowerCase(),
+    _headers: event.headers || {},
+    _host: "https://"+event.headers.Host+hostPath,
+    _query: event.queryStringParameters || {},
+    _siteName: params.site
   };
 };
 
@@ -2187,9 +2207,13 @@ module.exports.bulk = function(event, context, callback) {
   new Chain({
     steps: {
       postBulkItems: function() {
-        var self = this;
-        this.model.insertMany(this._body, function(err, doc) {
-          if(err) return self.error(err);
+        var self = this,
+            options = { ordered: false };
+        this.model.insertMany(this._body, options, function(err, doc) {
+          if(err) {
+            self.next({message: err});
+            return;
+          }
           self.next("Success");
         });
       }
