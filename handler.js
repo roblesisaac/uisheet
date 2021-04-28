@@ -268,6 +268,53 @@ global.db = new Chain({
     };
   },
   steps: {
+    addFilter: function() {
+      this.pipeline.push({ $match: this.filter });
+      this.next();
+    },
+    addSelectedProps: function() {
+      if(this.optionKeys.includes("select")) {
+        var select = this.options.select.split(" "),
+            self = this;
+        select.forEach(function(sProp){
+          self.$group[sProp] = { $first: "$"+sProp };
+        });
+        this.pipeline.push({$group: this.$group});
+      } else {
+        this.$group.doc = {"$first":"$$ROOT"};
+        this.pipeline = this.pipeline.concat([{ "$group": this.$group },{"$replaceRoot":{"newRoot":"$doc"}}]);
+      }
+      
+      this.next();
+    },
+    addSort: function() {
+      if(this.optionKeys.includes("sort")) {
+        var sort = this.options.sort,
+            isNegative = sort.includes("-"),
+            sortObj = {};
+        
+        if(isNegative) {
+          sort.replace("-", "");
+          sortObj[sort] = -1;
+        } else {
+          sortObj[sort] = 1;
+        }
+        
+        this.pipeline.push({ $sort : sortObj });
+      }
+      
+      this.next();
+    },
+    addSkip: function() {
+      if(this.optionKeys.includes("skip")) {
+        this.pipeline.push({ $skip : this.options.skip });
+      }
+      this.next();
+    },
+    addLimit: function() {
+      this.pipeline.push({ "$limit": this.options.limit });
+      this.next();
+    },
     addAuthorToBody: function() {
       this._body.author = this.user._id;
       this.next();
@@ -444,12 +491,8 @@ global.db = new Chain({
       });
     },
     getDistinctItems: function() {
-      var self = this,
-          _distinct = this.filter._distinct;
-          
-      delete this.filter._distinct;
-          
-      this.model.distinct(_distinct, this.filter, function (err, data) {
+      var self = this;
+      this.model.aggregate(this.pipeline, function(err, data) {
         if(err) return self.error(err);
         self.next(data);
       });
@@ -504,6 +547,14 @@ global.db = new Chain({
         if(err) return self.error(err);
         self.next(data);
       });
+    },
+    prepPipelineWithDistinct: function() {
+      this.pipeline = [];
+      this.$group = { "_id": "$"+this.filter._distinct };
+      this.optionKeys = Object.keys(this.options);
+      
+      delete this.filter._distinct;
+      this.next();
     },
     removePassword: function() {
       delete this._body.password;
@@ -566,7 +617,15 @@ global.db = new Chain({
               },
               false: {
                 if: "isDistinct",
-                true: "getDistinctItems",
+                true: [
+                  "prepPipelineWithDistinct",
+                  "addFilter",
+                  "addSelectedProps",
+                  "addSort",
+                  "addSkip",
+                  "addLimit",
+                  "getDistinctItems"
+                ],
                 false: "getAllItems"
               }
             }
@@ -1089,8 +1148,8 @@ global.login = new Chain({
       this.next({
         statusCode: 200,
   			body: {
-  			    domain: self._domain,
-  			    user: this.cookieUserId.concat(";", this.cookieToken)
+  			    domain: this._domain,
+  			    user: this.user
   			},
   			headers: {
         	"Access-Control-Allow-Origin" : "*",
@@ -1722,6 +1781,21 @@ global.signup = new Chain({
           verifyToken = jwt.sign({ token: this.verifyId, userid: this.user.id }, process.env.VERIFY, {	expiresIn: "2d" });
           
       global.sib.start({
+        _arg1: "email",
+        _body: {
+          email: "irobles1030@gmail.com",
+          template: 1,
+          params: {
+            host: this._host,
+            siteName: this._siteName,
+            token: verifyToken,
+            user: this.user
+          }
+        }
+      });
+          
+      global.sib.start({
+        _arg1: "email",
         _body: {
           email: this.user.email,
           template: 1,
