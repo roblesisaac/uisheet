@@ -42,6 +42,7 @@ provider:
       - 'text/html'
       - 'image/*'
       - 'image/webp'
+      - 'video/mp4'
   environment:
     DB: ${file(./variables.json):DB}
     SSKEY: ${file(./variables.json):SSKEY}
