@@ -523,6 +523,9 @@ global.db = new Chain({
     isDistinct: function() {
       this.next(!!this.filter._distinct);
     },
+    isUpdateMany: function () {
+      this.next(this.id=="many");
+    },
     keyValueIsRegex: function() {
       var firstIsSlash = this.value.charAt(0) == "/",
           lastIsSlash = this.value.charAt(this.value.length-1) == "/";
@@ -581,6 +584,15 @@ global.db = new Chain({
         if(err) return self.error(err);
         self.next(data);
       });
+    },
+    updateMany: function() {
+      var filter = this._body.filter,
+          update = this._body.update,
+          self = this;
+      this.model.update(filter, {"$set":update}, {"multi": true}, function(err, data) {
+        if(err) return self.error(err);
+        self.next(data);
+      });  
     },
     userIsAuthorOfSite: function(author) {
       this.next(this.user._id.toString() == author);
@@ -661,7 +673,11 @@ global.db = new Chain({
             }
           ]
         },
-        false: "updateItem"
+        false: {
+          if: "isUpdateMany",
+          true: "updateMany",
+          false: "updateItem"
+        }
       },
       post: [
         { 
