@@ -13,7 +13,7 @@ module.exports = function(page, props) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <meta charset="utf-8" />
     <meta name="theme-color">
-    <link rel="icon" type="image/png" href="https://uisheet.s3-us-west-1.amazonaws.com/${siteName}/car.png">
+    <link rel="icon" type="image/png" href="https://uisheet.s3-us-west-1.amazonaws.com/${siteName}/favicon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.6.3/css/foundation-float.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.6.3/css/foundation.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.min.css" />
