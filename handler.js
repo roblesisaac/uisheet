@@ -47,7 +47,8 @@ const ssClient = require("smartsheet");
 
 global.test = new Chain({
   steps: {
-    tester: function(res, next) {
+    tester: function(res) {
+      var self = this;
       permits.find({ 
         $or: [ 
           // { quantity: { $lt: 20 } }, 
@@ -55,7 +56,7 @@ global.test = new Chain({
           { username: "public" } 
         ] 
       }).then(function(err, res){
-        next(res);
+        self.next(res);
       });
     }
   },
@@ -402,6 +403,9 @@ global.db = new Chain({
     bulkImportCompleted: function() {
       this.next("<(-_-)> Imported " + this._body.length + " items to " + this.sheetName + ", you have.");
     },
+    convertToOr: function() {
+      
+    },
     convertToRegex: function() {
       this.value = this.value.replace(/\//g,"");
       this.value = { $regex: new RegExp(this.value) };
@@ -542,11 +546,6 @@ global.db = new Chain({
     isUpdateMany: function () {
       this.next(this.id=="many");
     },
-    keyValueIsRegex: function() {
-      var firstIsSlash = this.value.charAt(0) == "/",
-          lastIsSlash = this.value.charAt(this.value.length-1) == "/";
-      this.next(firstIsSlash && lastIsSlash);
-    },
     lookupSiteAuthor: function () {
       var self = this;
       models.sites.findById(this.id, function(err, site){
@@ -612,6 +611,14 @@ global.db = new Chain({
     },
     userIsAuthorOfSite: function(author) {
       this.next(this.user._id.toString() == author);
+    },
+    valueIsRegex: function() {
+      var firstIsSlash = this.value.charAt(0) == "/",
+          lastIsSlash = this.value.charAt(this.value.length-1) == "/";
+      this.next(firstIsSlash && lastIsSlash);
+    },
+    valueHasPlusSigns: function() {
+      this.next(this.value.includes("+"));
     }
   },
   instruct: [
@@ -626,7 +633,8 @@ global.db = new Chain({
             if: "isANativeOption",
             true: "addToOptions",
             false: [
-              { if: "keyValueIsRegex", true: "convertToRegex" },
+              { if: "valueIsRegex", true: "convertToRegex" },
+              { if: "valueHasPlusSigns", true: "convertToOr" },
               "addToFilter"
             ]
           }  
