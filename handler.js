@@ -1020,9 +1020,9 @@ global.getUserPermitForSheet = new Chain({
     false: [
       "grabSheet",
       
-      "grabPermit",
+      // "grabPermit",
       
-      // "fetchPermit",
+      "fetchPermit",
       { 
         if: "noPermitExists", 
         true: [
