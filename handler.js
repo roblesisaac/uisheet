@@ -45,24 +45,6 @@ const loop = function(arr) {
 const render = require("./render");
 const ssClient = require("smartsheet");
 
-global.test = new Chain({
-  steps: {
-    tester: function(res) {
-      var self = this;
-      permits.find({
-        $or: [ 
-          // { quantity: { $lt: 20 } }, 
-          { username: "Eiken" },
-          { username: "public" } 
-        ]
-      }, function(err, foundPermits){
-        if(err) return self.error(err);
-        self.next(foundPermits);
-      });
-    }
-  },
-  instruct: ["tester"]
-});
 global.auth = new Chain({
   steps: {
     lookupAuth: function() {
@@ -405,7 +387,7 @@ global.db = new Chain({
       this.next("<(-_-)> Imported " + this._body.length + " items to " + this.sheetName + ", you have.");
     },
     convertToOr: function() {
-      var ors = this.value.split("+"),
+      var ors = this.value.split(","),
           key = this.key;
       
       var $ors = ors.map(function(or) {
@@ -633,9 +615,9 @@ global.db = new Chain({
           lastIsSlash = this.value.charAt(this.value.length-1) == "/";
       this.next(firstIsSlash && lastIsSlash);
     },
-    valueHasPlusSigns: function() {
+    valueHasPlusCommas: function() {
       var isString = typeof this.value == "string";
-      this.next(this.value && isString && this.value.indexOf("+")>-1);
+      this.next(this.value && isString && this.value.indexOf(",")>-1);
     }
   },
   instruct: [
@@ -652,7 +634,7 @@ global.db = new Chain({
             false: [
               { if: "valueIsRegex", true: "convertToRegex" },
               { 
-                if: "valueHasPlusSigns",
+                if: "valueHasPlusCommas",
                 true: "convertToOr",
                 false: "addToFilter"
               }
