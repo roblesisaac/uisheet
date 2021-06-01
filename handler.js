@@ -634,7 +634,7 @@ global.db = new Chain({
       this.next(firstIsSlash && lastIsSlash);
     },
     valueHasPlusSigns: function() {
-      this.next(this.value.includes("+"));
+      this.next(this.value.indexOf("+")>-1);
     }
   },
   instruct: [
