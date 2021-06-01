@@ -933,17 +933,17 @@ global._fetchSheetForEachPermit = new Chain({
     }
   },
   instruct: [
-    "grabUserPermitsForSite",
-    // "fetchSheetsForUserPermits",
-    loop([ "define=>permit",
-      {
-        if: "userHasAccessToSheet",
-        true: [
-          "fetchCorrespondingSheet",
-          "appendToSheets"
-        ]
-      }
-    ]),
+    // "grabUserPermitsForSite",
+    "fetchSheetsForUserPermits",
+    // loop([ "define=>permit",
+    //   {
+    //     if: "userHasAccessToSheet",
+    //     true: [
+    //       "fetchCorrespondingSheet",
+    //       "appendToSheets"
+    //     ]
+    //   }
+    // ]),
     "sortSheets"
   ]
 });
