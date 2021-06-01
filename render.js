@@ -40,7 +40,6 @@ module.exports = function(page, props) {
   <script type="text/javascript">
     const globalScript = {};
     let page = "ui-${page}";
-    console.log("HI", page);
     const siteName = "${props._siteName}";
     const scripts = {};
     const user = ${ JSON.stringify(props.user) };
