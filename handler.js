@@ -990,6 +990,7 @@ global.getUserPermitForSheet = new Chain({
       this.permitted = {
         permits: this.permits,
         lookupThisId: id,
+        method: typeof this.permits.findOne,
         founded: this.permits.findOne({
           sheetId: id
         })
