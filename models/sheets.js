@@ -10,13 +10,6 @@ const scriptObj =  {
   text: String
 };
 
-const uploadStatus = {
-  id: String,
-  currentCount: Number,
-  errors: [{ count: Number, id: String }],
-  totalCount: Number
-};
-
 const sheetSchema = new mongoose.Schema({
   "name": String,
   "htmlButton": String,
@@ -33,8 +26,7 @@ const sheetSchema = new mongoose.Schema({
     "css": String,
     "scripts": [ scriptObj ],
     "blocks": [ blockCell ]
-  },
-  uploadStatus: uploadStatus
+  }
 });
 
 module.exports = mongoose.model('sheet', sheetSchema);
