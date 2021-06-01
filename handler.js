@@ -986,17 +986,9 @@ global.getUserPermitForSheet = new Chain({
       });
     },
     grabPermit: function() {
-      var id = this.sheet._id.toString();
-      this.permitted = {
-        permits: this.permits,
-        method: typeof this.permits.findOne,
-        founded: this.permits.findOne({
-          sheetId: id
-        })
-      };
-      // this.permitted = this.permits.findOne({
-      //   sheetId: id
-      // });
+      this.permitted = this.permits.findOne({
+        sheetId: this.sheet._id.toString()
+      });
       this.next();
     },
     noPermitExists: function() {
@@ -1028,7 +1020,7 @@ global.getUserPermitForSheet = new Chain({
     false: [
       "grabSheet",
       
-      "grabPermit",
+      // "grabPermit",
       
       "fetchPermit",
       { 
