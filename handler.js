@@ -49,15 +49,15 @@ global.test = new Chain({
   steps: {
     tester: function(res) {
       var self = this;
-      permits.find({ 
+      permits.find({
         $or: [ 
           // { quantity: { $lt: 20 } }, 
           { username: "Eiken" },
           { username: "public" } 
-        ] 
-      }).then(function(err, res){
+        ]
+      }, function(err, foundPermits){
         if(err) return self.error(err);
-        self.next(res);
+        self.next(foundPermits);
       });
     }
   },
