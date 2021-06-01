@@ -404,7 +404,20 @@ global.db = new Chain({
       this.next("<(-_-)> Imported " + this._body.length + " items to " + this.sheetName + ", you have.");
     },
     convertToOr: function() {
+      var ors = this.value.split("+"),
+          key = this.key;
       
+      var $ors = ors.map(function(or) {
+        var obj = {};
+        obj[key] = or;
+        return obj;
+      });
+      
+      if(this.filter.$or) {
+        this.filter.$or = this.filter.$or.concat($ors);
+      } else {
+        this.filter.$or = $ors;
+      }
     },
     convertToRegex: function() {
       this.value = this.value.replace(/\//g,"");
