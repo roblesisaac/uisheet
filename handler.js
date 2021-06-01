@@ -650,8 +650,11 @@ global.db = new Chain({
             true: "addToOptions",
             false: [
               { if: "valueIsRegex", true: "convertToRegex" },
-              { if: "valueHasPlusSigns", true: "convertToOr" },
-              "addToFilter"
+              { 
+                if: "valueHasPlusSigns",
+                true: "convertToOr",
+                false: "addToFilter"
+              }
             ]
           }  
         ],
