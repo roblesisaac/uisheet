@@ -56,6 +56,7 @@ global.test = new Chain({
           { username: "public" } 
         ] 
       }).then(function(err, res){
+        if(err) return self.error(err);
         self.next(res);
       });
     }
@@ -418,6 +419,8 @@ global.db = new Chain({
       } else {
         this.filter.$or = $ors;
       }
+      
+      this.next();
     },
     convertToRegex: function() {
       this.value = this.value.replace(/\//g,"");
