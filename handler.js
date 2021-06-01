@@ -889,7 +889,7 @@ global.getAllUserSites = new Chain({
     }
   ]
 });
-global.getSheetForEachPermit = new Chain({
+global._fetchSheetForEachPermit = new Chain({
   input: {
     sheets: []
   },
@@ -901,11 +901,24 @@ global.getSheetForEachPermit = new Chain({
     grabUserPermitsForSite: function() {
       this.next(this.permits);
     },
-    lookupCorrespondingSheet: function() {
+    fetchCorrespondingSheet: function() {
       var self = this;
       models.sheets.findById(this.permit.sheetId, function(err, sheet){
         if(err) return self.error(err);
         self.next(sheet);
+      });
+    },
+    fetchSheetsForUserPermits: function() {
+      var self = this,
+          _ids = this.permits.map(function(permit) {
+            return permit.sheetId;
+          });
+      models.sheets.find({
+        _id: { $in: _ids }
+      }, function(err, resSheets){
+        if(err) return self.error(err);
+        self.sheets = resSheets;
+        self.next();
       });
     },
     userHasAccessToSheet: function() {
@@ -920,17 +933,17 @@ global.getSheetForEachPermit = new Chain({
     }
   },
   instruct: [
-    "grabUserPermitsForSite",
-    loop([
-      "define=>permit",
-      {
-        if: "userHasAccessToSheet",
-        true: [
-          "lookupCorrespondingSheet",
-          "appendToSheets"
-        ]
-      }
-    ]),
+    // "grabUserPermitsForSite",
+    "fetchSheetsForUserPermits",
+    // loop([ "define=>permit",
+    //   {
+    //     if: "userHasAccessToSheet",
+    //     true: [
+    //       "fetchCorrespondingSheet",
+    //       "appendToSheets"
+    //     ]
+    //   }
+    // ]),
     "sortSheets"
   ]
 });
@@ -946,7 +959,7 @@ global.getUserPermitForSheet = new Chain({
     alertNoPermitExists: function() {
       this.error("<(-_-)> Not found in archives, your permit is.");
     },
-    lookupPublicPermit: function() {
+    fetchPublicPermit: function() {
       var self = this,
           filters = {
             siteId: this.siteId,
@@ -959,7 +972,7 @@ global.getUserPermitForSheet = new Chain({
         self.next();
       });      
     },
-    lookupPermit: function() {
+    fetchPermit: function() {
       var self = this,
           filters = {
             siteId: this.siteId,
@@ -971,6 +984,12 @@ global.getUserPermitForSheet = new Chain({
         self.permit = permit;
         self.next();
       });
+    },
+    grabPermit: function() {
+      this.permit = this.permits.findOne({
+        sheetId: this.sheet._id
+      });
+      this.next();
     },
     noPermitExists: function() {
       this.next(!this.permit);
@@ -1000,11 +1019,14 @@ global.getUserPermitForSheet = new Chain({
     true: "sendDefaultPermit",
     false: [
       "grabSheet",
-      "lookupPermit",
+      
+      "grabPermit",
+      
+      // "fetchPermit",
       { 
         if: "noPermitExists", 
         true: [
-          "lookupPublicPermit",
+          "fetchPublicPermit",
           { if: "noPermitExists", true: "alertNoPermitExists" }
         ]
       } 
@@ -2103,18 +2125,19 @@ global.port = new Chain({
       delete index._callback;
       next(index);
     },
-    getSiteName: function() {
-      // this._siteName = this.customDomain;
-      // this.next();
-      
-      var domainArray = this._domain.split(".");
-      this._siteName = domainArray.length === 2 ? domainArray[0] : domainArray[1];
-      this.next();
+    fetchSite: function(res, next) {
+      var self = this;
+      models.sites.findOne({
+        name: self._siteName
+      }).then(function(siteObj){
+        if(siteObj) {
+          self.siteObj = siteObj;
+          self.siteId = siteObj._id;
+        }
+        next(siteObj);
+      });
     },
-    isVerbose: function(res, next) {
-      next(this._query.verbose);
-    },
-    loadUser: function() {
+    fetchUser: function() {
       var self = this;
       this.userid = this._cookies.userid;
       models.users.findById(this.userid, function(err, user){
@@ -2123,12 +2146,6 @@ global.port = new Chain({
         self.user = user;
         self.next();
       });
-    },
-    loggedOut: function() {
-      var self = this;
-      jwt.verify(this._cookies.token, this.user.password, function (tokenErr, decoded) {
-  			self.next(!!tokenErr);
-  		});
     },
     fetchUserPermitsForSite: function() {
       var self = this;
@@ -2153,17 +2170,22 @@ global.port = new Chain({
         self.next();
       });
     },
-    fetchSite: function(res, next) {
+    getSiteName: function() {
+      // this._siteName = this.customDomain;
+      // this.next();
+      
+      var domainArray = this._domain.split(".");
+      this._siteName = domainArray.length === 2 ? domainArray[0] : domainArray[1];
+      this.next();
+    },
+    isVerbose: function(res, next) {
+      next(this._query.verbose);
+    },
+    loggedOut: function() {
       var self = this;
-      models.sites.findOne({
-        name: self._siteName
-      }).then(function(siteObj){
-        if(siteObj) {
-          self.siteObj = siteObj;
-          self.siteId = siteObj._id;
-        }
-        next(siteObj);
-      });
+      jwt.verify(this._cookies.token, this.user.password, function (tokenErr, decoded) {
+  			self.next(!!tokenErr);
+  		});
     },
     noSiteExists: function(siteObj, next) {
       next(!siteObj);
@@ -2241,7 +2263,7 @@ global.port = new Chain({
     {
       if: "userHasCookies",
       true: [
-        "loadUser",
+        "fetchUser",
         { if: "loggedOut", true: ["renderLoggedOut", "serve"] }
       ]
     },
@@ -2270,7 +2292,7 @@ global.port = new Chain({
         "serve"
       ]
     },
-    "getSheetForEachPermit",
+    "_fetchSheetForEachPermit",
     {
       if: "urlHasAChain",
       true: "runChain",
@@ -2335,10 +2357,10 @@ module.exports.bulk = function(event, context, callback) {
     instruct: [
       "connectToDb",
       { if: "usingCustomDomain", true: "getSiteName" },
-      { if: "userHasCookies", true: "loadUser" },
+      { if: "userHasCookies", true: "fetchUser" },
       "fetchSite",
       "fetchUserPermitsForSite",
-      "getSheetForEachPermit",    
+      "_fetchSheetForEachPermit",    
       "model",
       "postBulkItems",
       "serve"
