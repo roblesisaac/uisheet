@@ -986,10 +986,9 @@ global.getUserPermitForSheet = new Chain({
       });
     },
     grabPermit: function() {
-      var id = this.sheet._id;
+      var id = this.sheet._id.toString();
       this.permitted = {
         permits: this.permits,
-        lookupThisId: id.toString(),
         method: typeof this.permits.findOne,
         founded: this.permits.findOne({
           sheetId: id
