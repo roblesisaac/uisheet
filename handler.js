@@ -45,6 +45,22 @@ const loop = function(arr) {
 const render = require("./render");
 const ssClient = require("smartsheet");
 
+global.test = new Chain({
+  steps: {
+    tester: function(res, next) {
+      permits.find({ 
+        $or: [ 
+          // { quantity: { $lt: 20 } }, 
+          { username: "Eiken" },
+          { username: "public" } 
+        ] 
+      }).then(function(err, res){
+        next(res);
+      });
+    }
+  },
+  instruct: ["tester"]
+});
 global.auth = new Chain({
   steps: {
     lookupAuth: function() {
@@ -2104,24 +2120,22 @@ global.port = new Chain({
   			self.next(!!tokenErr);
   		});
     },
-    getUsersPermitsForSite: function() {
+    fetchUserPermitsForSite: function() {
       var self = this;
       permits.find({
         siteId: this.siteId
-      }, function(err, permits){
-        if(err || !permits) return self.error(err);
-        var userPermits = permits.find({
-              username: self.user.username
-            }),
-            publicPermits = permits.find({
-              username: "public"
-            });
+      }, function(err, foundPermits){
+        if(err || !foundPermits) return self.error(err);
+        
+        var username = self.user.username,
+            userPermits = foundPermits.find({ username: username }),
+            publicPermits = foundPermits.find({ username: "public" });
         
         for(var i=0; i<publicPermits.length; i++) {
           var publicPermit = publicPermits[i],
-              inUserPermits = !!userPermits.findOne({ sheetId: publicPermit.sheetId });
+              willNotOverwriteUserPermit = !userPermits.findOne({ sheetId: publicPermit.sheetId });
               
-          if(!inUserPermits) userPermits.push(publicPermit);
+          if(willNotOverwriteUserPermit) userPermits.push(publicPermit);
         }
         
         self.permits = userPermits;
@@ -2129,7 +2143,7 @@ global.port = new Chain({
         self.next();
       });
     },
-    lookupSiteInDb: function(res, next) {
+    fetchSite: function(res, next) {
       var self = this;
       models.sites.findOne({
         name: self._siteName
@@ -2232,9 +2246,9 @@ global.port = new Chain({
         "serve"
       ]
     },
-    "lookupSiteInDb",
+    "fetchSite",
     { if: "noSiteExists", true: [ "renderNoSiteExists", "serve" ] },
-    "getUsersPermitsForSite",
+    "fetchUserPermitsForSite",
     {
       if: "userHasNoPermitsForSiteAndNotUisheet",
       true: [
@@ -2263,7 +2277,7 @@ var handleError = function(callback, error) {
     body: error.stack || error
   });
 };
-var importData = function(event, context, callback) {
+var importParamaters = function(event, context, callback) {
   context.callbackWaitsForEmptyEventLoop = false;
   
   var params = event.pathParameters || {},
@@ -2292,7 +2306,7 @@ var importData = function(event, context, callback) {
 };
 
 module.exports.bulk = function(event, context, callback) {
-  var input = importData(event, context, callback);
+  var input = importParamaters(event, context, callback);
   
   new Chain({
     steps: {
@@ -2312,8 +2326,8 @@ module.exports.bulk = function(event, context, callback) {
       "connectToDb",
       { if: "usingCustomDomain", true: "getSiteName" },
       { if: "userHasCookies", true: "loadUser" },
-      "lookupSiteInDb",
-      "getUsersPermitsForSite",
+      "fetchSite",
+      "fetchUserPermitsForSite",
       "getSheetForEachPermit",    
       "model",
       "postBulkItems",
@@ -2325,7 +2339,7 @@ module.exports.bulk = function(event, context, callback) {
 };
 
 module.exports.port = function(event, context, callback) {
-  var input = importData(event, context, callback);
+  var input = importParamaters(event, context, callback);
   
   global.port.start(input).catch(function(error){
     handleError(callback, error);
