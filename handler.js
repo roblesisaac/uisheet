@@ -206,7 +206,7 @@ global.checkPermit = new Chain({
     }
   },
   instruct: [
-    "getUserPermitForSheet",
+    "_grabUserPermitForSheet",
     { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" }
   ]
 });
@@ -947,7 +947,7 @@ global._fetchSheetForEachPermit = new Chain({
     "sortSheets"
   ]
 });
-global.getUserPermitForSheet = new Chain({
+global._grabUserPermitForSheet = new Chain({
   input: function() {
     return {
       sheetName: this._arg1 || "sheets",
@@ -1019,9 +1019,7 @@ global.getUserPermitForSheet = new Chain({
     true: "sendDefaultPermit",
     false: [
       "grabSheet",
-      
       "grabPermit",
-      
       // "fetchPermit",
       { 
         if: "noPermitExists", 
@@ -1600,6 +1598,23 @@ global.scripts = new Chain({
           dataNames = ["sheets", "permits", "siteData"],
           dataScripts = dataNames.map(function(dataName) {
             if(self[dataName]) {
+              
+              if(dataName=="sheets") {
+                self.sheets.forEach(function(sheet) {
+                  
+                  var scripts = [];
+                  for(var i=0; i<sheet.ui.scripts.length; i++) {
+                    var script = sheet.ui.scripts[i],
+                        name = script.name;
+                    if(name.includes(".html") || name.includes(".css")) {
+                      scripts.push(script);
+                    }
+                  }
+                  
+                  sheet.scripts = scripts;
+                });
+              }
+              
               return `var ${dataName} = ${JSON.stringify(self[dataName])};`;
             }
           });
