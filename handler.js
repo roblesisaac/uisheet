@@ -1680,13 +1680,9 @@ global.scripts = new Chain({
         //   self.next(minified);
         // });
       } else {
-        this.end({
+        this.next({
           body: script,
           type: this.scriptType,
-    		  headers:{
-    		    "Access-Control-Allow-Origin": "*",
-    		    "Cache-Control": "max-age=31536000"
-    		  },
           data: this.data
         });
       }
