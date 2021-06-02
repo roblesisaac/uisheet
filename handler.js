@@ -1646,7 +1646,7 @@ global.scripts = new Chain({
                   var sheet = self.sheets[s];
                   removeJs(sheet.ui.scripts);
                 }
-                return `console.log('${Date.now()}'); \nvar ${dataName} = ${JSON.stringify(self[dataName])};`;
+                return `var ${dataName} = ${JSON.stringify(self[dataName])};`;
               }
               
               if(dataName=="siteData") {
