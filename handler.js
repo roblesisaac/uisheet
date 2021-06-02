@@ -224,12 +224,12 @@ global.connectToDb = new Chain({
           };
       mongoose.connect(process.env.DB, options).then(function(database){
         isConnected = database.connections[0].readyState;
-        self.next();
+        self.next("Init Connect");
       });
     },
     promiseResolve: function() {
       Promise.resolve();
-      this.next();
+      this.next("Connected");
     }
   },
   instruct: {
@@ -1670,10 +1670,7 @@ global.scripts = new Chain({
     renderExam: function() {
       this.next({
         body: "console.log('hello')",
-  		  headers:{
-  		    "Access-Control-Allow-Origin": "*"
-  		  },
-        type: "js"
+  		  type: "js"
       });  
     },
     renderScripts: function() {
@@ -1777,8 +1774,7 @@ global.serve = new Chain({
 		format: { 
 		  headers:{
 		    "Access-Control-Allow-Origin": "*",
-		    "Cache-Control": "no-cache",
-		    // "Cache-Control": "max-age=31536000"
+		    "Cache-Control": "no-cache"
 		  },
 		  statusCode: 200
 		}
