@@ -608,9 +608,13 @@ global.db = new Chain({
       });  
     },
     updateSiteCacheStamp: function() {
-      var body = { cacheStamp: Date.now()+"" },
+      this._body.cacheStamp = Date.now();
+      this.next();
+    },
+    updateAndSaveSiteCacheStamp: function() {
+      var body = { cacheStamp: Date.now() },
           self = this;
-      models.sites.findByIdAndUpdate(this.siteId.toString(), body, { new: true }, function(err, data){
+      models.sites.findByIdAndUpdate(this.siteId, body, { new: true }, function(err, data){
         if(err) return self.error(err);
         self.next();
       });
@@ -690,7 +694,7 @@ global.db = new Chain({
               false: "alertNeedPermissionFromAuthor"
             }
           ],
-          sheets: "updateSiteCacheStamp",
+          sheets: ["updateAndSaveSiteCacheStamp", "updateItem"],
           users: [
             "lookupUser",
             {
