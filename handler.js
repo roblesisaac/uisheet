@@ -1601,17 +1601,15 @@ global.scripts = new Chain({
               
               if(dataName=="sheets") {
                 self.sheets.forEach(function(sheet) {
-                  
-                  var scripts = [];
+                
                   for(var i=0; i<sheet.ui.scripts.length; i++) {
                     var script = sheet.ui.scripts[i],
                         name = script.name;
-                    if(name.includes(".html") || name.includes(".css")) {
-                      scripts.push(script);
+                    if(name.excludes(".html") && name.excludes(".css")) {
+                      sheet.ui.scripts.splice(i,1);
+                      i--;
                     }
                   }
-                  
-                  sheet.scripts = scripts;
                 });
               }
               
