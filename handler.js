@@ -1668,7 +1668,7 @@ global.scripts = new Chain({
       });    
     },
     renderExam: function() {
-      this.end({
+      this.next({
         body: "console.log('hello')",
   		  headers:{
   		    "Access-Control-Allow-Origin": "*"
