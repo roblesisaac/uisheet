@@ -608,9 +608,9 @@ global.db = new Chain({
       });  
     },
     updateSiteCacheStamp: function() {
-      var body = { cacheStamp: Date.now() },
+      var body = { cacheStamp: Date.now()+"" },
           self = this;
-      models.sites.findByIdAndUpdate(this.siteId, body, { new: true }, function(err, data){
+      models.sites.findByIdAndUpdate(this.siteId.toString(), body, { new: true }, function(err, data){
         if(err) return self.error(err);
         self.next();
       });
