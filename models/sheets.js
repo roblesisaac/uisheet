@@ -1,10 +1,5 @@
 const mongoose = require('mongoose');
 
-const blockCell = {
-  width: Number,
-  rows: Array
-};
-
 const scriptObj =  {
   name: String,
   text: String
@@ -24,8 +19,7 @@ const sheetSchema = new mongoose.Schema({
     "js": String,
     "html": String,
     "css": String,
-    "scripts": [ scriptObj ],
-    "blocks": [ blockCell ]
+    "scripts": [ scriptObj ]
   }
 });
 
