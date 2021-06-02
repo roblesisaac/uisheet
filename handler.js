@@ -1754,7 +1754,9 @@ global.serve = new Chain({
   },
   steps: {
     addContentTypeToHeaders: function(res) {
-      this.format.headers["Content-Type"] = res.type || res["Content-Type"];
+      if(res.type || res["Content-Type"]) {
+        this.format.headers["Content-Type"] = res.type || res["Content-Type"];  
+      }
       this.next(res.body || "// <(-_-)> Empty, your body content is.");
     },
     addBodyToFormatObj: function(res) {
@@ -1821,7 +1823,7 @@ global.serve = new Chain({
 	        { if: "thereAreVariables", true: "renderVariables" },
           {
     	      if: "hasCustomHeadersObj",
-    	      true: "assignCustomHeadersObj",
+    	      true: ["assignCustomHeadersObj", "addContentTypeToHeaders"],
     	      false: "addContentTypeToHeaders"
     	    },
     	    "addBodyToFormatObj"
