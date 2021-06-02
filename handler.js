@@ -682,6 +682,7 @@ global.db = new Chain({
               false: "alertNeedPermissionFromAuthor"
             }  
           ],
+          // sheets: "updateSiteCacheStamp",
           users: [
             "lookupUser",
             {
@@ -1615,6 +1616,7 @@ global.scripts = new Chain({
                   var sheet = self.sheets[s];
                   removeJs(sheet.ui.scripts);
                 }
+                return `console.log('started'); \nvar ${dataName} = ${JSON.stringify(self[dataName])};`;
               }
               
               if(dataName=="siteData") {
