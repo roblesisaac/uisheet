@@ -607,6 +607,14 @@ global.db = new Chain({
         self.next(data);
       });  
     },
+    updateSiteCacheStamp: function() {
+      var body = { cacheStamp: Date.now() },
+          self = this;
+      models.sites.findByIdAndUpdate(this.siteId, body, { new: true }, function(err, data){
+        if(err) return self.error(err);
+        self.next();
+      });
+    },
     userIsAuthorOfSite: function(author) {
       this.next(this.user._id.toString() == author);
     },
@@ -680,9 +688,10 @@ global.db = new Chain({
               if: "userIsAuthorOfSite",
               true: "updateItem",
               false: "alertNeedPermissionFromAuthor"
-            }  
+            },
+            "updateSiteCacheStamp"
           ],
-          // sheets: "updateSiteCacheStamp",
+          sheets: "updateSiteCacheStamp",
           users: [
             "lookupUser",
             {
@@ -1674,6 +1683,10 @@ global.scripts = new Chain({
         this.next({
           body: script,
           type: this.scriptType,
+    		  headers:{
+    		    "Access-Control-Allow-Origin": "*",
+    		    "Cache-Control": "max-age=31536000"
+    		  },
           data: this.data
         });
       }
