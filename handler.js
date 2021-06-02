@@ -1604,7 +1604,7 @@ global.scripts = new Chain({
                 scripts.splice(i,1);
                 i--;
               }
-            }       
+            }
           },
           dataScripts = dataNames.map(function(dataName) {
             // remove js keep html and css
@@ -1627,6 +1627,10 @@ global.scripts = new Chain({
           
       this.end({
         body: dataScripts.join("\n"),
+  		  headers:{
+  		    "Access-Control-Allow-Origin": "*",
+  		    "Cache-Control": "max-age=31536000"
+  		  },
         type: "js",
         data: this.data
       });    
