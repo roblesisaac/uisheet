@@ -1673,8 +1673,7 @@ global.scripts = new Chain({
   		  headers:{
   		    "Access-Control-Allow-Origin": "*"
   		  },
-        type: "js",
-        data: this.data
+        type: "js"
       });  
     },
     renderScripts: function() {
