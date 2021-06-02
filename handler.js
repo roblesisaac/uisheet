@@ -526,7 +526,7 @@ global.db = new Chain({
       this.next(!!this._body.newPassword);
     },
     hasSpecialCaveates: function () {
-      var caveats = ["sites", "users"];
+      var caveats = ["sites", "users", "sheets"];
       this.next(caveats.indexOf(this.sheetName)>-1);
     },
     hasId: function(res, next) {
@@ -686,10 +686,9 @@ global.db = new Chain({
             "lookupSiteAuthor",
             {
               if: "userIsAuthorOfSite",
-              true: "updateItem",
+              true: ["updateSiteCacheStamp", "updateItem"],
               false: "alertNeedPermissionFromAuthor"
-            },
-            "updateSiteCacheStamp"
+            }
           ],
           sheets: "updateSiteCacheStamp",
           users: [
