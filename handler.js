@@ -1765,7 +1765,7 @@ global.serve = new Chain({
     },
     assignCustomHeadersObj: function(res) {
       this.format.headers = res.headers;
-      this.next(res.body);
+      this.next(res);
     },
     assignFullyCustomResponse: function(res) {
       this.format = res;
