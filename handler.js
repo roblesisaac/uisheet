@@ -1596,12 +1596,12 @@ global.scripts = new Chain({
       };
       var self = this,
           dataNames = ["sheets", "permits", "siteData"],
-          removeJs = function(sheet) {
-            for(var i=0; i<sheet.ui.scripts.length; i++) {
-              var script = sheet.ui.scripts[i],
+          removeJs = function(scripts) {
+            for(var i=0; i<scripts.length; i++) {
+              var script = scripts[i],
                   name = script.name;
               if(name.excludes(".html") && name.excludes(".css")) {
-                sheet.ui.scripts.splice(i,1);
+                scripts.splice(i,1);
                 i--;
               }
             }       
@@ -1613,13 +1613,18 @@ global.scripts = new Chain({
               if(dataName=="sheets") {
                 for(var s=0; s<self.sheets.length; s++) {
                   var sheet = self.sheets[s];
-                  removeJs(sheet);
+                  removeJs(sheet.ui.scripts);
                 }
+              }
+              
+              if(dataName=="siteData") {
+                removeJs(self.siteData.scripts);
               }
               
               return `var ${dataName} = ${JSON.stringify(self[dataName])};`;
             }
           });
+          
       this.end({
         body: dataScripts.join("\n"),
         type: "js",
