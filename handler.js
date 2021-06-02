@@ -1680,7 +1680,7 @@ global.scripts = new Chain({
         //   self.next(minified);
         // });
       } else {
-        this.next({
+        this.end({
           body: script,
           type: this.scriptType,
     		  headers:{
