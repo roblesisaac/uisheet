@@ -1667,6 +1667,16 @@ global.scripts = new Chain({
         data: this.data
       });    
     },
+    renderExam: function() {
+      this.end({
+        body: "console.log('hello')",
+  		  headers:{
+  		    "Access-Control-Allow-Origin": "*"
+  		  },
+        type: "js",
+        data: this.data
+      });  
+    },
     renderScripts: function() {
       var script = this.scripts.join("\n"),
           self = this;
@@ -1720,6 +1730,7 @@ global.scripts = new Chain({
     "_loadMasterSite",
     {
       switch: "toScriptType",
+      examin: "renderExam",
       data: "renderDatas",
       css: [
         "forEachScriptFromMasterSite", [
