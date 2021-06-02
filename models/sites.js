@@ -6,7 +6,8 @@ var siteSchema = new mongoose.Schema({
   author: String,
   scripts: [
     { name: String, text: String }  
-  ] 
+  ],
+  cacheStamp: String
 });
 
 module.exports = mongoose.model('site', siteSchema);
