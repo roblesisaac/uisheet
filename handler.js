@@ -1682,6 +1682,10 @@ global.scripts = new Chain({
       } else {
         this.next({
           body: script,
+    		  headers:{
+    		    "Access-Control-Allow-Origin": "*",
+    		    "Cache-Control": "max-age=31536000"
+    		  },
           type: this.scriptType,
           data: this.data
         });
