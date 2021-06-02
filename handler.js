@@ -663,7 +663,20 @@ global.db = new Chain({
               if: "hasSpecialCaveates",
               true: { 
                 switch: "toCaveats",
-                sites: "getAllUserSites"
+                sites: "getAllUserSites",
+                sheets: {
+                  if: "isDistinct",
+                  true: [
+                    "prepPipelineWithDistinct",
+                    "addFilter",
+                    "addSelectedProps",
+                    "addSort",
+                    "addSkip",
+                    "addLimit",
+                    "getDistinctItems"
+                  ],
+                  false: "getAllItems"
+                }
               },
               false: {
                 if: "isDistinct",
@@ -752,7 +765,12 @@ global.db = new Chain({
               ],
               false: "alertNeedPermissionFromAuthor"
             }  
-          ]
+          ],
+          sheets: {
+            if: "droppingDb",
+            true: "dropDb",
+            false: "deleteItem"  
+          }
         },
         false:  {
           if: "droppingDb",
