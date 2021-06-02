@@ -1596,21 +1596,25 @@ global.scripts = new Chain({
       };
       var self = this,
           dataNames = ["sheets", "permits", "siteData"],
+          removeJs = function(sheet) {
+            for(var i=0; i<sheet.ui.scripts.length; i++) {
+              var script = sheet.ui.scripts[i],
+                  name = script.name;
+              if(name.excludes(".html") && name.excludes(".css")) {
+                sheet.ui.scripts.splice(i,1);
+                i--;
+              }
+            }       
+          },
           dataScripts = dataNames.map(function(dataName) {
+            // remove js keep html and css
             if(self[dataName]) {
               
               if(dataName=="sheets") {
-                self.sheets.forEach(function(sheet) {
-                
-                  for(var i=0; i<sheet.ui.scripts.length; i++) {
-                    var script = sheet.ui.scripts[i],
-                        name = script.name;
-                    if(name.excludes(".html") && name.excludes(".css")) {
-                      sheet.ui.scripts.splice(i,1);
-                      i--;
-                    }
-                  }
-                });
+                for(var s=0; s<self.sheets.length; s++) {
+                  var sheet = self.sheets[s];
+                  removeJs(sheet);
+                }
               }
               
               return `var ${dataName} = ${JSON.stringify(self[dataName])};`;
