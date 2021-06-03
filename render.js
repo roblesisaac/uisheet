@@ -5,7 +5,7 @@ module.exports = function(page, props) {
                     ? "uisheet"
                     : props._siteName || "uisheet";
   const windowLocation = props._host;
-  const cacheStamp = prop.user.username + (props.siteObj || {}).cacheStamp || Date.now();
+  const cacheStamp = props.user.username + (props.siteObj || {}).cacheStamp || Date.now();
   return `<!DOCTYPE html>
 <html>
   <head>
