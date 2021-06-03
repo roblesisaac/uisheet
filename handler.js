@@ -584,6 +584,9 @@ global.db = new Chain({
         self.next();
       });
     },
+    siteIsUisheet: function() {
+      this.next(this._body.name=="uisheet");
+    },
     toCaveats: function() {
       this.next(this.sheetName);
     },
@@ -606,6 +609,14 @@ global.db = new Chain({
         if(err) return self.error(err);
         self.next(data);
       });  
+    },
+    updateAllSiteStamps: function() {
+      var update = { cacheStamp: Date.now() },
+          self = this;
+      this.model.sites.update({}, {"$set":update}, {"multi": true}, function(err, data) {
+        if(err) return self.error(err);
+        self.next();
+      });   
     },
     updateSiteCacheStamp: function() {
       this._body.cacheStamp = Date.now();
@@ -703,7 +714,14 @@ global.db = new Chain({
             "lookupSiteAuthor",
             {
               if: "userIsAuthorOfSite",
-              true: ["updateSiteCacheStamp", "updateItem"],
+              true: [
+                {
+                  if: "siteIsUisheet",
+                  true: "updateAllSiteStamps",
+                  false: "updateSiteCacheStamp"
+                },
+                "updateItem"
+              ],
               false: "alertNeedPermissionFromAuthor"
             }
           ],
