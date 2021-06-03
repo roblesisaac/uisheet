@@ -5,7 +5,8 @@ module.exports = function(page, props) {
                     ? "uisheet"
                     : props._siteName || "uisheet";
   const windowLocation = props._host;
-  const cacheStamp = props.user.username + (props.siteObj || {}).cacheStamp || Date.now();
+  const stamp = (props.siteObj || {}).cacheStamp || Date.now();
+  const cacheStamp = props.user.username + stamp;
   return `<!DOCTYPE html>
 <html>
   <head>
@@ -49,7 +50,6 @@ module.exports = function(page, props) {
   
   <script src="${windowLocation}/scripts/data/${cacheStamp}"></script>
   <script src="${windowLocation}/scripts/js/${cacheStamp}"></script>
-
   <script defer src="https://js.braintreegateway.com/web/3.72.0/js/client.min.js"></script>
   <script defer src="https://js.braintreegateway.com/web/3.72.0/js/data-collector.min.js"></script>
   <script defer src="https://js.braintreegateway.com/web/dropin/1.26.0/js/dropin.min.js"></script>
