@@ -1668,7 +1668,9 @@ global.scripts = new Chain({
       });    
     },
     renderExam: function() {
-      this.next("console.log('hello')");  
+      this.next({
+        message: "console.log('hello')"
+      });  
     },
     renderScripts: function() {
       var script = this.scripts.join("\n"),
