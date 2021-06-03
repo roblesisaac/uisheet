@@ -1667,11 +1667,6 @@ global.scripts = new Chain({
         data: this.data
       });    
     },
-    renderExam: function() {
-      this.next({
-        message: "console.log('hello')"
-      });  
-    },
     renderScripts: function() {
       var script = this.scripts.join("\n"),
           self = this;
@@ -1725,7 +1720,6 @@ global.scripts = new Chain({
     "_loadMasterSite",
     {
       switch: "toScriptType",
-      examin: "renderExam",
       data: "renderDatas",
       css: [
         "forEachScriptFromMasterSite", [
