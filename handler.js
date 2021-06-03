@@ -613,10 +613,10 @@ global.db = new Chain({
     updateAllSiteStamps: function() {
       var update = { cacheStamp: Date.now() },
           self = this;
-      this.model.sites.update({}, {"$set":update}, {"multi": true}, function(err, data) {
+      models.sites.update({}, {"$set":update}, {"multi": true}, function(err, data) {
         if(err) return self.error(err);
         self.next();
-      });   
+      });
     },
     updateSiteCacheStamp: function() {
       this._body.cacheStamp = Date.now();
