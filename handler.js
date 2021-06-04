@@ -454,6 +454,10 @@ global.db = new Chain({
       this.filter.siteId = this.siteId;
       next();
     },
+    addUsernameToFilter: function() {
+      this.filter.username = this.user.username;
+      this.next();
+    },
     addToOptions: function() {
       this.options[this.key] = this.nativeOptions[this.key](this.value);
       this.next();
@@ -690,9 +694,6 @@ global.db = new Chain({
     moreThanOneItem: function() {
       this.next(Array.isArray(this._body));
     },
-    needsASiteId: function(res, next) {
-      next(this.sheetName == "sheets");
-    },
     permitHasRules: function() {
       var ruleCount = 0;
       this.permit.db.rules;
@@ -806,30 +807,26 @@ global.db = new Chain({
         ],
         // { if: "permitHasRules", true: "addRules" },
         { if: "isDbCount", true: ["getCount", "serve"] },
+        { if: "hasId", true: ["findById", "serve"] },
         {
-          if: "hasId",
-          true: "findById",
-          false: [
-            { if: "needsASiteId", true: "addSiteIdToFilter" },
-            
-            {
-              switch: "toCaveats",
-              sites: ["getAllUserSites", "serve"]
-            },
-            {
-                if: "isDistinct",
-                true: [
-                  "prepPipelineWithDistinct",
-                  "addFilter",
-                  "addSelectedProps",
-                  "addSort",
-                  "addSkip",
-                  "addLimit",
-                  "getDistinctItems"
-                ],
-                false: "getAllItems"
-            }
-          ]
+          switch: "toCaveats",
+          sites: ["_fetchAllUserSites", "serve"],
+          sheets: "addSiteIdToFilter",
+          permits: ["addSiteIdToFilter", "addUsernameToFilter"],
+          users: ["addSiteIdToFilter"]
+        },
+        {
+            if: "isDistinct",
+            true: [
+              "prepPipelineWithDistinct",
+              "addFilter",
+              "addSelectedProps",
+              "addSort",
+              "addSkip",
+              "addLimit",
+              "getDistinctItems"
+            ],
+            false: "getAllItems"
         }
       ],
       put: {
@@ -1018,7 +1015,7 @@ global.fetch = new Chain({
     "fetchUrl"  
   ]
 });
-global.getAllUserSites = new Chain({
+global._fetchAllUserSites = new Chain({
   input: {
     userSites: []
   },
@@ -1189,12 +1186,12 @@ global._grabUserPermitForSheet = new Chain({
       };
       this.next();
     },
-    siteIsUisheetOrSheetIsUser: function() {
-      this.next(this.siteObj.name == "uisheet" || this.sheetName=="users");
+    siteIsUisheetOrSheetIsNative: function() {
+      this.next(this.siteObj.name == "uisheet" || models[this.sheetName]);
     }
   },
   instruct: {
-    if: "siteIsUisheetOrSheetIsUser",
+    if: "siteIsUisheetOrSheetIsNative",
     true: "sendDefaultPermit",
     false: [
       "_grabSheet",
