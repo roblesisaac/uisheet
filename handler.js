@@ -1146,7 +1146,13 @@ global._grabUserPermitForSheet = new Chain({
   },
   steps: {
     alertNoPermitExists: function() {
-      this.error("<(-_-)> Not found in archives, your permit is.");
+      this.error({
+        message: "<(-_-)> Not found in archives, your permit is.",
+        permitSheet: this.permitSheet,
+        permit: this.permit,
+        sheetName: this._query.sheetName
+      });
+      // this.error("<(-_-)> Not found in archives, your permit is.");
     },
     fetchPublicPermit: function() {
       var self = this,
@@ -1175,12 +1181,12 @@ global._grabUserPermitForSheet = new Chain({
       });
     },
     grabPermitForPermit: function() {
-      var sheetName = this._query.sheetName,
-          sheet = this.sheets.findOne({
-            name: sheetName
+      var sheetName = this._query.sheetName;
+      this.permitSheet = this.sheets.findOne({
+            name: "sheets"
           });
       this.permit = this.permits.findOne({
-        sheetId: sheet._id
+        sheetId: this.permitSheet._id
       });
       this.next();
     },
