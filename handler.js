@@ -328,7 +328,7 @@ global.checkPermit = new Chain({
       this.error("<(-_-)> Method is prohibited, your permit declares.");
     },
     permitExcludesMethodForProp: function() {
-      var prop = this._chain == "db" ? "db" : "permit";
+      var prop = this.sheetName == "permits" ? "permit" : "db";
       this.next(this.permit[prop].methods.indexOf(this._eventMethod) == -1);
     }
   },
