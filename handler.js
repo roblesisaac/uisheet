@@ -157,6 +157,132 @@ global.braintree = new Chain({
     }
   ]
 });
+global._buildModel = new Chain({
+  input: function() {
+    return {
+      sheetName: this._arg1
+    };
+  },
+  steps: {
+    collectionExists: function() {
+      this.modelIndex = mongoose.modelNames().indexOf(this.collectionName);
+      this.next(this.modelIndex > -1);
+    },
+    createModel: function() {
+      var options = {
+        strict: true,
+        collection: this.collectionName 
+      };
+      this.model = mongoose.model(this.collectionName, new mongoose.Schema(this.schema, options));
+      this.next({
+        name: this.collectionName,
+        schema: this.stringSchema
+      });
+    },
+    defineCollectionName: function() {
+      this.collectionName = this.siteId+"_"+this.sheet._id;
+      this.next();
+    },
+    relayModel: function() {
+      this.model = mongoose.model(this.collectionName);
+      this.next({
+        collectionName: this.collectionName,
+        index: this.modelIndex,
+        schema: this.stringSchema,
+        mongoose: {
+          models: mongoose.modelNames(),
+          version: mongoose.version
+        }
+      });  
+    },
+    relayNativeModel: function() {
+      this.model = models[this.sheetName];
+      this.next(this.model);
+    },
+    removeExistingModel: function() {
+      delete mongoose.connection.models[this.collectionName];
+      this.next();
+    },
+    schemaChanged: function() {
+      var mSchema = mongoose.model(this.collectionName).schema.obj;
+      this.next(!Object.matches(mSchema, this.schema));
+    },
+    sheetNameIsNative: function() {
+      this.next(!!models[this.sheetName]);
+    }
+  },
+  instruct: [
+    "checkPermit",
+    {
+      if: "sheetNameIsNative",
+      true: "relayNativeModel",
+      false: [
+        "_grabSheet",
+        "defineCollectionName",
+        "_buildSchema",
+        {
+          if: "collectionExists",
+          true: {
+            if: "schemaChanged",
+            true: ["removeExistingModel", "createModel"],
+            false: "relayModel"
+          },
+          false: "createModel"
+        }
+      ]
+    }
+  ]
+});
+global._buildSchema = new Chain({
+  describe: "gets schema obj from sheeet, ready to convert into model",
+  input: function() {
+    return {
+      sheetName: this._arg1,
+      types: { 
+        "string": String,
+        "number": Number,
+        "date": Date,
+        "boolean": Boolean,
+        "array": Array,
+        "{}": Object,
+        "lowercase": { type: String, lowercase: true },
+        "obj": Object,
+        "object": Object,
+        "wild": Object
+      }
+    };
+  },
+  steps: {
+    convertToFuncion: function() {
+      if(!this.value) {
+        this.obj[this.key] = String;
+        this.stringSchema = "string";
+        return;
+      }
+      var keyName = typeof this.value == "string"
+                    ? this.value.toLowerCase()
+                    : "string",
+          convert = this.types[keyName];
+      this.stringSchema[this.key] = keyName;
+      this.obj[this.key] = convert || String;
+      this.next();
+    },
+    forEachItemInSchema: function() {
+      this.sheet.db = this.sheet.db || {};
+      this.schema = this.sheet.db.schema || { noKeysDefined: "string"};
+      this.stringSchema = Object.assign({}, this.schema);
+      this.next(this.schema);
+    }
+  },
+  instruct: [
+    "checkPermit",
+    "_grabSheet",
+    "forEachItemInSchema", ["convertToFuncion"],
+    function() {
+      this.next(this.stringSchema);
+    }
+  ]
+});
 global.checkEmailVerified = new Chain({
   steps: {
     alertVerificationEmailSent: function() {
@@ -646,7 +772,7 @@ global.db = new Chain({
   instruct: [
     "checkEmailVerified",
     "checkPermit",
-    "model",
+    "_buildModel",
     {
       switch: "toRouteMethod",
       get: [
@@ -656,7 +782,7 @@ global.db = new Chain({
             true: "addToOptions",
             false: [
               { if: "valueIsRegex", true: "convertToRegex" },
-              { 
+              {
                 if: "valueHasPlusCommas",
                 true: "convertToOr",
                 false: "addToFilter"
@@ -664,32 +790,20 @@ global.db = new Chain({
             ]
           }  
         ],
+        // { if: "permitHasRules", true: "addRules" },
         { if: "isDbCount", true: ["getCount", "serve"] },
         {
           if: "hasId",
           true: "findById",
           false: [
             { if: "needsASiteId", true: "addSiteIdToFilter" },
+            
             {
-              if: "hasSpecialCaveates",
-              true: { 
-                switch: "toCaveats",
-                sites: "getAllUserSites",
-                sheets: {
-                  if: "isDistinct",
-                  true: [
-                    "prepPipelineWithDistinct",
-                    "addFilter",
-                    "addSelectedProps",
-                    "addSort",
-                    "addSkip",
-                    "addLimit",
-                    "getDistinctItems"
-                  ],
-                  false: "getAllItems"
-                }
-              },
-              false: {
+              switch: "toCaveats",
+              sites: ["getAllUserSites", "serve"],
+              orders: [function(){this.next("orderRus")}, "serve"]
+            },
+            {
                 if: "isDistinct",
                 true: [
                   "prepPipelineWithDistinct",
@@ -701,8 +815,42 @@ global.db = new Chain({
                   "getDistinctItems"
                 ],
                 false: "getAllItems"
-              }
-            }
+            },
+            
+            // {
+            //   if: "hasSpecialCaveates",
+            //   true: { 
+            //     switch: "toCaveats",
+            //     sites: "getAllUserSites",
+            //     sheets: {
+            //       if: "isDistinct",
+            //       true: [
+            //         "prepPipelineWithDistinct",
+            //         "addFilter",
+            //         "addSelectedProps",
+            //         "addSort",
+            //         "addSkip",
+            //         "addLimit",
+            //         "getDistinctItems"
+            //       ],
+            //       false: "getAllItems"
+            //     }
+            //   },
+            //   false: {
+            //     if: "isDistinct",
+            //     true: [
+            //       "prepPipelineWithDistinct",
+            //       "addFilter",
+            //       "addSelectedProps",
+            //       "addSort",
+            //       "addSkip",
+            //       "addLimit",
+            //       "getDistinctItems"
+            //     ],
+            //     false: "getAllItems"
+            //   }
+            // }
+            
           ]
         }
       ],
@@ -1067,7 +1215,7 @@ global._grabUserPermitForSheet = new Chain({
     if: "siteIsUisheetOrSheetIsUser",
     true: "sendDefaultPermit",
     false: [
-      "grabSheet",
+      "_grabSheet",
       "grabPermit",
       // "fetchPermit",
       { 
@@ -1171,7 +1319,7 @@ global.images = new Chain({
     post: "createPresignedPost"
   }
 });
-global.grabSheet = new Chain({
+global._grabSheet = new Chain({
   input: function() {
     return {
       sheetName: this._arg1
@@ -1321,82 +1469,6 @@ global.logout = new Chain({
     "sendLogout"
   ]
 });
-global.model = new Chain({
-  input: function() {
-    return {
-      sheetName: this._arg1
-    };
-  },
-  steps: {
-    collectionExists: function() {
-      this.modelIndex = mongoose.modelNames().indexOf(this.collectionName);
-      this.next(this.modelIndex > -1);
-    },
-    createModel: function() {
-      var options = {
-        strict: true,
-        collection: this.collectionName 
-      };
-      this.model = mongoose.model(this.collectionName, new mongoose.Schema(this.schema, options));
-      this.next({
-        name: this.collectionName,
-        schema: this.stringSchema
-      });
-    },
-    defineCollectionName: function() {
-      this.collectionName = this.siteId+"_"+this.sheet._id;
-      this.next();
-    },
-    relayModel: function() {
-      this.model = mongoose.model(this.collectionName);
-      this.next({
-        collectionName: this.collectionName,
-        index: this.modelIndex,
-        schema: this.stringSchema,
-        mongoose: {
-          models: mongoose.modelNames(),
-          version: mongoose.version
-        }
-      });  
-    },
-    relayNativeModel: function() {
-      this.model = models[this.sheetName];
-      this.next(this.model);
-    },
-    removeExistingModel: function() {
-      delete mongoose.connection.models[this.collectionName];
-      this.next();
-    },
-    schemaChanged: function() {
-      var mSchema = mongoose.model(this.collectionName).schema.obj;
-      this.next(!Object.matches(mSchema, this.schema));
-    },
-    sheetNameIsNative: function() {
-      this.next(!!models[this.sheetName]);
-    }
-  },
-  instruct: [
-    "checkPermit",
-    {
-      if: "sheetNameIsNative",
-      true: "relayNativeModel",
-      false: [
-        "grabSheet",
-        "defineCollectionName",
-        "schema",
-        {
-          if: "collectionExists",
-          true: {
-            if: "schemaChanged",
-            true: ["removeExistingModel", "createModel"],
-            false: "relayModel"
-          },
-          false: "createModel"
-        }
-      ]
-    }
-  ]
-});
 global.permits = new Chain({
   input: function() {
     return {
@@ -1477,7 +1549,7 @@ global.permits = new Chain({
       switch: "toRouteMethod",
       get: "getPermits",
       post: [
-        "grabSheet",
+        "_grabSheet",
         { if: "noUsernameSpecified", true: "alertNoUsernameSpecified" },
         { if: "permitAlreadyExists", true: "alertPermitAlreadyExists" },
         "postNewPermit"
@@ -1508,56 +1580,6 @@ global.renderUserLibrary = new Chain({
     }
   },
   instruct: "renderLibrary"
-});
-global.schema = new Chain({
-  describe: "gets schema obj from sheeet, ready to convert into model",
-  input: function() {
-    return {
-      sheetName: this._arg1,
-      types: { 
-        "string": String,
-        "number": Number,
-        "date": Date,
-        "boolean": Boolean,
-        "array": Array,
-        "{}": Object,
-        "lowercase": { type: String, lowercase: true },
-        "obj": Object,
-        "object": Object,
-        "wild": Object
-      }
-    };
-  },
-  steps: {
-    convertToFuncion: function() {
-      if(!this.value) {
-        this.obj[this.key] = String;
-        this.stringSchema = "string";
-        return;
-      }
-      var keyName = typeof this.value == "string"
-                    ? this.value.toLowerCase()
-                    : "string",
-          convert = this.types[keyName];
-      this.stringSchema[this.key] = keyName;
-      this.obj[this.key] = convert || String;
-      this.next();
-    },
-    forEachItemInSchema: function() {
-      this.sheet.db = this.sheet.db || {};
-      this.schema = this.sheet.db.schema || { noKeysDefined: "string"};
-      this.stringSchema = Object.assign({}, this.schema);
-      this.next(this.schema);
-    }
-  },
-  instruct: [
-    "checkPermit",
-    "grabSheet",
-    "forEachItemInSchema", ["convertToFuncion"],
-    function() {
-      this.next(this.stringSchema);
-    }
-  ]
 });
 global.scripts = new Chain({
   input: function() {
@@ -2442,7 +2464,7 @@ module.exports.bulk = function(event, context, callback) {
       "fetchSite",
       "fetchUserPermitsForSite",
       "_fetchSheetForEachPermit",    
-      "model",
+      "_buildModel",
       "postBulkItems",
       "serve"
     ]
