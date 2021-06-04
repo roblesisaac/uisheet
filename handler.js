@@ -617,6 +617,15 @@ global.db = new Chain({
         self.next(permits);
       });
     },
+    forEachPermitForSheet: function() {
+      var self = this;
+      permits.find({
+        sheetId: this.id
+      }, function(err, permits){
+        if(err) return self.error(err);
+        self.next(permits);
+      });
+    },
     findById: function(res, next) {
       var self = this;
       this.model.findById(this.id, null, this.options, function(err, item) {
@@ -885,8 +894,13 @@ global.db = new Chain({
       delete: [
         {
           switch: "toCaveats",
-          permits: "updateAndSaveSiteCacheStamp",
-          sheets: "updateAndSaveSiteCacheStamp",
+          permits: ["updateAndSaveSiteCacheStamp", "deleteItem", "serve"],
+          sheets: [
+            "updateAndSaveSiteCacheStamp",
+            "forEachPermitForSheet", loop(["deletePermit"]),
+            "deleteItem",
+            "serve"
+          ],
           sites: [
             "lookupSiteAuthor",
             {
@@ -898,7 +912,7 @@ global.db = new Chain({
                 "serve"
               ],
               false: ["alertNeedPermissionFromAuthor", "serve"]
-            }  
+            } 
           ]
         },
         {
