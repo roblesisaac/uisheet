@@ -1175,9 +1175,10 @@ global._grabUserPermitForSheet = new Chain({
       });
     },
     grabPermitForPermit: function() {
-      var sheet = this.sheets.findOne({
-        name: this._query.sheetName
-      });
+      var sheetName = this._query.sheetName,
+          sheet = this.sheets.findOne({
+            name: sheetName
+          });
       this.permit = this.permits.findOne({
         sheetId: sheet._id
       });
