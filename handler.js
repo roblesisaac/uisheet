@@ -652,7 +652,7 @@ global.db = new Chain({
       this.next(!!this._body.newPassword);
     },
     hasSpecialCaveates: function () {
-      var caveats = ["sites", "users", "sheets"];
+      var caveats = ["sites", "users", "sheets", "permits"];
       this.next(caveats.indexOf(this.sheetName)>-1);
     },
     hasId: function(res, next) {
@@ -800,8 +800,7 @@ global.db = new Chain({
             
             {
               switch: "toCaveats",
-              sites: ["getAllUserSites", "serve"],
-              orders: [function(){this.next("orderRus")}, "serve"]
+              sites: ["getAllUserSites", "serve"]
             },
             {
                 if: "isDistinct",
@@ -815,42 +814,7 @@ global.db = new Chain({
                   "getDistinctItems"
                 ],
                 false: "getAllItems"
-            },
-            
-            // {
-            //   if: "hasSpecialCaveates",
-            //   true: { 
-            //     switch: "toCaveats",
-            //     sites: "getAllUserSites",
-            //     sheets: {
-            //       if: "isDistinct",
-            //       true: [
-            //         "prepPipelineWithDistinct",
-            //         "addFilter",
-            //         "addSelectedProps",
-            //         "addSort",
-            //         "addSkip",
-            //         "addLimit",
-            //         "getDistinctItems"
-            //       ],
-            //       false: "getAllItems"
-            //     }
-            //   },
-            //   false: {
-            //     if: "isDistinct",
-            //     true: [
-            //       "prepPipelineWithDistinct",
-            //       "addFilter",
-            //       "addSelectedProps",
-            //       "addSort",
-            //       "addSkip",
-            //       "addLimit",
-            //       "getDistinctItems"
-            //     ],
-            //     false: "getAllItems"
-            //   }
-            // }
-            
+            }
           ]
         }
       ],
@@ -858,6 +822,7 @@ global.db = new Chain({
         if: "hasSpecialCaveates",
         true: {
           switch: "toCaveats",
+          permits: ["updateAndSaveSiteCacheStamp", "updateItem"],
           sites: [
             "lookupSiteAuthor",
             {
@@ -900,8 +865,9 @@ global.db = new Chain({
       post: [
         { 
           switch: "toCaveats",
+          permits: "updateAndSaveSiteCacheStamp",
           sites: "addAuthorToBody",
-          sheets: ["addAuthorToBody", "addSiteIdToBody" ]
+          sheets: ["updateAndSaveSiteCacheStamp", "addAuthorToBody", "addSiteIdToBody" ]
         },
         {
           if: "moreThanOneItem",
@@ -916,10 +882,11 @@ global.db = new Chain({
           ]
         }
       ],
-      delete: {
-        if: "hasSpecialCaveates",
-        true: {
+      delete: [
+        {
           switch: "toCaveats",
+          permits: "updateAndSaveSiteCacheStamp",
+          sheets: "updateAndSaveSiteCacheStamp",
           sites: [
             "lookupSiteAuthor",
             {
@@ -927,23 +894,19 @@ global.db = new Chain({
               true: [
                 "deleteItem",
                 "forEachSheetInSite", loop(["deleteSheet"]),
-                "forEachPermitInSite", loop(["deletePermit"])
+                "forEachPermitInSite", loop(["deletePermit"]),
+                "serve"
               ],
-              false: "alertNeedPermissionFromAuthor"
+              false: ["alertNeedPermissionFromAuthor", "serve"]
             }  
-          ],
-          sheets: {
-            if: "droppingDb",
-            true: "dropDb",
-            false: "deleteItem"  
-          }
+          ]
         },
-        false:  {
+        {
           if: "droppingDb",
           true: "dropDb",
           false: "deleteItem"
         }
-      }
+      ]
     }
   ]
 });
