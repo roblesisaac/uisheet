@@ -604,15 +604,6 @@ global.db = new Chain({
     droppingDb: function() {
       this.next(this.id==="drop");
     },
-    forEachSheetInSite: function() {
-      var self = this;
-      models.sheets.find({
-        siteId: this.id
-      }, function(err, sheets){
-        if(err) return self.error(err);
-        self.next(sheets);
-      });  
-    },
     forEachPermitInSite: function() {
       var self = this;
       permits.find({
@@ -631,15 +622,24 @@ global.db = new Chain({
         self.next(permits);
       });
     },
+    forEachQueryKey: function() {
+      this.next(this._query);
+    },
+    forEachSheetInSite: function() {
+      var self = this;
+      models.sheets.find({
+        siteId: this.id
+      }, function(err, sheets){
+        if(err) return self.error(err);
+        self.next(sheets);
+      });  
+    },
     findById: function(res, next) {
       var self = this;
       this.model.findById(this.id, null, this.options, function(err, item) {
         if(err) return self.error(err);
         next(item);
       });
-    },
-    forEachQueryKey: function() {
-      this.next(this._query);
     },
     getAllItems: function() {
       var self = this;
@@ -1175,8 +1175,11 @@ global._grabUserPermitForSheet = new Chain({
       });
     },
     grabPermitForPermit: function() {
+      var sheet = this.sheets.findOne({
+        name: this._query.sheetName
+      });
       this.permit = this.permits.findOne({
-        sheetId: this.id
+        sheetId: sheet._id
       });
       this.next();
     },
@@ -1234,7 +1237,7 @@ global._grabUserPermitForSheet = new Chain({
 global._grabSheet = new Chain({
   input: function() {
     return {
-      sheetName: this._arg1
+      sheetName: this._arg1 || this._query
     };
   },
   steps: {
@@ -1254,10 +1257,7 @@ global._grabSheet = new Chain({
   },
   instruct: [
     "lookupAndDefineSheet",
-    {
-      if: "noSheetFound",
-      true: "alertNoSheetFound"
-    }    
+    { if: "noSheetFound", true: "alertNoSheetFound" }    
   ]
 });
 global.images = new Chain({
