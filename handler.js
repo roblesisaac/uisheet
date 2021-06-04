@@ -8,12 +8,13 @@ const s3 = new AWS.S3();
 const mime = require("mime");
 const Utils = require("./scripts/utils");
 const Chain = require("./scripts/chain");
+const permits = require("./models/permits");
 var models = {
   sheets: require("./models/sheets"),
   sites: require("./models/sites"), 
-  users: require("./models/users")
+  users: require("./models/users"),
+  permits: permits
 };
-const permits = require("./models/permits");
 const lambda = new AWS.Lambda({ region: "us-west-1" });
 const mongoose = require("mongoose");
 const cookie = require("cookie");
@@ -691,6 +692,10 @@ global.db = new Chain({
     },
     needsASiteId: function(res, next) {
       next(this.sheetName == "sheets");
+    },
+    permitHasRules: function() {
+      var ruleCount = 0;
+      this.permit.db.rules;
     },
     postItem: function() {
       var self = this;
