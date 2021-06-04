@@ -1,21 +1,13 @@
 const mongoose = require('mongoose');
+const rule = {
+  add: Array, // add this[propName] to query
+  remove: Array // removes this[propName] from query
+}
 const rules = {
-    get: {
-      add: Array, // add this[propName] to query
-      remove: Array // removes this[propName] from query
-    },
-    put: {
-      add: Array,
-      remove: Array
-    },
-    post: {
-      add: Array,
-      remove: Array
-    },
-    delete: {
-      add: Array,
-      remove: Array
-    }
+    get: rule,
+    put: rule,
+    post: rule,
+    delete: rule
 }
 
 var permitSchema = new mongoose.Schema({
