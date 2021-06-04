@@ -1205,9 +1205,6 @@ global._grabUserPermitForSheet = new Chain({
       };
       this.next();
     },
-    // siteIsUisheetOrSheetIsNative: function() {
-    //   this.next(this.siteObj.name == "uisheet" || !!models[this.sheetName]);
-    // },
     sheetNeedsADefualtPermit: function() {
       this.next(this.validDefaults.indexOf(this.sheetName) > -1);
     },
@@ -1224,13 +1221,7 @@ global._grabUserPermitForSheet = new Chain({
   instruct: [
     {  if: "sheetNeedsADefualtPermit",  true: "sendDefaultPermit" },
     { if: "sheetNameIsPermits", true: "grabPermitForPermit" },
-    {
-      if: "sheetIsNormal",
-      true: [
-        "_grabSheet",
-        "grabPermit"
-      ]
-    },
+    { if: "sheetIsNormal", true: [ "_grabSheet", "grabPermit" ] },
     {
       if: "noPermitExists", 
       true: [
@@ -1238,23 +1229,7 @@ global._grabUserPermitForSheet = new Chain({
         { if: "noPermitExists", true: "alertNoPermitExists" }
       ]
     }
-  ],
-  instructs: {
-    if: "siteIsUisheetOrSheetIsNative",
-    true: "sendDefaultPermit",
-    false: [
-      "_grabSheet",
-      "grabPermit",
-      // "fetchPermit",
-      { 
-        if: "noPermitExists", 
-        true: [
-          "fetchPublicPermit",
-          { if: "noPermitExists", true: "alertNoPermitExists" }
-        ]
-      } 
-    ]
-  }
+  ]
 });
 global._grabSheet = new Chain({
   input: function() {
