@@ -812,7 +812,7 @@ global.db = new Chain({
           switch: "toCaveats",
           sites: ["_fetchAllUserSites", "serve"],
           sheets: "addSiteIdToFilter",
-          permits: ["addSiteIdToFilter", "addUsernameToFilter"],
+          permits: "addSiteIdToFilter",
           users: "addUsernameToFilter"
         },
         {
@@ -915,6 +915,18 @@ global.db = new Chain({
               ],
               false: ["alertNeedPermissionFromAuthor", "serve"]
             } 
+          ],
+          users: [
+            "lookupUser",
+            {
+              if: "userDoesntExist",
+              true: "alertUserDoesntExist",
+              false: {
+                if: "passwordAuthenticates",
+                true: ["deleteItem", "serve"],
+                false: "alertPasswordsDontMatch"
+              }
+            }
           ]
         },
         {
@@ -1128,7 +1140,8 @@ global._grabUserPermitForSheet = new Chain({
     return {
       sheetName: this._arg1 || "sheets",
       id: this._arg2,
-      sheet: {}
+      sheet: {},
+      validDefaults: ["users", "sites"]
     };
   },
   steps: {
@@ -1140,7 +1153,7 @@ global._grabUserPermitForSheet = new Chain({
           filters = {
             siteId: this.siteId,
             username: "public",
-            sheetId: this.sheet._id,
+            sheetId: (this.sheet || {})._id || this.id,
           };
       permits.findOne(filters, function(error, permit) {
         if(error) return self.error(error);
@@ -1160,6 +1173,12 @@ global._grabUserPermitForSheet = new Chain({
         self.permit = permit;
         self.next();
       });
+    },
+    grabPermitForPermit: function() {
+      this.permit = this.permits.findOne({
+        sheetId: this.id
+      });
+      this.next();
     },
     grabPermit: function() {
       this.permit = this.permits.findOne({
@@ -1186,11 +1205,41 @@ global._grabUserPermitForSheet = new Chain({
       };
       this.next();
     },
-    siteIsUisheetOrSheetIsNative: function() {
-      this.next(this.siteObj.name == "uisheet" || !!models[this.sheetName]);
+    // siteIsUisheetOrSheetIsNative: function() {
+    //   this.next(this.siteObj.name == "uisheet" || !!models[this.sheetName]);
+    // },
+    sheetNeedsADefualtPermit: function() {
+      this.next(this.validDefaults.indexOf(this.sheetName) > -1);
+    },
+    sheetNameIsPermits: function() {
+      this.next(this.sheetName=="permits");
+    },
+    sheetIsNormal: function() {
+      var notADefault = this.validDefaults.indexOf(this.sheetName) < 0,
+          nameIsntPermits = this.sheetName !== "permits";
+          
+      this.next(notADefault && nameIsntPermits);
     }
   },
-  instruct: {
+  instruct: [
+    {  if: "sheetNeedsADefualtPermit",  true: "sendDefaultPermit" },
+    { if: "sheetNameIsPermits", true: "grabPermitForPermit" },
+    {
+      if: "sheetIsNormal",
+      true: [
+        "_grabSheet",
+        "grabPermit"
+      ]
+    },
+    {
+      if: "noPermitExists", 
+      true: [
+        "fetchPublicPermit",
+        { if: "noPermitExists", true: "alertNoPermitExists" }
+      ]
+    }
+  ],
+  instructs: {
     if: "siteIsUisheetOrSheetIsNative",
     true: "sendDefaultPermit",
     false: [
@@ -1206,6 +1255,35 @@ global._grabUserPermitForSheet = new Chain({
       } 
     ]
   }
+});
+global._grabSheet = new Chain({
+  input: function() {
+    return {
+      sheetName: this._arg1
+    };
+  },
+  steps: {
+    alertNoSheetFound: function() {
+      this.error("Not existing in archives, sheet " + this.sheetName + " is. Or enter you will, when permit you have.");
+    },
+    lookupAndDefineSheet: function() {
+      var self = this;
+      this.sheet = this.sheets.findOne({
+        name: self.sheetName
+      });
+      this.next(this.sheet);
+    },
+    noSheetFound: function() {
+      this.next(this.sheet === null);  
+    }
+  },
+  instruct: [
+    "lookupAndDefineSheet",
+    {
+      if: "noSheetFound",
+      true: "alertNoSheetFound"
+    }    
+  ]
 });
 global.images = new Chain({
   input: function() {
@@ -1297,35 +1375,6 @@ global.images = new Chain({
     },
     post: "createPresignedPost"
   }
-});
-global._grabSheet = new Chain({
-  input: function() {
-    return {
-      sheetName: this._arg1
-    };
-  },
-  steps: {
-    alertNoSheetFound: function() {
-      this.error("Not existing in archives, sheet " + this.sheetName + " is. Or enter you will, when permit you have.");
-    },
-    lookupAndDefineSheet: function() {
-      var self = this;
-      this.sheet = this.sheets.findOne({
-        name: self.sheetName
-      });
-      this.next(this.sheet);
-    },
-    noSheetFound: function() {
-      this.next(this.sheet === null);  
-    }
-  },
-  instruct: [
-    "lookupAndDefineSheet",
-    {
-      if: "noSheetFound",
-      true: "alertNoSheetFound"
-    }    
-  ]
 });
 global._loadMasterSite = new Chain({
   input: {
