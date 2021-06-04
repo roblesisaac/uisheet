@@ -1187,7 +1187,7 @@ global._grabUserPermitForSheet = new Chain({
       this.next();
     },
     siteIsUisheetOrSheetIsNative: function() {
-      this.next(this.siteObj.name == "uisheet" || models[this.sheetName]);
+      this.next(this.siteObj.name == "uisheet" || !!models[this.sheetName]);
     }
   },
   instruct: {
