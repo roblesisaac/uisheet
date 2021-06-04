@@ -1146,10 +1146,7 @@ global._grabUserPermitForSheet = new Chain({
   },
   steps: {
     alertNoPermitExists: function() {
-      this.error({
-        message: "<(-_-)> Not found in archives, your permit is.",
-        sheetName: this._query.sheetName
-      });
+      this.error(this._query.sheetName);
       // this.error("<(-_-)> Not found in archives, your permit is.");
     },
     fetchPublicPermit: function() {
