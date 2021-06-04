@@ -813,7 +813,7 @@ global.db = new Chain({
           sites: ["_fetchAllUserSites", "serve"],
           sheets: "addSiteIdToFilter",
           permits: ["addSiteIdToFilter", "addUsernameToFilter"],
-          users: ["addSiteIdToFilter"]
+          users: "addUsernameToFilter"
         },
         {
             if: "isDistinct",
