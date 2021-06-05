@@ -717,6 +717,10 @@ global.db = new Chain({
       delete this._body.password;
       this.next();
     },
+    removeSheetNameFromFilter: function() {
+      delete this.filter.sheetName;
+      this.next();
+    },
     setNewPassword: function() {
       var self = this;
       this.user.hashPassword(this._body.newPassword, function(hashed){
@@ -812,7 +816,7 @@ global.db = new Chain({
           switch: "toCaveats",
           sites: ["_fetchAllUserSites", "serve"],
           sheets: "addSiteIdToFilter",
-          permits: "addSiteIdToFilter",
+          permits: ["addSiteIdToFilter", "removeSheetNameFromFilter"],
           users: "addUsernameToFilter"
         },
         {
@@ -1146,14 +1150,7 @@ global._grabUserPermitForSheet = new Chain({
   },
   steps: {
     alertNoPermitExists: function() {
-      this.end({
-        message: "<(-_-)> Not found in archives, your permit is.",
-        permitSheet: this.permitSheet,
-        permit: this.permit,
-        permits: this.permits,
-        sheetName: this._query.sheetName
-      });
-      // this.error("<(-_-)> Not found in archives, your permit is.");
+      this.error("<(-_-)> Not found in archives, your permit is.");
     },
     fetchPublicPermit: function() {
       var self = this,
@@ -1182,12 +1179,12 @@ global._grabUserPermitForSheet = new Chain({
       });
     },
     grabPermitForPermit: function() {
-      var sheetName = this._query.sheetName;
-      this.permitSheet = this.sheets.findOne({
-            name: "sheets"
+      var sheetName = this._query.sheetName,
+          sheet = this.sheets.findOne({
+            name: sheetName
           });
       this.permit = this.permits.findOne({
-        sheetId: this.permitSheet._id.toString()
+        sheetId: sheet._id.toString()
       });
       this.next();
     },
