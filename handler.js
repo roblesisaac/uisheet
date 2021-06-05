@@ -718,6 +718,16 @@ global.db = new Chain({
     moreThanOneItem: function() {
       this.next(Array.isArray(this._body));
     },
+    permitAlreadyExists: function() {
+      var self = this; // to do
+      permits.findOne({
+        username: this._body.username,
+        siteId: this.siteId,
+        sheetId: this.sheet._id
+      }).then(function(permit){
+        self.next(!!permit);
+      });
+    },
     permitHasRules: function() {
       var rules = this.permit.db.rules,
           ruleCount = rules.get.add.length;
@@ -906,7 +916,7 @@ global.db = new Chain({
       post: [
         { 
           switch: "toCaveats",
-          permits: "updateAndSaveSiteCacheStamp",
+          permits: "updateAndSaveSiteCacheStamp", // add permitAlreadyExists
           sites: "addAuthorToBody",
           sheets: ["updateAndSaveSiteCacheStamp", "addAuthorToBody", "addSiteIdToBody" ]
         },
@@ -1501,96 +1511,6 @@ global.logout = new Chain({
   instruct: [
     "createLogoutCookies",
     "sendLogout"
-  ]
-});
-global.permits = new Chain({
-  input: function() {
-    return {
-      sheetName: this._arg1 || "sheets",
-      id: this._arg2
-    };
-  },
-  steps: {
-    alertNoUsernameSpecified: function() {
-      this.error("<(-_-)> First specify a username for your permit, you must.");
-    },
-    alertPermitAlreadyExists: function() {
-      this.error("<(-_-)> Already in archives, " + this._body.username + "'s permit is.");
-    },
-    deletePermit: function() {
-      var self = this,
-          id = this.item ? this.item._id : this.id;
-      permits.findByIdAndRemove(id).then(function(deleted){
-        self.next({
-          message: "<(-_-)> Erased from archives, permit has become.",
-          body: deleted
-        });
-      });
-    },
-    getPermits: function() {
-      var self = this;
-      permits.find({
-        siteId: this.siteId,
-        sheetId: this.sheet._id
-      }, function(err, permits){
-        if(err) return self.error(err);
-        self.next(permits);
-      });
-    },
-    noUsernameSpecified: function() {
-      this.next(!this._body.username);
-    },
-    permitAlreadyExists: function() {
-      var self = this;
-      permits.findOne({
-        username: this._body.username,
-        siteId: this.siteId,
-        sheetId: this.sheet._id
-      }).then(function(permit){
-        self.next(!!permit);
-      });
-    },
-    postNewPermit: function() {
-      var self = this,
-          defaults = {
-            methods: { methods: ["get", "put", "post", "delete"] },
-            ui: { apps: ["all"] }
-          },
-          body = {
-            username: this._body.username,
-            siteId: this.siteId,
-            sheetId: this.sheet._id,
-            db: this._body.db || defaults.methods,
-            ui: this._body.ui || defaults.ui,
-            permit: this._body.permit || defaults.methods
-          };
-      permits.create(body, function(err, newPermit){
-        if(err) return self.error(err);
-        self.next(newPermit);
-      });
-    },
-    updatePermit: function() {
-      var self = this;
-      permits.findByIdAndUpdate(this.id, this._body, { new: true }, function(err, updatedPermit){
-        if(err) return self.error(err);
-        self.next(updatedPermit);
-      });
-    }
-  },
-  instruct: [
-    "checkPermit",
-    {
-      switch: "toRouteMethod",
-      get: "getPermits",
-      post: [
-        "_grabSheet",
-        { if: "noUsernameSpecified", true: "alertNoUsernameSpecified" },
-        { if: "permitAlreadyExists", true: "alertPermitAlreadyExists" },
-        "postNewPermit"
-      ],
-      put: "updatePermit",
-      delete: "deletePermit"
-    }
   ]
 });
 global.renderUserLandingPage = new Chain({
