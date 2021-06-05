@@ -604,6 +604,28 @@ global.db = new Chain({
     droppingDb: function() {
       this.next(this.id==="drop");
     },
+    forEachAddRules: function() {
+      this.next(this.permit.db.rules.get.add); 
+    },
+    addRule: function() {
+      var keys = Object.keys(this.item),
+          prop = keys[0],
+          value = this.item[prop];
+      if(value.includes("'")) {
+        value = value.replaceAll("'","");
+      } else {
+        value = this[value];
+      }
+      this.filter[prop] = value;
+      this.next();
+    },
+    forEachRemoveRules: function() {
+      this.next(this.permit.db.rules.remove.add);
+    },
+    removeRule: function() {
+      delete this.filter[this.item];
+      this.next();
+    },
     forEachPermitInSite: function() {
       var self = this;
       permits.find({
@@ -695,8 +717,8 @@ global.db = new Chain({
       this.next(Array.isArray(this._body));
     },
     permitHasRules: function() {
-      var ruleCount = 0;
-      this.permit.db.rules;
+      var rules = this.permit.db.rules,
+          ruleCount = rules.get.add.length;
     },
     postItem: function() {
       var self = this;
@@ -810,6 +832,8 @@ global.db = new Chain({
           }  
         ],
         // { if: "permitHasRules", true: "addRules" },
+        "forEachAddRules", [ "addRule" ],
+        "forEachRemoveRules", [ "removeRule" ],
         { if: "isDbCount", true: ["getCount", "serve"] },
         { if: "hasId", true: ["findById", "serve"] },
         {
