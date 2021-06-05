@@ -620,7 +620,7 @@ global.db = new Chain({
       this.next();
     },
     forEachRemoveRules: function() {
-      this.next(this.permit.db.rules.remove.add);
+      this.next(this.permit.db.rules.get.remove);
     },
     removeRule: function() {
       delete this.filter[this.item];
