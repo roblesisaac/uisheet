@@ -161,6 +161,14 @@ if (!String.prototype.excludes) {
     return String.prototype.indexOf.apply(this, arguments) === -1;
   };
 }
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+if (!String.prototype.replaceAll) {
+  String.prototype.replaceAll =  function(match, replacement) {
+    return this.replace(new RegExp(escapeRegExp(match), "g"), ()=>replacement);
+  }
+}
 function percentage(number, digits) {
   digits = digits || 0;
   return (number*100).toFixed(digits) + "%";
@@ -244,28 +252,4 @@ function convertCsvToJson(csv, delimeter) {
     }
   }
   return objArray;
-}
-
-if (!String.prototype.includes) {
-  String.prototype.includes = function() {
-    'use strict';
-    return String.prototype.indexOf.apply(this, arguments) !== -1;
-  };
-}
-if (!String.prototype.excludes) {
-  String.prototype.excludes = function() {
-    'use strict';
-    return String.prototype.indexOf.apply(this, arguments) === -1;
-  };
-}
-
-if (typeof String.prototype.parseFunction != "function") {
-  String.prototype.parseFunction = function () {
-    var funcReg = /function *\(([^()]*)\)[ \n\t]*{(.*)}/gmi;
-    var match = funcReg.exec(this.replace(/\n/g, " "));
-    if(match) {
-      return new Function(match[1].split(","), match[2]);
-    }
-    return null;
-  };
 }
