@@ -605,6 +605,7 @@ global.db = new Chain({
       this.next(this.id==="drop");
     },
     forEachAddRules: function() {
+      if(!this.permit.db.rules) return this.next([]);
       this.next(this.permit.db.rules.get.add); 
     },
     addRule: function() {
@@ -620,6 +621,7 @@ global.db = new Chain({
       this.next();
     },
     forEachRemoveRules: function() {
+      if(!this.permit.db.rules) return this.next([]);
       this.next(this.permit.db.rules.get.remove);
     },
     removeRule: function() {
