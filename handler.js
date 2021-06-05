@@ -718,7 +718,7 @@ global.db = new Chain({
       this.next();
     },
     removeSheetNameFromFilter: function() {
-      delete this.filter.sheetName;
+      delete this.filter._sheetName;
       this.next();
     },
     setNewPassword: function() {
@@ -1179,7 +1179,7 @@ global._grabUserPermitForSheet = new Chain({
       });
     },
     grabPermitForPermit: function() {
-      var sheetName = this._query.sheetName,
+      var sheetName = this._query._sheetName,
           sheet = this.sheets.findOne({
             name: sheetName
           });
