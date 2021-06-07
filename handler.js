@@ -333,6 +333,9 @@ global._checkPermit = new Chain({
     };
   },
   steps: {
+    alreadyHasPermit: function() {
+      this.next(!!this.permit);
+    },
     alertPermitExcludesMethod: function() {
       this.error("<(-_-)> Method is prohibited, your permit declares.");
     },
@@ -433,21 +436,24 @@ global._checkPermit = new Chain({
     }
   },
   instruct: {
-    if: "sheetNeedsADefualtPermit", 
-    true: "sendDefaultPermit",
-    false: [
-      "_grabSheet",
-      { if: "sheetNameIsPermits", true: "grabPermitForPermit" },
-      { if: "sheetIsNormal", true: "grabPermit" },
-      {
-        if: "noPermitExists", 
-        true: [
-          "fetchPublicPermit",
-          { if: "noPermitExists", true: "alertNoPermitExists" }
-        ]
-      },
-      { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" }   
-    ]
+    if: "alreadyHasPermit",
+    false: {
+      if: "sheetNeedsADefualtPermit", 
+      true: "sendDefaultPermit",
+      false: [
+        "_grabSheet",
+        { if: "sheetNameIsPermits", true: "grabPermitForPermit" },
+        { if: "sheetIsNormal", true: "grabPermit" },
+        {
+          if: "noPermitExists", 
+          true: [
+            "fetchPublicPermit",
+            { if: "noPermitExists", true: "alertNoPermitExists" }
+          ]
+        },
+        { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" }   
+      ]
+    }
   }
 });
 global.connectToDb = new Chain({
