@@ -324,17 +324,126 @@ global._checkEmailVerified = new Chain({
   }
 });
 global._checkPermit = new Chain({
+  input: function() {
+    return {
+      sheetName: this._arg1 || "sheets",
+      id: this._arg2,
+      sheet: {},
+      validDefaults: ["users", "sites"]
+    };
+  },
   steps: {
     alertPermitExcludesMethod: function() {
       this.error("<(-_-)> Method is prohibited, your permit declares.");
     },
+    alertNoPermitExists: function() {
+      this.error("<(-_-)> Not found in archives, your permit is.");
+    },
+    fetchPublicPermit: function() {
+      var self = this,
+          filters = {
+            siteId: this.siteId,
+            username: "public",
+            sheetId: (this.sheet || {})._id || this.id,
+          };
+      permits.findOne(filters, function(error, permit) {
+        if(error) return self.error(error);
+        self.permit = permit;
+        self.next();
+      });      
+    },
+    fetchPermit: function() {
+      var self = this,
+          filters = {
+            siteId: this.siteId,
+            username: this.user.username,
+            sheetId: this.sheet._id,
+          };
+      permits.findOne(filters, function(error, permit) {
+        if(error) return self.error(error);
+        self.permit = permit;
+        self.next();
+      });
+    },
+    grabPermitForPermit: function() {
+      var sheetName = this._query._sheetName,
+          self = this,
+          filters = { sheetId: this.sheet._id.toString() };
+      
+      if(this.permits.length) {
+        this.permit = this.permits.findOne(filters);
+        this.next();
+        return;
+      }
+
+      permits.findOne(filters, function (err, permit) {
+        self.permit = permit;
+        self.next();
+      });
+    },
+    grabPermit: function() {
+      var filters = { sheetId: this.sheet._id.toString() };
+      
+      if(this.permits.length) {
+        this.permit = this.permits.findOne(filters);
+        this.next();
+        return;
+      }
+      
+      var self = this;
+      permits.findOne(filters, function (err, permit) {
+        self.permit = permit;
+        self.next();
+      });
+    },
+    noPermitExists: function() {
+      this.next(!this.permit);
+    },
     permitExcludesMethodForProp: function() {
       var prop = this.sheetName == "permits" ? "permit" : "db";
       this.next(this.permit[prop].methods.indexOf(this._eventMethod) == -1);
+    },
+    sendDefaultPermit: function() {
+      this.permit = {
+        db: {
+          methods: ["get","put","post","delete"]
+        },
+        ui: {
+          apps: ["all"]
+        },
+        permit: {
+          methods: ["get","put","post","delete"]
+        },
+        username: this.user.username,
+        siteId: this.siteObj._id
+      };
+      this.next();
+    },
+    sheetNeedsADefualtPermit: function() {
+      this.next(this.validDefaults.indexOf(this.sheetName) > -1);
+    },
+    sheetNameIsPermits: function() {
+      this.next(this.sheetName=="permits");
+    },
+    sheetIsNormal: function() {
+      var notADefault = this.validDefaults.indexOf(this.sheetName) < 0,
+          nameIsntPermits = this.sheetName !== "permits";
+          
+      this.next(notADefault && nameIsntPermits);
     }
   },
   instruct: [
-    "_grabUserPermitForSheet",
+    {  if: "sheetNeedsADefualtPermit",  true: "sendDefaultPermit" },
+    "_grabSheet",
+    { if: "sheetNameIsPermits", true: "grabPermitForPermit" },
+    { if: "sheetIsNormal", true: "grabPermit" },
+    {
+      if: "noPermitExists", 
+      true: [
+        "fetchPublicPermit",
+        { if: "noPermitExists", true: "alertNoPermitExists" }
+      ]
+    },
     { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" }
   ]
 });
@@ -1187,122 +1296,6 @@ global._fetchSheetForEachPermit = new Chain({
     //   }
     // ]),
     "sortSheets"
-  ]
-}); // needs
-global._grabUserPermitForSheet = new Chain({
-  input: function() {
-    return {
-      sheetName: this._arg1 || "sheets",
-      id: this._arg2,
-      sheet: {},
-      validDefaults: ["users", "sites"]
-    };
-  },
-  steps: {
-    alertNoPermitExists: function() {
-      this.error("<(-_-)> Not found in archives, your permit is.");
-    },
-    fetchPublicPermit: function() {
-      var self = this,
-          filters = {
-            siteId: this.siteId,
-            username: "public",
-            sheetId: (this.sheet || {})._id || this.id,
-          };
-      permits.findOne(filters, function(error, permit) {
-        if(error) return self.error(error);
-        self.permit = permit;
-        self.next();
-      });      
-    },
-    fetchPermit: function() {
-      var self = this,
-          filters = {
-            siteId: this.siteId,
-            username: this.user.username,
-            sheetId: this.sheet._id,
-          };
-      permits.findOne(filters, function(error, permit) {
-        if(error) return self.error(error);
-        self.permit = permit;
-        self.next();
-      });
-    },
-    grabPermitForPermit: function() {
-      var sheetName = this._query._sheetName,
-          self = this,
-          filters = { sheetId: this.sheet._id.toString() };
-      
-      if(this.permits.length) {
-        this.permit = this.permits.findOne(filters);
-        this.next();
-        return;
-      }
-
-      permits.findOne(filters, function (err, permit) {
-        self.permit = permit;
-        self.next();
-      });
-    },
-    grabPermit: function() {
-      var filters = { sheetId: this.sheet._id.toString() };
-      
-      if(this.permits.length) {
-        this.permit = this.permits.findOne(filters);
-        this.next();
-        return;
-      }
-      
-      var self = this;
-      permits.findOne(filters, function (err, permit) {
-        self.permit = permit;
-        self.next();
-      });
-    },
-    noPermitExists: function() {
-      this.next(!this.permit);
-    },
-    sendDefaultPermit: function() {
-      this.permit = {
-        db: {
-          methods: ["get","put","post","delete"]
-        },
-        ui: {
-          apps: ["all"]
-        },
-        permit: {
-          methods: ["get","put","post","delete"]
-        },
-        username: this.user.username,
-        siteId: this.siteObj._id
-      };
-      this.next();
-    },
-    sheetNeedsADefualtPermit: function() {
-      this.next(this.validDefaults.indexOf(this.sheetName) > -1);
-    },
-    sheetNameIsPermits: function() {
-      this.next(this.sheetName=="permits");
-    },
-    sheetIsNormal: function() {
-      var notADefault = this.validDefaults.indexOf(this.sheetName) < 0,
-          nameIsntPermits = this.sheetName !== "permits";
-          
-      this.next(notADefault && nameIsntPermits);
-    }
-  },
-  instruct: [
-    {  if: "sheetNeedsADefualtPermit",  true: "sendDefaultPermit" },
-    "_grabSheet",
-    { if: "sheetNameIsPermits", true: "grabPermitForPermit" },
-    { if: "sheetIsNormal", true: "grabPermit" },
-    {
-      if: "noPermitExists", 
-      true: [
-        "fetchPublicPermit",
-        { if: "noPermitExists", true: "alertNoPermitExists" }
-      ]
-    }
   ]
 }); // needs
 global._grabSheet = new Chain({
