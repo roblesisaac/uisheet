@@ -1295,17 +1295,19 @@ global._fetchSheetForEachPermit = new Chain({
 }); // needs
 global._grabSheet = new Chain({
   input: function() {
-    var sheetName = this._arg1 || this._query;
     return {
-      sheetName: sheetName,
-      filter: {
-        name: sheetName
-      }
+      sheetName: this._arg1 || this._query
     };
   },
   steps: {
     alertNoSheetFound: function() {
       this.error("Not existing in archives, sheet " + this.sheetName + " is. Or enter you will, when permit you have.");
+    },
+    buildFilter: function() {
+      this.filter = {
+        name: this.sheetName
+      };
+      this.next();
     },
     fetchSheet: function() {
       var self = this;
@@ -1327,6 +1329,7 @@ global._grabSheet = new Chain({
     }
   },
   instruct: [
+    "buildFilter",
     {
       if: "hasSheets",
       true: "lookupAndDefineSheet",
