@@ -1300,6 +1300,9 @@ global._grabSheet = new Chain({
     };
   },
   steps: {
+    alreadyHasSheet: function() {
+      this.next(!!this.sheet);
+    },
     alertNoSheetFound: function() {
       this.error("Not existing in archives, sheet " + this.sheetName + " is. Or enter you will, when permit you have.");
     },
@@ -1328,15 +1331,18 @@ global._grabSheet = new Chain({
       this.next(this.sheet === null);  
     }
   },
-  instruct: [
-    "buildFilter",
-    {
-      if: "hasSheets",
-      true: "lookupAndDefineSheet",
-      false: "fetchSheet"
-    },
-    { if: "noSheetFound", true: "alertNoSheetFound" }    
-  ]
+  instruct: {
+    if: "alreadyHasSheet",
+    false: [
+      "buildFilter",
+      {
+        if: "hasSheets",
+        true: "lookupAndDefineSheet",
+        false: "fetchSheet"
+      },
+      { if: "noSheetFound", true: "alertNoSheetFound" }  
+    ]
+  }
 }); // needs sheets
 global.images = new Chain({
   input: function() {
