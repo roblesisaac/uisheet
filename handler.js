@@ -1430,7 +1430,7 @@ global.login = new Chain({
       this.token = jwt.sign(tokenContent, secret, {	expiresIn: "10h" });
       this.cookieToken = cookie.serialize("token", String(this.token), cookieOptions);
       this.cookieUserId = cookie.serialize("userid", String(this.user._id), cookieOptions);
-      this.userStatus = cookie.serialize("status", String(this.user.stauts), cookieOptions);
+      this.userStatus = cookie.serialize("status", String(this.user.status), cookieOptions);
       this.next();
     },
     fetchUser: function() {
