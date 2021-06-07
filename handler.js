@@ -337,7 +337,7 @@ global._checkPermit = new Chain({
     "_grabUserPermitForSheet",
     { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" }
   ]
-}); // needs
+});
 global.connectToDb = new Chain({
   steps: {
     alreadyConnected: function() {
@@ -1077,7 +1077,7 @@ global._fetchAllUserSites = new Chain({
       this.userSites.push(userSite);
       this.next();
     },
-    getAllPermitsForUser: function() {
+    fetchAllPermitsForUser: function() {
       var self = this;
       this.userPermits = [];
       permits.find({
@@ -1088,6 +1088,16 @@ global._fetchAllUserSites = new Chain({
         self.next();
       });
     },
+    fetchSitesForUserPermits: function() {
+      var self = this,
+          _ids = this.uniqueSiteIds;
+      models.sites.find({
+        _id: { $in: _ids }
+      }, function(err, resSites){
+        if(err) return self.error(err);
+        self.next(resSites);
+      });
+    },
     getUniqueSiteIds: function() {
       var uniqueSiteIds = [];
       for(var i=0; i<this.userPermits.length; i++) {
@@ -1096,7 +1106,8 @@ global._fetchAllUserSites = new Chain({
           uniqueSiteIds.push(permit.siteId);
         }
       }
-      this.next(uniqueSiteIds);
+      this.uniqueSiteIds = uniqueSiteIds;
+      this.next();
     },
     getUserSite: function() {
       var self = this;
@@ -1107,17 +1118,19 @@ global._fetchAllUserSites = new Chain({
     }
   },
   instruct: [
-    "getAllPermitsForUser",
-    "getUniqueSiteIds", loop([
-      "define=>userSiteId",
-      "getUserSite",
-      "appendToUserSites"
-    ]),
-    function() {
-      this.next(this.userSites);
-    }
+    "fetchAllPermitsForUser",
+    "getUniqueSiteIds",
+    "fetchSitesForUserPermits",
+    // "getUniqueSiteIds", loop([
+    //   "define=>userSiteId",
+    //   "getUserSite",
+    //   "appendToUserSites"
+    // ]),
+    // function() {
+    //   this.next(this.userSites);
+    // }
   ]
-}); // needs
+});
 global._fetchSheetForEachPermit = new Chain({
   input: {
     sheets: []
@@ -1217,19 +1230,34 @@ global._grabUserPermitForSheet = new Chain({
     },
     grabPermitForPermit: function() {
       var sheetName = this._query._sheetName,
-          sheet = this.sheets.findOne({
-            name: sheetName
-          });
-      this.permit = this.permits.findOne({
-        sheetId: sheet._id.toString()
+          self = this,
+          filters = { sheetId: this.sheet._id.toString() };
+      
+      if(this.permits.length) {
+        this.permit = this.permits.findOne(filters);
+        this.next();
+        return;
+      }
+
+      permits.findOne(filters, function (err, permit) {
+        self.permit = permit;
+        self.next();
       });
-      this.next();
     },
     grabPermit: function() {
-      this.permit = this.permits.findOne({
-        sheetId: this.sheet._id.toString()
+      var filters = { sheetId: this.sheet._id.toString() };
+      
+      if(this.permits.length) {
+        this.permit = this.permits.findOne(filters);
+        this.next();
+        return;
+      }
+      
+      var self = this;
+      permits.findOne(filters, function (err, permit) {
+        self.permit = permit;
+        self.next();
       });
-      this.next();
     },
     noPermitExists: function() {
       this.next(!this.permit);
@@ -1265,8 +1293,9 @@ global._grabUserPermitForSheet = new Chain({
   },
   instruct: [
     {  if: "sheetNeedsADefualtPermit",  true: "sendDefaultPermit" },
-    { if: "sheetNameIsPermits", true: "grabPermitForPermit" }, // needs
-    { if: "sheetIsNormal", true: [ "_grabSheet", "grabPermit" ] }, // needs
+    "_grabSheet",
+    { if: "sheetNameIsPermits", true: "grabPermitForPermit" },
+    { if: "sheetIsNormal", true: "grabPermit" },
     {
       if: "noPermitExists", 
       true: [
