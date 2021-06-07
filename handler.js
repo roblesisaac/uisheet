@@ -1612,6 +1612,14 @@ global.scripts = new Chain({
       this.sheetScript+="\n};";
       this.next();
     },
+    fetchSite: function() {
+      var self = this,
+          filter = { name: this._siteName };
+      models.sites.findOne(filter).then(function(siteObj){
+        if(siteObj) self.siteObj = siteObj;
+        self.next(siteObj);
+      });
+    },
     forEachScriptFromUserSite: function() {
       this.next(this.siteObj.scripts);
     },
@@ -1760,6 +1768,7 @@ global.scripts = new Chain({
     }
   },
   instruct: [
+    "fetchSite",
     "fetchUserPermitsForSite",
     "_fetchSheetForEachPermit",
     "_fetchMasterSite",
@@ -2233,11 +2242,10 @@ global.port = new Chain({
       delete index._callback;
       next(index);
     },
-    fetchSite: function(res, next) {
-      var self = this;
-      models.sites.findOne({
-        name: self._siteName
-      }).then(function(siteObj){
+    fetchSimpleSite: function(res, next) {
+      var self = this,
+          filter = { name: this._siteName };
+      models.sites.findOne(filter, "-scripts" , function(siteObj){
         if(siteObj) {
           self.siteObj = siteObj;
           self.siteId = siteObj._id;
@@ -2386,7 +2394,7 @@ global.port = new Chain({
         "serve"
       ]
     },
-    "fetchSite",
+    "fetchSimpleSite",
     { if: "noSiteExists", true: [ "renderNoSiteExists", "serve" ] },
     // {
     //   if: "userHasNoPermitsForSiteAndNotUisheet",
@@ -2465,7 +2473,7 @@ module.exports.bulk = function(event, context, callback) {
       "connectToDb",
       { if: "usingCustomDomain", true: "getSiteName" },
       { if: "userHasCookies", true: "fetchUserFromCookie" },
-      "fetchSite",
+      "fetchSimpleSite",
       "fetchUserPermitsForSite",
       "_fetchSheetForEachPermit",    
       "_buildModel",
