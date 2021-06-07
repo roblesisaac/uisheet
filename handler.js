@@ -1337,18 +1337,15 @@ global._grabSheet = new Chain({
       this.next(this.sheet === null);  
     }
   },
-  instruct: {
-    if: "alreadyHasSheet",
-    false: [
-      "buildFilter",
-      {
-        if: "hasSheets",
-        true: "lookupAndDefineSheet",
-        false: "fetchSheet"
-      },
-      { if: "noSheetFound", true: "alertNoSheetFound" }  
-    ]
-  }
+  instruct: [
+    "buildFilter",
+    {
+      if: "hasSheets",
+      true: "lookupAndDefineSheet",
+      false: "fetchSheet"
+    },
+    { if: "noSheetFound", true: "alertNoSheetFound" }  
+  ]
 }); // needs sheets
 global.images = new Chain({
   input: function() {
