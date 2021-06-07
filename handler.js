@@ -1304,14 +1304,14 @@ global._grabSheet = new Chain({
       this.error("Not existing in archives, sheet " + this.sheetName + " is. Or enter you will, when permit you have.");
     },
     buildFilter: function() {
-      this.filter = {
+      this.sheetFilter = {
         name: this.sheetName
       };
       this.next();
     },
     fetchSheet: function() {
       var self = this;
-      models.sheets.findOne(this.filter, function(err, resSheet){
+      models.sheets.findOne(this.sheetFilter, function(err, resSheet){
         if(err) return self.error(err);
         self.sheet = resSheet;
         self.next();
@@ -1321,7 +1321,7 @@ global._grabSheet = new Chain({
       this.next(!!this.sheets.length);
     },
     lookupAndDefineSheet: function() {
-      this.sheet = this.sheets.findOne(this.filter);
+      this.sheet = this.sheets.findOne(this.sheetFilter);
       this.next(this.sheet);
     },
     noSheetFound: function() {
