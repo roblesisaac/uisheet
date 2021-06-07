@@ -1537,6 +1537,7 @@ global.logout = new Chain({
       var cookieOptions = { secure: true, sameSite: "strict", httpOnly: true, maxAge: 0, path: "/" };
       this.cookieToken = cookie.serialize("token", "", cookieOptions);
       this.cookieUserId = cookie.serialize("userid", "", cookieOptions);
+      this.cookieUserStatus = cookie.serialize("status", "", cookieOptions);
       this.next();     
     },
     sendLogout: function() {
@@ -1551,7 +1552,7 @@ global.logout = new Chain({
         	"Access-Control-Allow-Credentials" : true
   			},
   			multiValueHeaders: {
-          "Set-Cookie": [ this.cookieToken, this.cookieUserId ]
+          "Set-Cookie": [ this.cookieToken, this.cookieUserId, this.cookieUserStatus ]
   			}
   		});   
     }
