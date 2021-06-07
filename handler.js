@@ -346,26 +346,13 @@ global._checkPermit = new Chain({
           filters = {
             siteId: this.siteId,
             username: "public",
-            sheetId: (this.sheet || {})._id || this.id,
+            sheetId: ((this.sheet || {})._id || "").toString() || this.id,
           };
       permits.findOne(filters, function(error, permit) {
         if(error) return self.error(error);
         self.permit = permit;
         self.next();
       });      
-    },
-    fetchPermit: function() {
-      var self = this,
-          filters = {
-            siteId: this.siteId,
-            username: this.user.username,
-            sheetId: this.sheet._id,
-          };
-      permits.findOne(filters, function(error, permit) {
-        if(error) return self.error(error);
-        self.permit = permit;
-        self.next();
-      });
     },
     fetchPermitForPermit: function() {
       var self = this,
@@ -384,6 +371,7 @@ global._checkPermit = new Chain({
     },
     grabPermit: function() {
       var filters = { 
+            siteId: this.siteId,
             sheetId: this.sheet._id.toString(),
             username: this.user.username
           };
@@ -396,12 +384,13 @@ global._checkPermit = new Chain({
       
       var self = this;
       permits.findOne(filters, function (err, permit) {
+        if(err) return self.error(err);
         self.permit = permit;
         self.next();
       });
     },
-    noPermitExists: function() {
-      this.next(!this.permit);
+    noPermitExistsAndUserIsNotPublic: function() {
+      this.next(!this.permit && this.user.username !== "public");
     },
     permitExcludesMethodForProp: function() {
       var prop = this.sheetName == "permits" ? "permit" : "db";
@@ -445,12 +434,12 @@ global._checkPermit = new Chain({
         { if: "sheetNameIsPermits", true: "fetchPermitForPermit" },
         { if: "sheetIsNormal", true: ["_grabSheet", "grabPermit"] },
         {
-          if: "noPermitExists", 
+          if: "noPermitExistsAndUserIsNotPublic", 
           true: [
-            "_grabSheet",
             "fetchPublicPermit",
             { if: "noPermitExists", true: "alertNoPermitExists" }
-          ]
+          ],
+          false: "alertNoPermitExists"
         },
         { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" }   
       ]
