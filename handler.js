@@ -1319,7 +1319,7 @@ global._grabSheet = new Chain({
     },
     fetchSheet: function() {
       var self = this;
-      models.sheets.findOne(this.sheetFilter, function(err, resSheet){
+      models.sheets.findOne(this.sheetFilter, "-ui", function(err, resSheet){
         if(err) return self.error(err);
         self.sheet = resSheet;
         self.next();
