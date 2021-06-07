@@ -389,8 +389,8 @@ global._checkPermit = new Chain({
         self.next();
       });
     },
-    noPermitExistsAndUserIsNotPublic: function() {
-      this.next(!this.permit && this.user.username !== "public");
+    noPermitExists: function() {
+      this.next(!this.permit);
     },
     permitExcludesMethodForProp: function() {
       var prop = this.sheetName == "permits" ? "permit" : "db";
@@ -423,6 +423,9 @@ global._checkPermit = new Chain({
           nameIsntPermits = this.sheetName !== "permits";
           
       this.next(notADefault && nameIsntPermits);
+    },
+    userIsNotPublic: function() {
+      this.next(this.user.username !== "public");
     }
   },
   instruct: {
@@ -434,12 +437,11 @@ global._checkPermit = new Chain({
         { if: "sheetNameIsPermits", true: "fetchPermitForPermit" },
         { if: "sheetIsNormal", true: ["_grabSheet", "grabPermit"] },
         {
-          if: "noPermitExistsAndUserIsNotPublic", 
+          if: "noPermitExists", 
           true: [
-            "fetchPublicPermit",
+            { if: "userIsNotPublic", true: "fetchPublicPermit" },
             { if: "noPermitExists", true: "alertNoPermitExists" }
-          ],
-          false: "alertNoPermitExists"
+          ]
         },
         { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" }   
       ]
