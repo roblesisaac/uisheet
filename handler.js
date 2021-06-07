@@ -298,7 +298,7 @@ global._checkEmailVerified = new Chain({
       }); 
     },
     emailNotVerifiedYet: function() {
-      if(this._cookie.status == "verified" || this.user.username=="public") return this.next(false);
+      if(this._cookies.status == "verified" || this.user.username=="public") return this.next(false);
       
       var dateFromObjectId = function (objectId) {
           	return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
@@ -320,7 +320,7 @@ global._checkEmailVerified = new Chain({
       "alertVerificationEmailSent"
     ]
   }
-}); // needs to save user to cookie
+});
 global._checkPermit = new Chain({
   steps: {
     alertPermitExcludesMethod: function() {
