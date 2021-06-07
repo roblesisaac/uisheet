@@ -298,8 +298,7 @@ global._checkEmailVerified = new Chain({
       }); 
     },
     emailNotVerifiedYet: function() {
-      if(!this.user) return this.error("<(-_-)> Missing user, you are.");
-      if(this.user.status == "verified" || this.user.username=="public") return this.next(false);
+      if(this._cookie.status == "verified" || this.user.username=="public") return this.next(false);
       
       var dateFromObjectId = function (objectId) {
           	return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
@@ -321,7 +320,7 @@ global._checkEmailVerified = new Chain({
       "alertVerificationEmailSent"
     ]
   }
-});
+}); // needs to save user to cookie
 global._checkPermit = new Chain({
   steps: {
     alertPermitExcludesMethod: function() {
@@ -1116,7 +1115,7 @@ global._fetchAllUserSites = new Chain({
       this.next(this.userSites);
     }
   ]
-});
+}); // needs
 global._fetchSheetForEachPermit = new Chain({
   input: {
     sheets: []
@@ -1174,7 +1173,7 @@ global._fetchSheetForEachPermit = new Chain({
     // ]),
     "sortSheets"
   ]
-});
+}); // needs
 global._grabUserPermitForSheet = new Chain({
   input: function() {
     return {
@@ -1274,7 +1273,7 @@ global._grabUserPermitForSheet = new Chain({
       ]
     }
   ]
-});
+}); // needs
 global._grabSheet = new Chain({
   input: function() {
     return {
@@ -1747,7 +1746,7 @@ global.scripts = new Chain({
       ]
     }  
   ]
-});
+}); // needs
 global.serve = new Chain({
   input: {
 		types: {
