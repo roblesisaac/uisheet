@@ -433,18 +433,23 @@ global._checkPermit = new Chain({
     }
   },
   instruct: [
-    {  if: "sheetNeedsADefualtPermit",  true: "sendDefaultPermit" },
-    "_grabSheet",
-    { if: "sheetNameIsPermits", true: "grabPermitForPermit" },
-    { if: "sheetIsNormal", true: "grabPermit" },
-    {
-      if: "noPermitExists", 
-      true: [
-        "fetchPublicPermit",
-        { if: "noPermitExists", true: "alertNoPermitExists" }
+    {  
+      if: "sheetNeedsADefualtPermit", 
+      true: "sendDefaultPermit",
+      false: [
+        "_grabSheet",
+        { if: "sheetNameIsPermits", true: "grabPermitForPermit" },
+        { if: "sheetIsNormal", true: "grabPermit" },
+        {
+          if: "noPermitExists", 
+          true: [
+            "fetchPublicPermit",
+            { if: "noPermitExists", true: "alertNoPermitExists" }
+          ]
+        },
+        { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" }   
       ]
-    },
-    { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" }
+    }
   ]
 });
 global.connectToDb = new Chain({
