@@ -1306,7 +1306,8 @@ global._grabSheet = new Chain({
     },
     buildFilter: function() {
       this.sheetFilter = {
-        name: this.sheetName
+        name: this.sheetName,
+        siteId: this.siteId
       };
       this.next();
     },
