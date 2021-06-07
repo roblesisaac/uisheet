@@ -356,7 +356,10 @@ global._checkPermit = new Chain({
     },
     fetchPermitForPermit: function() {
       var self = this,
-          filters = { sheetId: this._query.sheetId };
+          filters = { 
+            sheetId: this._query.sheetId,
+            username: this.user.username
+          };
       
       if(this.permits.length) {
         this.permit = this.permits.findOne(filters);
