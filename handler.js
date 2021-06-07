@@ -891,7 +891,7 @@ global.db = new Chain({
           ],
           sheets: ["updateAndSaveSiteCacheStamp", "updateItem"],
           users: [
-            "fetchUser",
+            "fetchUserFromCookie",
             {
               if: "userDoesntExist",
               true: "alertUserDoesntExist",
@@ -957,7 +957,7 @@ global.db = new Chain({
             } 
           ],
           users: [
-            "fetchUser",
+            "fetchUserFromCookie",
             {
               if: "userDoesntExist",
               true: "alertUserDoesntExist",
@@ -2195,7 +2195,7 @@ global.port = new Chain({
         next(siteObj);
       });
     },
-    fetchUser: function() {
+    fetchUserFromCookie: function() {
       var self = this;
       this.userid = this._cookies.userid;
       models.users.findById(this.userid, function(err, user){
@@ -2321,7 +2321,7 @@ global.port = new Chain({
     {
       if: "userHasCookies",
       true: [
-        "fetchUser",
+        "fetchUserFromCookie",
         { if: "loggedOut", true: ["renderLoggedOut", "serve"] }
       ]
     },
@@ -2415,7 +2415,7 @@ module.exports.bulk = function(event, context, callback) {
     instruct: [
       "connectToDb",
       { if: "usingCustomDomain", true: "getSiteName" },
-      { if: "userHasCookies", true: "fetchUser" },
+      { if: "userHasCookies", true: "fetchUserFromCookie" },
       "fetchSite",
       "fetchUserPermitsForSite",
       "_fetchSheetForEachPermit",    
