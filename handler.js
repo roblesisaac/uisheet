@@ -300,10 +300,12 @@ global._checkEmailVerified = new Chain({
     emailNotVerifiedYet: function() {
       if(this._cookies.status == "verified" || this.user.username=="public") return this.next(false);
       
+      if(!this.user) return this.error("<(-_-)> Missing user, you are.");
+      
       var dateFromObjectId = function (objectId) {
           	return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
           },
-          createdOn = dateFromObjectId(this.user.id),
+          createdOn = dateFromObjectId(this._cookies.userid),
           rightNow = Date.now(),
           secondsSinceCreated = rightNow-createdOn,
           aMinute = 1000*60,
