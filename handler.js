@@ -383,7 +383,10 @@ global._checkPermit = new Chain({
       });
     },
     grabPermit: function() {
-      var filters = { sheetId: this.sheet._id.toString() };
+      var filters = { 
+            sheetId: this.sheet._id.toString(),
+            username: this.user.username
+          };
       
       if(this.permits.length) {
         this.permit = this.permits.findOne(filters);
@@ -440,7 +443,7 @@ global._checkPermit = new Chain({
       true: "sendDefaultPermit",
       false: [
         { if: "sheetNameIsPermits", true: "fetchPermitForPermit" },
-        { if: "sheetIsNormal", true: [function(){this._isNormal=true; this.next();},"_grabSheet", "grabPermit"] },
+        { if: "sheetIsNormal", true: ["_grabSheet", "grabPermit"] },
         {
           if: "noPermitExists", 
           true: [
