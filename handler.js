@@ -1440,12 +1440,12 @@ global.images = new Chain({
     post: "createPresignedPost"
   }
 });
-global._loadMasterSite = new Chain({
+global._fetchMasterSite = new Chain({
   input: {
     masterSite: false,
   },
   steps: {
-    loadMasterSite: function() {
+    fetchMasterSite: function() {
       var self = this;
       models.sites.findOne({ name: "uisheet" }, function(err, masterSite){
         if(err) return self.next(err);
@@ -1457,7 +1457,7 @@ global._loadMasterSite = new Chain({
       this.next(!this.masterSite);
     }
   },
-  instruct: { if: "masterSiteNotLoaded", true: "loadMasterSite" }
+  instruct: { if: "masterSiteNotLoaded", true: "fetchMasterSite" }
 });
 global.login = new Chain({
   steps: {
@@ -1760,7 +1760,9 @@ global.scripts = new Chain({
     }
   },
   instruct: [
-    "_loadMasterSite",
+    "fetchUserPermitsForSite",
+    "_fetchSheetForEachPermit",
+    "_fetchMasterSite",
     {
       switch: "toScriptType",
       data: "renderDatas",
@@ -2386,19 +2388,18 @@ global.port = new Chain({
     },
     "fetchSite",
     { if: "noSiteExists", true: [ "renderNoSiteExists", "serve" ] },
-    "fetchUserPermitsForSite",
-    {
-      if: "userHasNoPermitsForSiteAndNotUisheet",
-      true: [
-        {
-          if: "urlHasAChain",
-          true: "runChain",
-          false: "renderNoPermitsExistForSite"
-        },
-        "serve"
-      ]
-    },
-    "_fetchSheetForEachPermit",
+    // {
+    //   if: "userHasNoPermitsForSiteAndNotUisheet",
+    //   true: [
+    //     {
+    //       if: "urlHasAChain",
+    //       true: "runChain",
+    //       false: "renderNoPermitsExistForSite"
+    //     },
+    //     "serve"
+    //   ]
+    // },
+    // "_fetchSheetForEachPermit",
     {
       if: "urlHasAChain",
       true: "runChain",
