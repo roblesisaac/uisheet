@@ -213,7 +213,7 @@ global._buildModel = new Chain({
     }
   },
   instruct: [
-    "checkPermit",
+    "_checkPermit",
     {
       if: "sheetNameIsNative",
       true: "relayNativeModel",
@@ -276,7 +276,7 @@ global._buildSchema = new Chain({
     }
   },
   instruct: [
-    "checkPermit",
+    "_checkPermit",
     "_grabSheet",
     "forEachItemInSchema", ["convertToFuncion"],
     function() {
@@ -284,7 +284,7 @@ global._buildSchema = new Chain({
     }
   ]
 });
-global.checkEmailVerified = new Chain({
+global._checkEmailVerified = new Chain({
   steps: {
     alertVerificationEmailSent: function() {
       var resendUrl = this._host+"/resendVerification";
@@ -322,7 +322,7 @@ global.checkEmailVerified = new Chain({
     ]
   }
 });
-global.checkPermit = new Chain({
+global._checkPermit = new Chain({
   steps: {
     alertPermitExcludesMethod: function() {
       this.error("<(-_-)> Method is prohibited, your permit declares.");
@@ -336,7 +336,7 @@ global.checkPermit = new Chain({
     "_grabUserPermitForSheet",
     { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" }
   ]
-});
+}); // needs
 global.connectToDb = new Chain({
   steps: {
     alreadyConnected: function() {
@@ -823,8 +823,8 @@ global.db = new Chain({
     }
   },
   instruct: [
-    "checkEmailVerified",
-    "checkPermit",
+    "_checkEmailVerified",
+    "_checkPermit",
     "_buildModel",
     {
       switch: "toRouteMethod",
@@ -891,7 +891,7 @@ global.db = new Chain({
           ],
           sheets: ["updateAndSaveSiteCacheStamp", "updateItem"],
           users: [
-            "lookupUser",
+            "fetchUser",
             {
               if: "userDoesntExist",
               true: "alertUserDoesntExist",
@@ -916,7 +916,7 @@ global.db = new Chain({
       post: [
         { 
           switch: "toCaveats",
-          permits: "updateAndSaveSiteCacheStamp", // add permitAlreadyExists
+          permits: "updateAndSaveSiteCacheStamp",
           sites: "addAuthorToBody",
           sheets: ["updateAndSaveSiteCacheStamp", "addAuthorToBody", "addSiteIdToBody" ]
         },
@@ -957,7 +957,7 @@ global.db = new Chain({
             } 
           ],
           users: [
-            "lookupUser",
+            "fetchUser",
             {
               if: "userDoesntExist",
               true: "alertUserDoesntExist",
@@ -1264,8 +1264,8 @@ global._grabUserPermitForSheet = new Chain({
   },
   instruct: [
     {  if: "sheetNeedsADefualtPermit",  true: "sendDefaultPermit" },
-    { if: "sheetNameIsPermits", true: "grabPermitForPermit" },
-    { if: "sheetIsNormal", true: [ "_grabSheet", "grabPermit" ] },
+    { if: "sheetNameIsPermits", true: "grabPermitForPermit" }, // needs
+    { if: "sheetIsNormal", true: [ "_grabSheet", "grabPermit" ] }, // needs
     {
       if: "noPermitExists", 
       true: [
@@ -1300,7 +1300,7 @@ global._grabSheet = new Chain({
     "lookupAndDefineSheet",
     { if: "noSheetFound", true: "alertNoSheetFound" }    
   ]
-});
+}); // needs sheets
 global.images = new Chain({
   input: function() {
     return {
@@ -1430,9 +1430,10 @@ global.login = new Chain({
       this.token = jwt.sign(tokenContent, secret, {	expiresIn: "10h" });
       this.cookieToken = cookie.serialize("token", String(this.token), cookieOptions);
       this.cookieUserId = cookie.serialize("userid", String(this.user._id), cookieOptions);
+      this.userStatus = cookie.serialize("status", String(this.user.stauts), cookieOptions);
       this.next();
     },
-    lookupUser: function() {
+    fetchUser: function() {
       var self = this;
       models.users.findOne({username: this._body.username}, function(err, user){
         if(err) return self.error(err);
@@ -1459,7 +1460,7 @@ global.login = new Chain({
         	"Access-Control-Allow-Credentials" : true
   			},
   			multiValueHeaders: {
-          "Set-Cookie": [ this.cookieToken, this.cookieUserId ]
+          "Set-Cookie": [ this.cookieToken, this.cookieUserId, this.userStatus ]
   			}
   		});
     },
@@ -1468,7 +1469,7 @@ global.login = new Chain({
     }
   },
   instruct: [
-    "lookupUser",
+    "fetchUser",
     {
       if: "userDoesntExist",
       true: "alertUserDoesntExist",
