@@ -1,9 +1,5 @@
 const mongoose = require('mongoose');
 
-const scriptObj =  {
-
-};
-
 const sheetSchema = new mongoose.Schema({
    "name": String,
   "sort": Number,
