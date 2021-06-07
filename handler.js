@@ -367,10 +367,9 @@ global._checkPermit = new Chain({
         self.next();
       });
     },
-    grabPermitForPermit: function() {
-      var sheetName = this._query._sheetName,
-          self = this,
-          filters = { sheetId: this.sheet._id.toString() };
+    fetchPermitForPermit: function() {
+      var self = this,
+          filters = { sheetId: this._query.sheetId };
       
       if(this.permits.length) {
         this.permit = this.permits.findOne(filters);
@@ -421,7 +420,7 @@ global._checkPermit = new Chain({
       };
       this.next();
     },
-    sheetNeedsADefualtPermit: function() {
+    sheetNeedsADefaultPermit: function() {
       this.next(this.validDefaults.indexOf(this.sheetName) > -1);
     },
     sheetNameIsPermits: function() {
@@ -437,15 +436,15 @@ global._checkPermit = new Chain({
   instruct: {
     if: "alreadyHasPermit",
     false: {
-      if: "sheetNeedsADefualtPermit", 
+      if: "sheetNeedsADefaultPermit", 
       true: "sendDefaultPermit",
       false: [
-        "_grabSheet",
-        { if: "sheetNameIsPermits", true: "grabPermitForPermit" },
-        { if: "sheetIsNormal", true: "grabPermit" },
+        { if: "sheetNameIsPermits", true: "fetchPermitForPermit" },
+        { if: "sheetIsNormal", true: ["_grabSheet", "grabPermit"] },
         {
           if: "noPermitExists", 
           true: [
+            "_grabSheet",
             "fetchPublicPermit",
             { if: "noPermitExists", true: "alertNoPermitExists" }
           ]
