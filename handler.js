@@ -440,7 +440,7 @@ global._checkPermit = new Chain({
       true: "sendDefaultPermit",
       false: [
         { if: "sheetNameIsPermits", true: "fetchPermitForPermit" },
-        { if: "sheetIsNormal", true: ["_grabSheet", "grabPermit"] },
+        { if: "sheetIsNormal", true: [function(){this._isNormal=true; this.next();},"_grabSheet", "grabPermit"] },
         {
           if: "noPermitExists", 
           true: [
