@@ -1232,15 +1232,7 @@ global._fetchAllUserSites = new Chain({
   instruct: [
     "fetchAllPermitsForUser",
     "getUniqueSiteIds",
-    "fetchSitesForUserPermits",
-    // "getUniqueSiteIds", loop([
-    //   "define=>userSiteId",
-    //   "getUserSite",
-    //   "appendToUserSites"
-    // ]),
-    // function() {
-    //   this.next(this.userSites);
-    // }
+    "fetchSitesForUserPermits"
   ]
 });
 global._fetchSheetForEachPermit = new Chain({
@@ -1303,19 +1295,31 @@ global._fetchSheetForEachPermit = new Chain({
 }); // needs
 global._grabSheet = new Chain({
   input: function() {
+    var sheetName = this._arg1 || this._query;
     return {
-      sheetName: this._arg1 || this._query
+      sheetName: sheetName,
+      filter: {
+        name: sheetName
+      }
     };
   },
   steps: {
     alertNoSheetFound: function() {
       this.error("Not existing in archives, sheet " + this.sheetName + " is. Or enter you will, when permit you have.");
     },
-    lookupAndDefineSheet: function() {
+    fetchSheet: function() {
       var self = this;
-      this.sheet = this.sheets.findOne({
-        name: self.sheetName
+      models.sheets.findOne(this.filter, function(err, resSheet){
+        if(err) return self.error(err);
+        self.sheet = resSheet;
+        self.next();
       });
+    },
+    hasSheets: function() {
+      this.next(!!this.sheets.length);
+    },
+    lookupAndDefineSheet: function() {
+      this.sheet = this.sheets.findOne(this.filter);
       this.next(this.sheet);
     },
     noSheetFound: function() {
@@ -1323,7 +1327,11 @@ global._grabSheet = new Chain({
     }
   },
   instruct: [
-    "lookupAndDefineSheet",
+    {
+      if: "hasSheets",
+      true: "lookupAndDefineSheet",
+      false: "fetchSheet"
+    },
     { if: "noSheetFound", true: "alertNoSheetFound" }    
   ]
 }); // needs sheets
