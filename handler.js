@@ -2245,7 +2245,8 @@ global.port = new Chain({
     fetchSimpleSite: function(res, next) {
       var self = this,
           filter = { name: this._siteName };
-      models.sites.findOne(filter, "-scripts" , function(siteObj){
+
+      models.sites.findOne(filter, "-scripts" , function(err, siteObj){
         if(siteObj) {
           self.siteObj = siteObj;
           self.siteId = siteObj._id;
