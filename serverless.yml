@@ -69,9 +69,6 @@ functions:
   bulk:
     handler: handler.bulk
     timeout: 900
-    warmup:
-      get:
-        enabled: false
   get:
     handler: handler.port
     timeout: 30
