@@ -2430,6 +2430,7 @@ module.exports.bulk = function(event, context, callback) {
         var self = this,
             options = { ordered: false };
             
+        console.log(this._body);
         this.model.insertMany(this._body, options, function(err, doc) {
           if(err) {
             self.next({message: err});
