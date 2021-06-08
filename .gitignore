@@ -4,3 +4,5 @@ variables.json
 /frontend/misc.md
 .env
 .webpack
+.warmup
+package-lock.json
