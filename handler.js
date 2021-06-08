@@ -589,16 +589,14 @@ global.db = new Chain({
         FunctionName: "uisheet-dev-bulk",
         Payload: JSON.stringify(self._event),
         InvocationType: "Event"
-      }, function(error, response) {
+      }, function(error, lambdaResponse) {
         if(error) return self.error(error);
         self.next({
           yoda: {
             event: self._event,
-            message: "<(-_-)> Uploading " + self._body.length + " items, you are.",
-            response: response
+            message: "<(-_-)> Uploading " + self._body.length + " items, you are."
           },
-          response: response,
-          error: error
+          lambdaResponse: lambdaResponse
         });
       });
 
