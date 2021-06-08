@@ -2429,7 +2429,9 @@ module.exports.bulk = function(event, context, callback) {
       postBulkItems: function() {
         var self = this,
             options = { ordered: false };
-            
+        
+        console.log("uploaded items you tried");
+        console.log(this._body.length);
         console.log(this._body);
         this.model.insertMany(this._body, options, function(err, doc) {
           if(err) {
