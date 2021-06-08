@@ -2422,12 +2422,6 @@ var importParamaters = function(event, context, callback) {
 };
 
 module.exports.bulk = function(event, context, callback) {
-  if (true) {
-    console.log("<(-_-)> Bulky bulk...");
-    var data = JSON.parse(event.body || "{}") || [1,2,3,4,5,6,7];
-    console.log(data.length);
-    return callback(null, "Bulk just ended");
-  }
   var input = importParamaters(event, context, callback);
   
   new Chain({
@@ -2455,6 +2449,12 @@ module.exports.bulk = function(event, context, callback) {
       "connectToDb",
       { if: "usingCustomDomain", true: "getSiteName" },
       { if: "userHasCookies", true: "fetchUserFromCookie" },
+      function() {
+        console.log("<(-_-)> Bulky bulkerson...");
+        var data = this._body || [1,2,3,4,5,6,7];
+        console.log(data.length);
+        callback(null, "Bulk just ended");
+      },
       "fetchSimpleSite",
       "_buildModel",
       "postBulkItems",
