@@ -594,7 +594,7 @@ global.db = new Chain({
         self.next({
           yoda: {
             event: self._event,
-            message: "<(-_-)> Imported " + this._body.length + " items to " + this.sheetName + ", you have."
+            message: "<(-_-)> Imported " + self._body.length + " items to " + self.sheetName + ", you have."
           },
           lambdaResponse: lambdaResponse
         });
@@ -2429,6 +2429,7 @@ module.exports.bulk = function(event, context, callback) {
       postBulkItems: function() {
         var self = this,
             options = { ordered: false };
+            
         this.model.insertMany(this._body, options, function(err, doc) {
           if(err) {
             self.next({message: err});
