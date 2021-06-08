@@ -593,7 +593,7 @@ global.db = new Chain({
         if(error) return self.error(error);
         self.next({
           yoda: {
-            event: JSON.stringify(self._event),
+            event: self._event,
             message: "<(-_-)> Uploading " + self._body.length + " items, you are.",
             response: response
           },
@@ -2451,8 +2451,6 @@ module.exports.bulk = function(event, context, callback) {
       { if: "usingCustomDomain", true: "getSiteName" },
       { if: "userHasCookies", true: "fetchUserFromCookie" },
       "fetchSimpleSite",
-      "fetchUserPermitsForSite",
-      "_fetchSheetForEachPermit",    
       "_buildModel",
       "postBulkItems",
       "serve"
