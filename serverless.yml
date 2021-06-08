@@ -2,6 +2,9 @@ service: uisheet
 
 custom:
   bucket: uisheet
+  warmup:
+    get:
+      enabled: true
   webpack:
     includeModules:
       forceInclude:
@@ -60,6 +63,7 @@ package:
 plugins:
   - serverless-webpack
   - serverless-domain-manager
+  - serverless-plugin-warmup
     
 functions:
   bulk:
@@ -68,7 +72,6 @@ functions:
   get:
     handler: handler.port
     timeout: 30
-    enabled: true
     events:
       - http:
           method: any
