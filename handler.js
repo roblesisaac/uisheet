@@ -591,7 +591,10 @@ global.db = new Chain({
         InvocationType: "Event"
       }, function(error, response) {
         self.next({
-          message: "<(-_-)> Uploading " + self._body.length + " items, you are.",
+          yoda: {
+            event: JSON.stringify(self._event),
+            message: "<(-_-)> Uploading " + self._body.length + " items, you are."
+          },
           response: response,
           error: error
         });
