@@ -3,7 +3,7 @@ service: uisheet
 custom:
   bucket: uisheet
   warmup:
-    get:
+    getWarm:
       enabled: true
   webpack:
     includeModules:
@@ -69,6 +69,9 @@ functions:
   bulk:
     handler: handler.bulk
     timeout: 900
+    warmup:
+      getWarm:
+        enabled: false
   get:
     handler: handler.port
     timeout: 30
