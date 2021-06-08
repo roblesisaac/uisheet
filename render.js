@@ -1,9 +1,7 @@
 const proper = require("./utils/proper");
 
 module.exports = function(page, props) {
-  const siteName = props.sheets.length === 0
-                    ? "uisheet"
-                    : props._siteName || "uisheet";
+  const siteName = props._siteName || "uisheet";
   const windowLocation = props._host;
   const stamp = (props.siteObj || {}).cacheStamp || Date.now();
   const cacheStamp = props.user.username + stamp;
