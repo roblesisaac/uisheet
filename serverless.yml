@@ -60,7 +60,6 @@ package:
 plugins:
   - serverless-webpack
   - serverless-domain-manager
-  - serverless-plugin-warmup
     
 functions:
   bulk:
