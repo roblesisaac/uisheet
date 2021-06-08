@@ -2451,7 +2451,7 @@ module.exports.bulk = function(event, context, callback) {
       { if: "userHasCookies", true: "fetchUserFromCookie" },
       "fetchSimpleSite",
       function() {
-        console.log("<(-_-)> Bulky bulkerson...");
+        console.log("<(-_-)> Bulky bulkinerson...");
         var data = this._body || [1,2,3,4,5,6,7];
         console.log(data.length);
         callback(null, "Bulk just ended");
