@@ -3,7 +3,6 @@
 try {
 const AWS = require("aws-sdk");
 const braintree = require("braintree");
-const busboy = require("busboy");
 const s3 = new AWS.S3();
 const mime = require("mime");
 const Utils = require("./scripts/utils");
@@ -584,35 +583,6 @@ global.db = new Chain({
       this.error("<(-_-)> Permission from site author, you must have.");
     },
     bulkImport: function() {
-      // var contentType = this._headers["Content-Type"] || this._headers["content-type"],
-      //     bb = new busboy({ headers: { "content-type": contentType }}),
-      //     self = this;
-      
-      // // this.next({
-      // //   message: "hi"
-      // // });
-      
-      // bb.on("file", function (fieldname, file, filename, encoding, mimetype) {
-      //   file
-      //   .on("data", function(data) {
-      //     self.next("data");
-      //   })
-      //   .on("end", function() {
-      //     // self.next("end");
-      //   });
-      // })
-      // .on("field", function(fieldname, val) {
-      //   // self.next("field");
-      // })
-      // .on("finish", function () {
-      //   // self.next("finish");
-      // })
-      // .on("error", function(err) {
-      //   // self.error(err);
-      // });
-    
-      // bb.end(self._body);
-      
       var self = this;
       
       lambda.invoke({
@@ -1293,7 +1263,7 @@ global._fetchSheetForEachPermit = new Chain({
     // ]),
     "sortSheets"
   ]
-}); // needs
+});
 global._grabSheet = new Chain({
   input: function() {
     return {
@@ -1345,7 +1315,7 @@ global._grabSheet = new Chain({
       { if: "noSheetFound", true: "alertNoSheetFound" }  
     ]
   }
-}); // needs sheets
+});
 global.images = new Chain({
   input: function() {
     return {
@@ -1804,7 +1774,7 @@ global.scripts = new Chain({
       ]
     }  
   ]
-}); // needs
+});
 global.serve = new Chain({
   input: {
 		types: {
