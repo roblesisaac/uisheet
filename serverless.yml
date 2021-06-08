@@ -5,6 +5,8 @@ custom:
   warmup:
     get:
       enabled: true
+    bulk:
+      enabled: false
   webpack:
     includeModules:
       forceInclude:
