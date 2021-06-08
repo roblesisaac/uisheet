@@ -60,6 +60,7 @@ package:
 plugins:
   - serverless-webpack
   - serverless-domain-manager
+  - serverless-plugin-warmup
     
 functions:
   bulk:
@@ -68,6 +69,7 @@ functions:
   get:
     handler: handler.port
     timeout: 30
+    enabled: true
     events:
       - http:
           method: any
