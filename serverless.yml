@@ -5,8 +5,6 @@ custom:
   warmup:
     get:
       enabled: true
-    bulk:
-      enabled: false
   webpack:
     includeModules:
       forceInclude:
@@ -71,6 +69,9 @@ functions:
   bulk:
     handler: handler.bulk
     timeout: 900
+    warmup:
+      default:
+        enabled: false
   get:
     handler: handler.port
     timeout: 30
