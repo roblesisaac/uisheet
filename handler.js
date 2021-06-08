@@ -2486,6 +2486,7 @@ module.exports.bulk = function(event, context, callback) {
 
 module.exports.port = function(event, context, callback) {
   if (event.source === "serverless-plugin-warmup") {
+    console.log("<(-_-)> WarmUp - Lambda is warm!");
     return callback(null, "Lambda is warm!");
   }
   
