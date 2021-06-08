@@ -2422,6 +2422,12 @@ var importParamaters = function(event, context, callback) {
 };
 
 module.exports.bulk = function(event, context, callback) {
+  if (true) {
+    console.log("<(-_-)> Bulky bulk...");
+    var data = JSON.parse(event.body || "{}") || [1,2,3,4,5,6,7];
+    console.log(data.length);
+    return callback(null, "Bulk just ended");
+  }
   var input = importParamaters(event, context, callback);
   
   new Chain({
