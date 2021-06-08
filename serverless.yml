@@ -12,7 +12,7 @@ custom:
   customDomain:
     domainName: www.exhaustbarn.com
     basePath: ''
-    stage: ${self:provider.stage}
+    stage: "dev"
     createRoute53Record: true
   optimize:
     external: ['mongoose']
