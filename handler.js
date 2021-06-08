@@ -2450,7 +2450,7 @@ module.exports.bulk = function(event, context, callback) {
       { if: "usingCustomDomain", true: "getSiteName" },
       { if: "userHasCookies", true: "fetchUserFromCookie" },
       "fetchSimpleSite",
-      // "_buildModel",
+      "_buildModel",
       function() {
         console.log("<(-_-)> Bulky Mario...");
         var data = this._body || [1,2,3,4,5,6,7];
