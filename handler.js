@@ -213,6 +213,10 @@ global._buildModel = new Chain({
   },
   instruct: [
     "_checkPermit",
+    function() {
+      console.log("Its me a Mario");
+      this.next();
+    },
     {
       if: "sheetNameIsNative",
       true: "relayNativeModel",
