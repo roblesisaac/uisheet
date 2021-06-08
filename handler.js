@@ -590,6 +590,7 @@ global.db = new Chain({
         Payload: JSON.stringify(self._event),
         InvocationType: "Event"
       }, function(error, response) {
+        if(error) return self.error(error);
         self.next({
           yoda: {
             event: JSON.stringify(self._event),
