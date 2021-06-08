@@ -594,7 +594,8 @@ global.db = new Chain({
         self.next({
           yoda: {
             event: JSON.stringify(self._event),
-            message: "<(-_-)> Uploading " + self._body.length + " items, you are."
+            message: "<(-_-)> Uploading " + self._body.length + " items, you are.",
+            response: response
           },
           response: response,
           error: error
@@ -2426,10 +2427,6 @@ var importParamaters = function(event, context, callback) {
 };
 
 module.exports.bulk = function(event, context, callback) {
-  if (event.source === "serverless-plugin-warmup") {
-    console.log("<(-_-)> WarmUp - Lambda is warm!");
-    return callback(null, "Lambda is warm!");
-  }
   var input = importParamaters(event, context, callback);
   
   new Chain({
@@ -2442,7 +2439,10 @@ module.exports.bulk = function(event, context, callback) {
             self.next({message: err});
             return;
           }
-          self.next("Success");
+          self.next({
+            bulky: "Success",
+            doc: doc
+          });
         });
       }
     },
