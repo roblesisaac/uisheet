@@ -583,35 +583,22 @@ global.db = new Chain({
       this.error("<(-_-)> Permission from site author, you must have.");
     },
     bulkImport: function() {
-        var self = this,
-            options = { ordered: false };
-        this.model.insertMany(this._body, options, function(err, doc) {
-          if(err) {
-            self.next({message: err});
-            return;
-          }
-          self.next({
-            bulky: "Success",
-            doc: doc
-          });
+      var self = this;
+      
+      lambda.invoke({
+        FunctionName: "uisheet-dev-bulk",
+        Payload: JSON.stringify(self._event),
+        InvocationType: "Event"
+      }, function(error, lambdaResponse) {
+        if(error) return self.error(error);
+        self.next({
+          yoda: {
+            event: self._event,
+            message: "<(-_-)> Imported " + this._body.length + " items to " + this.sheetName + ", you have."
+          },
+          lambdaResponse: lambdaResponse
         });
-      
-      // var self = this;
-      
-      // lambda.invoke({
-      //   FunctionName: "uisheet-dev-bulk",
-      //   Payload: JSON.stringify(self._event),
-      //   InvocationType: "Event"
-      // }, function(error, lambdaResponse) {
-      //   if(error) return self.error(error);
-      //   self.next({
-      //     yoda: {
-      //       event: self._event,
-      //       message: "<(-_-)> Imported " + this._body.length + " items to " + this.sheetName + ", you have."
-      //     },
-      //     lambdaResponse: lambdaResponse
-      //   });
-      // });
+      });
 
     },
     convertToOr: function() {
