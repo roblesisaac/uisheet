@@ -213,10 +213,6 @@ global._buildModel = new Chain({
   },
   instruct: [
     "_checkPermit",
-    function() {
-      console.log("Its me a Mario");
-      this.next();
-    },
     {
       if: "sheetNameIsNative",
       true: "relayNativeModel",
@@ -440,6 +436,10 @@ global._checkPermit = new Chain({
       if: "sheetNeedsADefaultPermit", 
       true: "sendDefaultPermit",
       false: [
+        function() {
+          console.log("Its me a Mario");
+          this.next();
+        },
         { if: "sheetNameIsPermits", true: "fetchPermitForPermit" },
         { if: "sheetIsNormal", true: ["_grabSheet", "grabPermit"] },
         {
