@@ -2210,7 +2210,7 @@ global.port = new Chain({
       delete index._callback;
       next(index);
     },
-    fetchSimpleSite: function(res, next) {
+    fetchSimpleSite: function(res) {
       var self = this,
           filter = { name: this._siteName };
 
@@ -2219,7 +2219,7 @@ global.port = new Chain({
           self.siteObj = siteObj;
           self.siteId = siteObj._id;
         }
-        next(siteObj);
+        self.next(siteObj);
       });
     },
     fetchUserFromCookie: function() {
@@ -2449,13 +2449,13 @@ module.exports.bulk = function(event, context, callback) {
       "connectToDb",
       { if: "usingCustomDomain", true: "getSiteName" },
       { if: "userHasCookies", true: "fetchUserFromCookie" },
+      "fetchSimpleSite",
       function() {
         console.log("<(-_-)> Bulky bulkerson...");
         var data = this._body || [1,2,3,4,5,6,7];
         console.log(data.length);
         callback(null, "Bulk just ended");
       },
-      "fetchSimpleSite",
       "_buildModel",
       "postBulkItems",
       "serve"
