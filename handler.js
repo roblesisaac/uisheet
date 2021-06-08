@@ -594,15 +594,12 @@ global.db = new Chain({
         self.next({
           yoda: {
             event: self._event,
-            message: "<(-_-)> Uploading " + self._body.length + " items, you are."
+            message: "<(-_-)> Imported " + this._body.length + " items to " + this.sheetName + ", you have."
           },
           lambdaResponse: lambdaResponse
         });
       });
 
-    },
-    bulkImportCompleted: function() {
-      this.next("<(-_-)> Imported " + this._body.length + " items to " + this.sheetName + ", you have.");
     },
     convertToOr: function() {
       var ors = this.value.split(","),
@@ -2450,8 +2447,7 @@ module.exports.bulk = function(event, context, callback) {
       { if: "userHasCookies", true: "fetchUserFromCookie" },
       "fetchSimpleSite",
       "_buildModel",
-      "postBulkItems",
-      "serve"
+      "postBulkItems"
     ]
   }).start(input).catch(function(error){
     handleError(callback, error);
