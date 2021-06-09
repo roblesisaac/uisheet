@@ -1292,6 +1292,8 @@ global._grabSheet = new Chain({
     },
     fetchSheet: function() {
       var self = this;
+      console.log("fetching sheet");
+      console.log(Object.keys(this));
       models.sheets.findOne(this.sheetFilter, "-ui", function(err, resSheet){
         if(err) return self.error(err);
         self.sheet = resSheet;
@@ -1313,10 +1315,6 @@ global._grabSheet = new Chain({
     if: "alreadyHasSheet",
     false: [
       "buildFilter",
-      function() {
-        console.log("Its me a Mario!!");
-        this.next();
-      },
       {
         if: "hasSheets",
         true: "lookupAndDefineSheet",
