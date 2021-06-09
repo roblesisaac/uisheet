@@ -1299,7 +1299,7 @@ global._grabSheet = new Chain({
       });
     },
     hasSheets: function() {
-      this.next(!!this.sheets.length);
+      this.next(!!this.sheets && !!this.sheets.length);
     },
     lookupAndDefineSheet: function() {
       this.sheet = this.sheets.findOne(this.sheetFilter);
@@ -1315,20 +1315,8 @@ global._grabSheet = new Chain({
       "buildFilter",
       {
         if: "hasSheets",
-        true:[
-          function() {
-            console.log("Mario has sheets!!");
-            this.next();
-          },
-          "lookupAndDefineSheet"
-        ],
-        false: [
-          function() {
-            console.log("Mario needs sheets!!");
-            this.next();
-          },
-          "fetchSheet"
-        ]
+        true: "lookupAndDefineSheet",
+        false: "fetchSheet"
       },
       { if: "noSheetFound", true: "alertNoSheetFound" }  
     ]
