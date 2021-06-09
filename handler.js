@@ -441,10 +441,6 @@ global._checkPermit = new Chain({
           if: "sheetIsNormal",
           true: [
             "_grabSheet",
-            function() {
-              console.log("Its me a Mario!!");
-              this.next();
-            },
             "grabPermit"
             ] 
         },
@@ -1317,6 +1313,10 @@ global._grabSheet = new Chain({
     if: "alreadyHasSheet",
     false: [
       "buildFilter",
+      function() {
+        console.log("Its me a Mario!!");
+        this.next();
+      },
       {
         if: "hasSheets",
         true: "lookupAndDefineSheet",
