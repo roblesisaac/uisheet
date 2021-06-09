@@ -440,11 +440,11 @@ global._checkPermit = new Chain({
         { 
           if: "sheetIsNormal",
           true: [
+            "_grabSheet",
             function() {
-              console.log("Its me a Mario");
+              console.log("Its me a Mario!!");
               this.next();
             },
-            "_grabSheet",
             "grabPermit"
             ] 
         },
