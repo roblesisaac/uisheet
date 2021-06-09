@@ -360,7 +360,7 @@ global._checkPermit = new Chain({
             username: this.user.username
           };
       
-      if(this.permits.length) {
+      if(this.permits && this.permits.length) {
         this.permit = this.permits.findOne(filters);
         this.next();
         return;
@@ -378,7 +378,7 @@ global._checkPermit = new Chain({
             username: this.user.username
           };
       
-      if(this.permits.length) {
+      if(this.permits && this.permits.length) {
         this.permit = this.permits.findOne(filters);
         this.next();
         return;
@@ -1295,7 +1295,6 @@ global._grabSheet = new Chain({
       models.sheets.findOne(this.sheetFilter, "-ui", function(err, resSheet){
         if(err) return self.error(err);
         self.sheet = resSheet;
-        console.log("<(-_-)> fetched yoda a sheet");
         self.next();
       });
     },
