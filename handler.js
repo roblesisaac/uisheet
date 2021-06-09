@@ -1292,10 +1292,10 @@ global._grabSheet = new Chain({
     },
     fetchSheet: function() {
       var self = this;
-      console.log("<(-_-)> fetching yoda a sheet");
       models.sheets.findOne(this.sheetFilter, "-ui", function(err, resSheet){
         if(err) return self.error(err);
         self.sheet = resSheet;
+        console.log("<(-_-)> fetched yoda a sheet");
         self.next();
       });
     },
