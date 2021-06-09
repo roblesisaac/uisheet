@@ -2436,9 +2436,6 @@ module.exports.bulk = function(event, context, callback) {
         var self = this,
             options = { ordered: false };
         
-        console.log("uploaded items you tried");
-        console.log(this._body.length);
-        console.log(this._body);
         this.model.insertMany(this._body, options, function(err, doc) {
           if(err) {
             self.next({message: err});
@@ -2457,12 +2454,6 @@ module.exports.bulk = function(event, context, callback) {
       { if: "userHasCookies", true: "fetchUserFromCookie" },
       "fetchSimpleSite",
       "_buildModel",
-      function() {
-        console.log("<(-_-)> Bulky Mario...");
-        var data = this._body || [1,2,3,4,5,6,7];
-        console.log(data.length);
-        callback(null, "Bulk just ended");
-      },
       "postBulkItems",
       "serve"
     ]
