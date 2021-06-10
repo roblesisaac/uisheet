@@ -573,8 +573,10 @@ global.db = new Chain({
       this.filter.siteId = this.siteId;
       next();
     },
-    addSheetIdTobBody: function() {
-      this._body.sheetId = this.sheet._id;
+    addSheetIdToBody: function() {
+      var sheet = this.sheet || {},
+          sheetId = this._query.sheetId || this.sheet._id;
+      this._body.sheetId = sheetId;
       this.next();
     },
     addUsernameToFilter: function() {
@@ -1010,7 +1012,7 @@ global.db = new Chain({
       post: [
         { 
           switch: "toCaveats",
-          permits: ["updateAndSaveSiteCacheStamp", "addSiteIdToBody", ],
+          permits: ["updateAndSaveSiteCacheStamp", "addSiteIdToBody", "addSheetIdToBody"],
           sites: "addAuthorToBody",
           sheets: ["updateAndSaveSiteCacheStamp", "addAuthorToBody", "addSiteIdToBody" ]
         },
