@@ -95,7 +95,7 @@ functions:
         enabled: false
   get:
     handler: handler.port
-    timeout: 30
+    timeout: 29
     events:
       - httpApi:
           method: '*'
