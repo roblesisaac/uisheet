@@ -11,11 +11,11 @@ custom:
         - sib-api-v3-sdk
   customDomains:
     - http:
-        domainName: www.exhaustbarn.com
+        domainName: exhaustbarn.com
         basePath: ''
         endpointType: 'regional'
     - http:
-        domainName: www.plazamuffler.com
+        domainName: plazamuffler.com
         basePath: ''
         endpointType: 'regional'
 
