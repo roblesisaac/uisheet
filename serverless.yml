@@ -12,9 +12,6 @@ custom:
   customDomains:
     - http:
         domainName: www.uisheet.com
-        stage: dev
-        basePath: ''
-        createRoute53Record: true
         endpointType: 'regional'
 #     - http:
 #         domainName: uisheet.com
@@ -22,9 +19,6 @@ custom:
 #         endpointType: 'regional'
     - http:
         domainName: www.exhaustbarn.com
-        stage: dev
-        basePath: ''
-        createRoute53Record: true
         endpointType: 'regional'
 #     - http:
 #         domainName: exhaustbarn.com
@@ -32,9 +26,6 @@ custom:
 #         endpointType: 'regional'
     - http:
         domainName: www.plazamuffler.com
-        stage: dev
-        basePath: ''
-        createRoute53Record: true
         endpointType: 'regional'
 #     - http:
 #         domainName: plazamuffler.com
@@ -45,6 +36,7 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: us-west-1
+  stage: dev
   memorySize: 512
   iam:
     role:
