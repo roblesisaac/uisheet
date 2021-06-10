@@ -11,7 +11,7 @@ custom:
         - sib-api-v3-sdk
   customDomains:
     - http:
-    	domainName: www.exhaustbarn.com
+        domainName: www.exhaustbarn.com
 	basePath: ''
     - http:
     	domainName: www.plazamuffler.com
