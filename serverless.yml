@@ -13,7 +13,6 @@ custom:
     - http:
         domainName: www.uisheet.com
         endpointType: 'regional'
-        stage: ${self:provider.stage}
 #     - http:
 #         domainName: uisheet.com
 #         basePath: ''
@@ -21,7 +20,6 @@ custom:
     - http:
         domainName: www.exhaustbarn.com
         endpointType: 'regional'
-        stage: ${self:provider.stage}
 #     - http:
 #         domainName: exhaustbarn.com
 #         basePath: ''
@@ -29,7 +27,6 @@ custom:
     - http:
         domainName: www.plazamuffler.com
         endpointType: 'regional'
-        stage: ${self:provider.stage}
 #     - http:
 #         domainName: plazamuffler.com
 #         basePath: ''
