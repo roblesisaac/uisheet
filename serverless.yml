@@ -10,26 +10,23 @@ custom:
       forceInclude:
         - sib-api-v3-sdk
   customDomains:
-    - http:
+    - rest:
         domainName: www.uisheet.com
         endpointType: 'regional'
-        stage: 'dev'
 #     - http:
 #         domainName: uisheet.com
 #         basePath: ''
 #         endpointType: 'regional'
-    - http:
+    - rest:
         domainName: www.exhaustbarn.com
         endpointType: 'regional'
-        stage: 'dev'
 #     - http:
 #         domainName: exhaustbarn.com
 #         basePath: ''
 #         endpointType: 'regional'
-    - http:
+    - rest:
         domainName: www.plazamuffler.com
         endpointType: 'regional'
-        stage: 'dev'
 #     - http:
 #         domainName: plazamuffler.com
 #         basePath: ''
@@ -95,26 +92,26 @@ functions:
         enabled: false
   get:
     handler: handler.port
-    timeout: 29
+    timeout: 30
     events:
-      - httpApi:
-          method: '*'
+      - http:
+          method: any
           path: /
           cors: true
-      - httpApi:
-          method: '*'
+      - http:
+          method: any
           path: /{site}
           cors: true
-      - httpApi:
-          method: '*'
+      - http:
+          method: any
           path: /{site}/{chain}
           cors: true
-      - httpApi:
-          method: '*'
+      - http:
+          method: any
           path: /{site}/{chain}/{arg1}
           cors: true
-      - httpApi:
-          method: '*'
+      - http:
+          method: any
           path: /{site}/{chain}/{arg1}/{arg2}
           cors: true
       - s3:
