@@ -11,12 +11,12 @@ custom:
         - sib-api-v3-sdk
   customDomains:
     - http:
-      domainName: exhaustbarn.com
+      domainName: www.exhaustbarn.com
       basePath: ''
       stage: "dev"
       createRoute53Record: true
     - http:
-      domainName: plazamuffler.com
+      domainName: www.plazamuffler.com
       basePath: ''
       stage: "dev"
       createRoute53Record: true
