@@ -10,11 +10,11 @@ custom:
       forceInclude:
         - sib-api-v3-sdk
   customDomains:
-     - http:
+    - http:
         domainName: www.uisheet.com
         basePath: ''
         endpointType: 'regional'
-     - http:
+    - http:
         domainName: uisheet.com
         basePath: ''
         endpointType: 'regional'
