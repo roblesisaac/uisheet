@@ -12,10 +12,8 @@ custom:
   customDomains:
     - rest:
         domainName: www.uisheet.com
-#     - http:
-#         domainName: uisheet.com
-#         basePath: ''
-#         endpointType: 'regional'
+    - rest:
+        domainName: uisheet.com
     - rest:
         domainName: www.exhaustbarn.com
 #     - http:
