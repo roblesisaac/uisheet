@@ -14,22 +14,18 @@ custom:
         domainName: www.exhaustbarn.com
         basePath: ''
         endpointType: 'regional'
-        stage: 'dev'
     - http:
         domainName: exhaustbarn.com
         basePath: ''
         endpointType: 'regional'
-        stage: 'dev'
     - http:
         domainName: www.plazamuffler.com
         basePath: ''
         endpointType: 'regional'
-        stage: 'dev'
     - http:
         domainName: plazamuffler.com
         basePath: ''
         endpointType: 'regional'
-        stage: 'dev'
 
 provider:
   name: aws
