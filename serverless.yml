@@ -12,6 +12,7 @@ custom:
   customDomains:
     - rest:
         domainName: www.uisheet.com
+        basePath: ''
         endpointType: 'regional'
 #     - http:
 #         domainName: uisheet.com
@@ -19,6 +20,7 @@ custom:
 #         endpointType: 'regional'
     - rest:
         domainName: www.exhaustbarn.com
+        basePath: ''
         endpointType: 'regional'
 #     - http:
 #         domainName: exhaustbarn.com
@@ -26,6 +28,7 @@ custom:
 #         endpointType: 'regional'
     - rest:
         domainName: www.plazamuffler.com
+        basePath: ''
         endpointType: 'regional'
 #     - http:
 #         domainName: plazamuffler.com
