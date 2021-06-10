@@ -9,11 +9,17 @@ custom:
     includeModules:
       forceInclude:
         - sib-api-v3-sdk
-  customDomain:
-    domainName: plazamuffler.com
-    basePath: ''
-    stage: "dev"
-    createRoute53Record: true
+  customDomains:
+    - http:
+      domainName: exhaustbarn.com
+      basePath: ''
+      stage: "dev"
+      createRoute53Record: true
+    - http:
+      domainName: plazamuffler.com
+      basePath: ''
+      stage: "dev"
+      createRoute53Record: true
   optimize:
     external: ['mongoose']
 
