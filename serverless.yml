@@ -14,10 +14,8 @@ custom:
         domainName: www.exhaustbarn.com
         basePath: ''
     - http:
-    	domainName: www.plazamuffler.com
+        domainName: www.plazamuffler.com
         basePath: ''
-  optimize:
-    external: ['mongoose']
 
 provider:
   name: aws
