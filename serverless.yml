@@ -11,11 +11,11 @@ custom:
         - sib-api-v3-sdk
   customDomains:
     - http:
-      domainName: exhaustbarn.com
-      basePath: ''
+	      domainName: exhaustbarn.com
+	      basePath: ''
     - http:
-      domainName: plazamuffler.com
-      basePath: ''
+	      domainName: plazamuffler.com
+	      basePath: ''
   optimize:
     external: ['mongoose']
 
