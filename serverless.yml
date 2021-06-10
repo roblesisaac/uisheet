@@ -95,23 +95,23 @@ functions:
     timeout: 30
     events:
       - httpApi:
-          method: any
+          method: '*'
           path: /
           cors: true
       - httpApi:
-          method: any
+          method: '*'
           path: /{site}
           cors: true
       - httpApi:
-          method: any
+          method: '*'
           path: /{site}/{chain}
           cors: true
       - httpApi:
-          method: any
+          method: '*'
           path: /{site}/{chain}/{arg1}
           cors: true
       - httpApi:
-          method: any
+          method: '*'
           path: /{site}/{chain}/{arg1}/{arg2}
           cors: true
       - s3:
