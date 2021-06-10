@@ -12,7 +12,7 @@ custom:
   customDomains:
     - http:
         domainName: www.uisheet.com
-        stage: 'dev'
+        stage: dev
         basePath: ''
         createRoute53Record: true
         endpointType: 'regional'
@@ -22,7 +22,7 @@ custom:
 #         endpointType: 'regional'
     - http:
         domainName: www.exhaustbarn.com
-        stage: 'dev'
+        stage: dev
         basePath: ''
         createRoute53Record: true
         endpointType: 'regional'
@@ -32,7 +32,7 @@ custom:
 #         endpointType: 'regional'
     - http:
         domainName: www.plazamuffler.com
-        stage: 'dev'
+        stage: dev
         basePath: ''
         createRoute53Record: true
         endpointType: 'regional'
