@@ -94,23 +94,23 @@ functions:
     handler: handler.port
     timeout: 30
     events:
-      - http:
+      - httpApi:
           method: any
           path: /
           cors: true
-      - http:
+      - httpApi:
           method: any
           path: /{site}
           cors: true
-      - http:
+      - httpApi:
           method: any
           path: /{site}/{chain}
           cors: true
-      - http:
+      - httpApi:
           method: any
           path: /{site}/{chain}/{arg1}
           cors: true
-      - http:
+      - httpApi:
           method: any
           path: /{site}/{chain}/{arg1}/{arg2}
           cors: true
