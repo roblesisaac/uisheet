@@ -10,7 +10,7 @@ custom:
       forceInclude:
         - sib-api-v3-sdk
   customDomain:
-    domainName: www.uisheet.com
+    domainName: uisheet.com
     basePath: ''
 #   customDomains:
 #     - http:
