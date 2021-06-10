@@ -39,6 +39,7 @@ provider:
   name: aws
   runtime: nodejs12.x
   region: us-west-1
+  stage: 'dev'
   memorySize: 512
   iam:
     role:
