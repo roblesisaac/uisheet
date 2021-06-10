@@ -12,10 +12,10 @@ custom:
   customDomains:
     - http:
         domainName: www.exhaustbarn.com
-	basePath: ''
+        basePath: ''
     - http:
     	domainName: www.plazamuffler.com
-	basePath: ''
+        basePath: ''
   optimize:
     external: ['mongoose']
 
