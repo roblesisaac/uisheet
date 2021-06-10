@@ -11,6 +11,14 @@ custom:
         - sib-api-v3-sdk
   customDomains:
     - http:
+        domainName: www.uisheet.com
+        basePath: ''
+        endpointType: 'regional'
+     - http:
+        domainName: uisheet.com
+        basePath: ''
+        endpointType: 'regional'
+    - http:
         domainName: www.exhaustbarn.com
         basePath: ''
         endpointType: 'regional'
