@@ -13,11 +13,11 @@ custom:
     - http:
         domainName: www.uisheet.com
         basePath: ''
-        endpointType: 'regional'
+#        endpointType: 'regional'
     - http:
         domainName: uisheet.com
         basePath: ''
-        endpointType: 'regional'
+#        endpointType: 'regional'
     - http:
         domainName: www.exhaustbarn.com
         basePath: ''
