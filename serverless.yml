@@ -13,9 +13,11 @@ custom:
     - http:
         domainName: www.exhaustbarn.com
         basePath: ''
+        endpointType: 'regional'
     - http:
         domainName: www.plazamuffler.com
         basePath: ''
+        endpointType: 'regional'
 
 provider:
   name: aws
