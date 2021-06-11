@@ -5,7 +5,16 @@ module.exports = function(page, props) {
   const windowLocation = props._host;
   const stamp = (props.siteObj || {}).cacheStamp || Date.now();
   const userid = props.userid || "";
-  const cacheStamp = userid + stamp;
+  const blend = function(str1, str2) {
+    var blended = "";
+    str1 = str1.toString().split("");
+    str2 = str2.toString().split("");
+    str1.forEach(function(char, i){
+      blended += (char+str2[i]);
+    });
+    return blended;
+  };
+  const cacheStamp = userid == "" ? stamp : blend(userid, stamp);
   return `<!DOCTYPE html>
 <html>
   <head>
