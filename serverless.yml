@@ -9,23 +9,21 @@ custom:
     includeModules:
       forceInclude:
         - sib-api-v3-sdk
-#   customDomains:
-#     - rest:
-#         domainName: www.uisheet.com
-#     - rest:
-#         domainName: uisheet.com
-#     - rest:
-#         domainName: www.exhaustbarn.com
-#     - rest:
-#         domainName: www.plazamuffler.com
-#     - http:
-#         domainName: exhaustbarn.com
-#         basePath: ''
-#         endpointType: 'regional'
-#     - http:
-#         domainName: plazamuffler.com
-#         basePath: ''
-#         endpointType: 'regional'
+  customDomains:
+    - rest:
+        domainName: www.uisheet.com
+    - rest:
+        domainName: uisheet.com
+    - rest:
+        domainName: uisheet.com
+    - rest:
+        domainName: www.exhaustbarn.com
+    - rest:
+        domainName: exhaustbarn.com
+    - rest:
+        domainName: www.plazamuffler.com
+    - rest:
+        domainName: plazamuffler.com
 
 provider:
   name: aws
