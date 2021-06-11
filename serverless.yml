@@ -15,8 +15,6 @@ custom:
     - rest:
         domainName: uisheet.com
     - rest:
-        domainName: uisheet.com
-    - rest:
         domainName: www.exhaustbarn.com
     - rest:
         domainName: exhaustbarn.com
