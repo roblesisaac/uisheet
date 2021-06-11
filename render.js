@@ -15,7 +15,7 @@ module.exports = function(page, props) {
     });
     return blended;
   };
-  const cacheStamp = userid == "" ? stamp : blend(userid, stamp);
+  const cacheStamp = userid == "" ? "" : blend(userid, stamp);
   return `<!DOCTYPE html>
 <html>
   <head>
