@@ -4,7 +4,8 @@ module.exports = function(page, props) {
   const siteName = props._siteName || "uisheet";
   const windowLocation = props._host;
   const stamp = (props.siteObj || {}).cacheStamp || Date.now();
-  const cacheStamp = props.user.username + stamp;
+  const userid = props.user._id || Date.now();
+  const cacheStamp = userid + stamp;
   return `<!DOCTYPE html>
 <html>
   <head>
@@ -22,7 +23,7 @@ module.exports = function(page, props) {
     <link href="https://fonts.googleapis.com/css?family=Work+Sans:900|Lobster" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Coda:800|Maven+Pro:900" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
-    <link rel="stylesheet" href="${windowLocation}/scripts/css">
+    <link rel="stylesheet" href="${windowLocation}/scripts/css/${cacheStamp}">
     <style id="siteStyles"></style>
     <style id="sheetStyles"></style>
   </head>
