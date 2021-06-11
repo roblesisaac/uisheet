@@ -9,19 +9,19 @@ custom:
     includeModules:
       forceInclude:
         - sib-api-v3-sdk
-  customDomains:
-    - rest:
-        domainName: www.uisheet.com
-    - rest:
-        domainName: uisheet.com
-    - rest:
-        domainName: www.exhaustbarn.com
+#   customDomains:
+#     - rest:
+#         domainName: www.uisheet.com
+#     - rest:
+#         domainName: uisheet.com
+#     - rest:
+#         domainName: www.exhaustbarn.com
+#     - rest:
+#         domainName: www.plazamuffler.com
 #     - http:
 #         domainName: exhaustbarn.com
 #         basePath: ''
 #         endpointType: 'regional'
-    - rest:
-        domainName: www.plazamuffler.com
 #     - http:
 #         domainName: plazamuffler.com
 #         basePath: ''
