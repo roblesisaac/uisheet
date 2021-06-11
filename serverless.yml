@@ -75,7 +75,7 @@ package:
 
 plugins:
   - serverless-webpack
-  - serverless-domain-manager
+#   - serverless-domain-manager
   - serverless-plugin-warmup
     
 functions:
@@ -109,5 +109,5 @@ functions:
           method: any
           path: /{site}/{chain}/{arg1}/{arg2}
           cors: true
-#       - s3:
-#           bucket: ${self:custom.bucket}
+      - s3:
+          bucket: ${self:custom.bucket}
