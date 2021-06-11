@@ -10,7 +10,8 @@ module.exports = function(page, props) {
     str1 = str1.toString().split("");
     str2 = str2.toString().split("");
     str1.forEach(function(char, i){
-      blended += (char+str2[i]);
+      var otherChar = str2[i] || "";
+      blended += (char+otherChar);
     });
     return blended;
   };
