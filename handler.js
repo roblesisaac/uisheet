@@ -1167,10 +1167,6 @@ global._fetchAllUserSites = new Chain({
     userSites: []
   },
   steps: {
-    appendToUserSites: function(userSite) {
-      this.userSites.push(userSite);
-      this.next();
-    },
     fetchAllPermitsForUser: function() {
       var self = this;
       this.userPermits = [];
@@ -1192,17 +1188,17 @@ global._fetchAllUserSites = new Chain({
       }
       this.uniqueSiteIds = uniqueSiteIds;
       this.next();
+    },
+    fetchSitesForUserPermits: function() {
+      var self = this;
+      
+      if(this.filter) this.filter._id = { $in: this.uniqueSiteIds };
+      
+      models.sites.find(this.filter, function(err, resSites){
+        if(err) return self.error(err);
+        self.next(resSites);
+      });
     }
-  },
-  fetchSitesForUserPermits: function() {
-    var self = this;
-    
-    if(this.filter) this.filter._id = { $in: this.uniqueSiteIds };
-    
-    models.sites.find(this.filter, function(err, resSites){
-      if(err) return self.error(err);
-      self.next(resSites);
-    });
   },
   instruct: [
     "fetchAllPermitsForUser",
