@@ -1641,8 +1641,8 @@ global.scripts = new Chain({
     renderDatas: function() {
       this.siteData = {
         name: this.siteObj.name,
-        scripts: this.siteObj.scripts,
-        url: this.siteObj.url
+        htmlButton: this.siteObj.htmlButton,
+        scripts: this.siteObj.scripts
       };
       var self = this,
           dataNames = ["sheets", "permits", "siteData"],
