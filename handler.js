@@ -1758,7 +1758,8 @@ global.scripts = new Chain({
       this.next({
         site: this.siteObj,
         sheets: this.sheets,
-        permits: this.permits
+        permits: this.permits,
+        user: this.user
       });
     },
     toScriptType: function() {
