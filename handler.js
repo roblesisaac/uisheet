@@ -1757,7 +1757,8 @@ global.scripts = new Chain({
     sendSiteJson: function() {
       this.next({
         site: this.siteObj,
-        sheets: this.sheets
+        sheets: this.sheets,
+        permits: this.permits
       });
     },
     toScriptType: function() {
