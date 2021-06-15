@@ -1731,6 +1731,12 @@ global.scripts = new Chain({
         });
       }
     },
+    sendSiteJson: function() {
+      this.next({
+        site: this.siteObj,
+        sheets: this.sheets
+      });
+    },
     toScriptType: function() {
       this.next(this.scriptType);
     }
@@ -1742,6 +1748,7 @@ global.scripts = new Chain({
     "_fetchMasterSite",
     {
       switch: "toScriptType",
+      json: "sendSiteJson",
       data: "renderDatas",
       css: [
         "forEachScriptFromMasterSite", [
