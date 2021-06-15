@@ -1671,6 +1671,7 @@ global.scripts = new Chain({
     renderDatas: function() {
       this.siteData = {
         name: this.siteObj.name,
+        clone: this.siteObj.clone,
         htmlButton: this.siteObj.htmlButton,
         scripts: this.siteObj.scripts
       };
