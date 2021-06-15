@@ -13,7 +13,8 @@ const sheetSchema = new mongoose.Schema({
   "siteId": String,
   "author": String,
   "db": {
-    "schema": {}
+    "schema": {},
+    "url" String
   },
   "ui": {
     "js": String,
