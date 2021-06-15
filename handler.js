@@ -1588,6 +1588,29 @@ global.scripts = new Chain({
         self.next(siteObj);
       });
     },
+    fetchUserPermitsForSite: function() {
+      var self = this;
+      permits.find({
+        siteId: this.siteId
+      }, function(err, foundPermits){
+        if(err || !foundPermits) return self.error(err);
+        
+        var username = self.user.username,
+            userPermits = foundPermits.find({ username: username }),
+            publicPermits = foundPermits.find({ username: "public" });
+        
+        for(var i=0; i<publicPermits.length; i++) {
+          var publicPermit = publicPermits[i],
+              willNotOverwriteUserPermit = !userPermits.findOne({ sheetId: publicPermit.sheetId });
+              
+          if(willNotOverwriteUserPermit) userPermits.push(publicPermit);
+        }
+        
+        self.permits = userPermits;
+        
+        self.next();
+      });
+    },
     forEachScriptFromUserSite: function() {
       this.next(this.siteObj.scripts);
     },
