@@ -1194,7 +1194,7 @@ global._fetchAllUserSites = new Chain({
       
       if(this.filter) this.filter._id = { $in: this.uniqueSiteIds };
       
-      models.sites.find(this.filter, function(err, resSites){
+      models.sites.find(this.filter, null, this.options || {}, function(err, resSites){
         if(err) return self.error(err);
         self.next(resSites);
       });
