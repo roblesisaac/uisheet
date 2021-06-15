@@ -684,6 +684,13 @@ global.db = new Chain({
         self.next(data);
       });   
     },
+    deletePermit: function() {
+      var self = this;
+      models.permits.findByIdAndRemove(this.item._id, function(err, data){
+        if(err) return self.error(err);
+        self.next(data);
+      });    
+    },
     dropDb: function() {
       var dbName = this._query.dbName,
           self = this;
@@ -734,10 +741,10 @@ global.db = new Chain({
       });
     },
     forEachPermitForSheet: function() {
-      var self = this;
-      permits.find({
-        sheetId: this.id
-      }, function(err, permits){
+      var self = this,
+          filter = { sheetId: this.id },
+          options = { select: "_id" };
+      permits.find(filter, null, options, function(err, permits){
         if(err) return self.error(err);
         self.next(permits);
       });
