@@ -14,7 +14,7 @@ const sheetSchema = new mongoose.Schema({
   "author": String,
   "db": {
     "schema": {},
-    "url" String
+    "url": String
   },
   "ui": {
     "js": String,
