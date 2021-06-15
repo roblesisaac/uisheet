@@ -939,7 +939,6 @@ global.db = new Chain({
             ]
           }  
         ],
-        // { if: "permitHasRules", true: "addRules" },
         "forEachAddRules", [ "addRule" ],
         "forEachRemoveRules", [ "removeRule" ],
         { if: "isDbCount", true: ["getCount", "serve"] },
@@ -1183,17 +1182,7 @@ global._fetchAllUserSites = new Chain({
         self.next();
       });
     },
-    fetchSitesForUserPermits: function() {
-      var self = this,
-          _ids = this.uniqueSiteIds;
-      models.sites.find({
-        _id: { $in: _ids }
-      }, function(err, resSites){
-        if(err) return self.error(err);
-        self.next(resSites);
-      });
-    },
-    getUniqueSiteIds: function() {
+    extractUniqueSiteIds: function() {
       var uniqueSiteIds = [];
       for(var i=0; i<this.userPermits.length; i++) {
         var permit = this.userPermits[i];
@@ -1203,18 +1192,21 @@ global._fetchAllUserSites = new Chain({
       }
       this.uniqueSiteIds = uniqueSiteIds;
       this.next();
-    },
-    getUserSite: function() {
-      var self = this;
-      models.sites.findById(this.userSiteId, function(err, userSite) {
-        if(err) return self.error(err);
-        self.next(userSite, "userSite");
-      });
     }
+  },
+  fetchSitesForUserPermits: function() {
+    var self = this;
+    
+    if(this.filter) this.filter._id = { $in: this.uniqueSiteIds };
+    
+    models.sites.find(this.filter, function(err, resSites){
+      if(err) return self.error(err);
+      self.next(resSites);
+    });
   },
   instruct: [
     "fetchAllPermitsForUser",
-    "getUniqueSiteIds",
+    "extractUniqueSiteIds",
     "fetchSitesForUserPermits"
   ]
 });
