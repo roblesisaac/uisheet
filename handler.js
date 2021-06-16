@@ -1238,7 +1238,8 @@ global._fetchSheetForEachPermit = new Chain({
             return permit.sheetId;
           });
       models.sheets.find({
-        _id: { $in: _ids }
+        _id: { $in: _ids },
+        siteId: this.siteId
       }, function(err, resSheets){
         if(err) return self.error(err);
         self.sheets = resSheets;
