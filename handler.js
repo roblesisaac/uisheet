@@ -395,8 +395,15 @@ global._checkPermit = new Chain({
       this.next(!this.permit);
     },
     permitExcludesMethodForProp: function() {
-      var prop = this.sheetName == "permits" ? "permit" : "db";
-      this.next(this.permit[prop].methods.indexOf(this._eventMethod) == -1);
+      var prop = this.sheetName == "permits" ? "permit" : "db",
+          userPermissions = this.permit[prop].methods,
+          action = this.id == "updateMany"
+                   ? "updateMany"
+                   : this._eventMethod == "post" && Array.isArray(this._body)
+                   ? "bulkImport"
+                   : this._eventMethod;
+          
+      this.next(userPermissions.excludes(action));
     },
     sendDefaultPermit: function() {
       this.permit = {
@@ -431,29 +438,20 @@ global._checkPermit = new Chain({
     }
   },
   instruct: {
-    if: "alreadyHasPermit",
-    false: {
-      if: "sheetNeedsADefaultPermit", 
-      true: "sendDefaultPermit",
-      false: [
-        { if: "sheetNameIsPermits", true: "fetchPermitForPermit" },
-        { 
-          if: "sheetIsNormal",
-          true: [
-            "_grabSheet",
-            "grabPermit"
-            ] 
-        },
-        {
-          if: "noPermitExists", 
-          true: [
-            { if: "userIsNotPublic", true: "fetchPublicPermit" },
-            { if: "noPermitExists", true: "alertNoPermitExists" }
-          ]
-        },
-        { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" }   
-      ]
-    }
+    if: "sheetNeedsADefaultPermit", 
+    true: "sendDefaultPermit",
+    false: [
+      { if: "sheetNameIsPermits", true: "fetchPermitForPermit" },
+      { if: "sheetIsNormal", true: [ "_grabSheet", "grabPermit" ] },
+      {
+        if: "noPermitExists", 
+        true: [
+          { if: "userIsNotPublic", true: "fetchPublicPermit" },
+          { if: "noPermitExists", true: "alertNoPermitExists" }
+        ]
+      },
+      { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" }   
+    ]
   }
 });
 global.connectToDb = new Chain({
@@ -510,7 +508,8 @@ global.db = new Chain({
       options: {
         limit: 50
       },
-      sheetName: this._arg1
+      sheetName: this._arg1,
+      stamp: Date.now()
     };
   },
   steps: {
@@ -579,12 +578,12 @@ global.db = new Chain({
       this._body.sheetId = sheetId;
       this.next();
     },
-    addUsernameToFilter: function() {
-      this.filter.username = this.user.username;
-      this.next();
-    },
     addToOptions: function() {
       this.options[this.key] = this.nativeOptions[this.key](this.value);
+      this.next();
+    },
+    addUsernameToFilter: function() {
+      this.filter.username = this.user.username;
       this.next();
     },
     addToFilter: function() {
@@ -709,26 +708,55 @@ global.db = new Chain({
     },
     forEachAddRules: function() {
       if(!this.permit.db.rules) return this.next([]);
-      this.next(this.permit.db.rules.get.add); 
+      
+      var event = this._eventMethod;
+      this.next(this.permit.db.rules[event].add); 
     },
     addRule: function() {
       var keys = Object.keys(this.item),
           prop = keys[0],
           value = this.item[prop];
-      if(value.includes("'")) {
-        value = value.replaceAll("'","");
+      
+      value = value.includes("'")
+              ? value.replaceAll("'","")
+              : this[value];
+              
+              
+      if(this._eventMethod == "get") {
+        this.filter[prop] = value;
+      } else if(this.id == "updateMany") {
+        this._body.update[prop] = value;
+      } else if(Array.isArray(this._body)) {
+        this._body.forEach(function(bItem) {
+          bItem[prop] = value;
+        }); 
       } else {
-        value = this[value];
+        this._body[prop] = value;
       }
-      this.filter[prop] = value;
+      
       this.next();
     },
     forEachRemoveRules: function() {
       if(!this.permit.db.rules) return this.next([]);
-      this.next(this.permit.db.rules.get.remove);
+      
+      var event = this._eventMethod;
+      this.next(this.permit.db.rules[event].remove); 
     },
     removeRule: function() {
-      delete this.filter[this.item];
+      if(this._eventMethod == "get") {
+        this.options.select = this.options.select || "";
+        this.options.select += (" "+this.item);
+      } else if(this.id == "updateMany") {
+        delete this._body.update[this.item];
+      } else if(Array.isArray(this._body)) {
+        var remover = this.item;
+        this._body.forEach(function(bItem) {
+          delete bItem[remover];
+        }); 
+      } else {
+        delete this._body[this.item];
+      }
+      
       this.next();
     },
     forEachPermitInSite: function() {
@@ -923,7 +951,7 @@ global.db = new Chain({
     valueHasPlusCommas: function() {
       var isString = typeof this.value == "string";
       this.next(this.value && isString && this.value.indexOf(",")>-1);
-    }
+    },
   },
   instruct: [
     "_checkEmailVerified",
@@ -971,51 +999,53 @@ global.db = new Chain({
             false: "getAllItems"
         }
       ],
-      put: {
-        if: "hasSpecialCaveates",
-        true: {
-          switch: "toCaveats",
-          permits: ["updateAndSaveSiteCacheStamp", "updateItem"],
-          sites: [
-            "lookupSiteAuthor",
-            {
-              if: "userIsAuthorOfSite",
-              true: [
-                {
-                  if: "siteIsUisheet",
-                  true: "updateAllSiteStamps",
-                  false: "updateSiteCacheStamp"
-                },
-                "updateItem"
-              ],
-              false: "alertNeedPermissionFromAuthor"
-            }
-          ],
-          sheets: ["updateAndSaveSiteCacheStamp", "updateItem"],
-          users: [
-            "fetchUserFromCookie",
-            {
-              if: "userDoesntExist",
-              true: "alertUserDoesntExist",
-              false: {
-                if: "passwordAuthenticates",
-                true: { 
-                  if: "hasNewPassword",
-                  true: ["setNewPassword", "updateItem", "createCookies", "sendCredentials"],
-                  false: ["removePassword", "updateItem"]
-                },
-                false: "alertPasswordsDontMatch"
+      put: [
+        "forEachAddRules", [ "addRule" ],
+        "forEachRemoveRules", [ "removeRule" ],
+        {
+          if: "hasSpecialCaveates",
+          true: {
+            switch: "toCaveats",
+            permits: ["updateAndSaveSiteCacheStamp", "updateItem"],
+            sites: [
+              "lookupSiteAuthor",
+              {
+                if: "userIsAuthorOfSite",
+                true: [
+                  {
+                    if: "siteIsUisheet",
+                    true: "updateAllSiteStamps",
+                    false: "updateSiteCacheStamp"
+                  },
+                  "updateItem"
+                ],
+                false: "alertNeedPermissionFromAuthor"
               }
-            }
-          ]
-        },
-        false: {
-          if: "isUpdateMany",
-          true: "updateMany",
-          false: "updateItem"
+            ],
+            sheets: ["updateAndSaveSiteCacheStamp", "updateItem"],
+            users: [
+              "fetchUserFromCookie",
+              {
+                if: "userDoesntExist",
+                true: "alertUserDoesntExist",
+                false: {
+                  if: "passwordAuthenticates",
+                  true: { 
+                    if: "hasNewPassword",
+                    true: ["setNewPassword", "updateItem", "createCookies", "sendCredentials"],
+                    false: ["removePassword", "updateItem"]
+                  },
+                  false: "alertPasswordsDontMatch"
+                }
+              }
+            ]
+          },
+          false: { if: "isUpdateMany", true: "updateMany", false: "updateItem" }
         }
-      },
+      ],
       post: [
+        "forEachAddRules", [ "addRule" ],
+        "forEachRemoveRules", [ "removeRule" ],
         { 
           switch: "toCaveats",
           permits: ["updateAndSaveSiteCacheStamp", "addSiteIdToBody", "addSheetIdToBody"],
