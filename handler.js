@@ -1319,7 +1319,7 @@ global.graphql = new Chain({
       var root = { hello: () => "Hello world!" },
           self = this;
        
-      graphql(schema, '{ hello }', root).then((response) => {
+      graphql(schema, '{ hello }', root).then(function(response) {
         self.next(response);
       });  
     }
