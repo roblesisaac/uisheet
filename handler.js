@@ -43,6 +43,7 @@ const loop = function(arr) {
   return { async: arr };
 };
 const render = require("./render");
+var { graphql, buildSchema } = require("graphql");
 const ssClient = require("smartsheet");
 
 global.auth = new Chain({
@@ -450,7 +451,11 @@ global._checkPermit = new Chain({
           { if: "noPermitExists", true: "alertNoPermitExists" }
         ]
       },
-      { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" }   
+      { if: "permitExcludesMethodForProp", true: "alertPermitExcludesMethod" },
+      // { 
+      //   if: "usernameIsPublicAndUrlHasId",
+      //   true: { if: "permitAllowsId", false: "alertPermitExcludesMethod" }
+      // } 
     ]
   }
 });
@@ -1300,6 +1305,27 @@ global._fetchSheetForEachPermit = new Chain({
     //   }
     // ]),
     "sortSheets"
+  ]
+});
+global.graphql = new Chain({
+  steps: {
+    helloGraphQl: function() {
+      var schema = buildSchema(`
+        type Query {
+          hello: String
+        }
+      `);
+       
+      var root = { hello: () => "Hello world!" },
+          self = this;
+       
+      graphql(schema, '{ hello }', root).then((response) => {
+        self.next(response);
+      });  
+    }
+  },
+  instruct: [
+    "helloGraphQl"  
   ]
 });
 global._grabSheet = new Chain({
