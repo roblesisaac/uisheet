@@ -43,7 +43,6 @@ const loop = function(arr) {
   return { async: arr };
 };
 const render = require("./render");
-var { graphql, buildSchema } = require("graphql");
 const ssClient = require("smartsheet");
 
 global.auth = new Chain({
@@ -1305,27 +1304,6 @@ global._fetchSheetForEachPermit = new Chain({
     //   }
     // ]),
     "sortSheets"
-  ]
-});
-global.graphql = new Chain({
-  steps: {
-    helloGraphQl: function() {
-      var schema = buildSchema(`
-        type Query {
-          hello: String
-        }
-      `);
-       
-      var root = { hello: () => "Hello world!" },
-          self = this;
-       
-      graphql(schema, '{ hello }', root).then(function(response) {
-        self.next("response is graph");
-      });  
-    }
-  },
-  instruct: [
-    "helloGraphQl"  
   ]
 });
 global._grabSheet = new Chain({
