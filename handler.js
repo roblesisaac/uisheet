@@ -1315,13 +1315,15 @@ global.graphql = new Chain({
           hello: String
         }
       `);
+      
+      this.next("Hello graphql");
        
-      var root = { hello: () => "Hello world!" },
-          self = this;
+      // var root = { hello: () => "Hello world!" },
+      //     self = this;
        
-      graphql(schema, '{ hello }', root).then(function(response) {
-        self.next(response);
-      });  
+      // graphql(schema, '{ hello }', root).then(function(response) {
+      //   self.next(response);
+      // });  
     }
   },
   instruct: [
