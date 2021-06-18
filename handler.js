@@ -1162,6 +1162,10 @@ global.fetch = new Chain({
       this.options.body = JSON.stringify(this.fetchBody);
       this.next();
     },
+    addHeaders: function() {
+      this.options.headers = this._body.headers;
+      this.next();
+    },
     addParamsToUrl: function() {
       for(var key in this.fetchBody) {
         this.url += (key+"="+this.fetchBody[key]+"&");
@@ -1180,6 +1184,9 @@ global.fetch = new Chain({
       }).catch(function(e){
         self.error(e);
       });
+    },
+    hasHeaders: function() {
+      this.next(Object.keys(this._body).includes("headers"));
     },
     makeSureUrlEndsWithQuestion: function() {
       if(this.url.excludes("?")) this.url += "?";
@@ -1201,6 +1208,7 @@ global.fetch = new Chain({
       },
       post: { if: "fetchHasBody", true: "addBodyToFetch" }
     },
+    { if: "hasHeaders", true: "addHeaders" },
     "fetchUrl"  
   ]
 });
