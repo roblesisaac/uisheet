@@ -668,7 +668,7 @@ global.db = new Chain({
         if(err) return self.error(err);
         self.next({
           newPermit: newPermit,
-          newSheet: self.newSheet
+          newSheet: self._postedItem
         });
       });
     },
@@ -871,6 +871,7 @@ global.db = new Chain({
       var self = this;
       this.model.create(this._body, function(err, data){
         if(err) return self.error(err);
+        self._postedItem = data;
         self.next(data);
       });
     },
