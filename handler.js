@@ -1268,9 +1268,13 @@ global._fetchSheetForEachPermit = new Chain({
     },
     fetchSheetsForUserPermits: function() {
       var self = this,
-          _ids = this.permits.map(function(permit) {
-            return permit.sheetId;
-          });
+          _ids = [];
+          
+      this.permits.forEach(function(permit) {
+        var id = permit.sheetId;
+        if(_ids.excludes(id)) _ids.push(id);
+      });
+      
       models.sheets.find({
         _id: { $in: _ids },
         siteId: this.siteId
@@ -1653,6 +1657,19 @@ global.scripts = new Chain({
         self.next();
       });
     },
+    fetchUsersPermitsForSite: function() {
+      var self = this;
+      permits.find({
+        siteId: this.siteId,
+        username: { $in: ["public", this.user.username] }
+      }, function(err, foundPermits){
+        if(err || !foundPermits) return self.error(err);
+        
+        self.permits = foundPermits;
+        
+        self.next();
+      });
+    },
     forEachScriptFromUserSite: function() {
       this.next(this.siteObj.scripts);
     },
@@ -1811,7 +1828,7 @@ global.scripts = new Chain({
   },
   instruct: [
     "fetchSite",
-    "fetchUserPermitsForSite",
+    "fetchUsersPermitsForSite",
     "_fetchSheetForEachPermit",
     "_fetchMasterSite",
     {
@@ -2304,29 +2321,6 @@ global.port = new Chain({
         if(err) return self.error(err);
         if(!user) return self.error("<(-_-)> Not existing in archives, user "+ self.userid +" is.");
         self.user = user;
-        self.next();
-      });
-    },
-    fetchUserPermitsForSite: function() {
-      var self = this;
-      permits.find({
-        siteId: this.siteId
-      }, function(err, foundPermits){
-        if(err || !foundPermits) return self.error(err);
-        
-        var username = self.user.username,
-            userPermits = foundPermits.find({ username: username }),
-            publicPermits = foundPermits.find({ username: "public" });
-        
-        for(var i=0; i<publicPermits.length; i++) {
-          var publicPermit = publicPermits[i],
-              willNotOverwriteUserPermit = !userPermits.findOne({ sheetId: publicPermit.sheetId });
-              
-          if(willNotOverwriteUserPermit) userPermits.push(publicPermit);
-        }
-        
-        self.permits = userPermits;
-        
         self.next();
       });
     },
