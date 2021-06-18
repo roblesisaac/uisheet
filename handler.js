@@ -1159,7 +1159,9 @@ global.fetch = new Chain({
   },
   steps: {
     addBodyToFetch: function() {
-      this.options.body = JSON.stringify(this.fetchBody);
+      this.options.body = typeof this.fetchBody == "string" 
+                          ? this.fetchBody 
+                          : JSON.stringify(this.fetchBody);
       this.next();
     },
     addHeaders: function() {
@@ -1179,7 +1181,10 @@ global.fetch = new Chain({
       var self = this;
       nodeFetch(this.url, this.options).then(function(res){
         res.json().then(function(json){
-          self.next(json);
+          self.next({
+            ogBody: self.options.body,
+            json: json
+          });
         });
       }).catch(function(e){
         self.error(e);
