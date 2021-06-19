@@ -71,7 +71,9 @@ global.brain = new Chain({
   },
   steps: {
     buildBrainAuth: function() {
-      this.brainAuth = "Basic " + btoa(this.brainPublic+":"+this.brainPrivate);
+      var keys = this.brainPublic+":"+this.brainPrivate;
+      this.brainAuth = "Basic " + Buffer.from(keys).toString("base64");
+      
       this.next();
     },
     buildBrainHeaders: function() {
