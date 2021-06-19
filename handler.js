@@ -105,7 +105,7 @@ global.brain = new Chain({
         }`,
         "variables": {
           "input": {
-            "clientToken": this._body
+            "clientToken": JSON.stringify(this._body)
           }
         }
       };
