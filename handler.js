@@ -104,16 +104,14 @@ global.brain = new Chain({
           }
         }`,
         "variables": {
-          "input": {
-            "clientToken": this._body
-          }
+          "input": this._body
         }
       };
 
       var body = {
         method: "POST",
         headers: this.brainHeaders,
-        body: `{ "query": "${query}" }`
+        body: query
       };
       
       var self = this;
