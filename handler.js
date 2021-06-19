@@ -104,7 +104,7 @@ global.brain = new Chain({
           }
         }`,
         "variables": {
-          "input": { "customerId": this._body.customerId}
+          "customerId": this._body.customerId
         }
       };
 
