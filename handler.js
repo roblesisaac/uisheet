@@ -94,14 +94,22 @@ global.brain = new Chain({
       var self = this;
       nodeFetch(this.endpoint, body).then(res=>res.json()).then(function(data){
         self.next(data);
-      }); 
+      });
     },
     graphToken: function() {
-      var query = `mutation {
-        createClientToken {
-          clientToken
+      var query = {
+        "query": `mutation GetClientToken($input: CreateClientTokenInput) {
+          createClientToken(input: $input) {
+            clientToken
+          }
+        }`,
+        "variables": {
+          "input": {
+            "clientToken": this._body
+          }
         }
-      }`;
+      };
+
       var body = {
         method: "POST",
         headers: this.brainHeaders,
