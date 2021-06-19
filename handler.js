@@ -60,6 +60,67 @@ global.auth = new Chain({
     "lookupAuth"  
   ]
 });
+global.brain = new Chain({
+  input: function() {
+    return {
+      brainMethod: this._arg1,
+      brainPublic: process.env.BTPUBLIC,
+      brainPrivate: process.env.BTPRIVATE,
+      endpoint: "https://payments.sandbox.braintree-api.com/graphql",
+    };
+  },
+  steps: {
+    buildBrainAuth: function() {
+      this.brainAuth = "Basic " + btoa(this.brainPublic+":"+this.brainPrivate);
+      this.next();
+    },
+    buildBrainHeaders: function() {
+      this.brainHeaders = {
+        "Content-Type": "application/json",
+        "Authorization": this.brainAuth,
+        "Braintree-Version": "2018-05-08"
+      };
+      this.next();
+    },
+    fetchGraph: function() {
+      var body = {
+        method: "POST",
+        headers: this.brainHeaders,
+        body: this._body
+      };
+      
+      var self = this;
+      nodeFetch(this.endpoint, body).then(res=>res.json()).then(function(data){
+        self.next(data);
+      }); 
+    },
+    graphToken: function() {
+      var body = {
+        method: "POST",
+        headers: this.brainHeaders,
+        body: `mutation {
+          createClientToken {
+            clientToken
+          }
+        }`
+      };
+      
+      var self = this;
+      nodeFetch(this.endpoint, body).then(res=>res.json()).then(function(data){
+        self.next(data);
+      }); 
+    }
+  },
+  instruct: [
+    "buildBrainAuth",
+    "buildBrainHeaders",
+    {
+      switch: "toBrainMethod",
+      graphql: "fetchGraph",
+      token: "graphToken"
+    }
+  ]
+});
 global.braintree = new Chain({
   input: function() {
     return {
@@ -1181,10 +1242,7 @@ global.fetch = new Chain({
       var self = this;
       nodeFetch(this.url, this.options).then(function(res){
         res.json().then(function(json){
-          self.next({
-            ogBody: self.options.body,
-            json: json
-          });
+          self.next(json);
         });
       }).catch(function(e){
         self.error(e);
@@ -2312,8 +2370,19 @@ global.port = new Chain({
   },
   steps: {
     addDetails: function(last, next) {
-      var index = Object.assign({}, this._memory.storage);
-      delete index._callback;
+      var index = Object.assign({}, this._memory.storage),
+          removers = [
+            "callback", 
+            "brainAuth", 
+            "brainPublic", 
+            "brainPrivate", 
+            "brainHeaders"
+          ];
+          
+      removers.forEach(function(r){
+        delete index[r];
+      });
+      
       next(index);
     },
     fetchSimpleSite: function(res) {
@@ -2347,7 +2416,7 @@ global.port = new Chain({
       this.next();
     },
     isVerbose: function(res, next) {
-      next(this._query.verbose);
+      next(this._query._verbose);
     },
     loggedOut: function() {
       var self = this;
