@@ -88,7 +88,7 @@ global.brain = new Chain({
       var body = {
         method: "POST",
         headers: this.brainHeaders,
-        body: this._body
+        body: typeof this._body == "string" ? this._body : JSON.stringify(this._body)
       };
       
       var self = this;
@@ -97,14 +97,15 @@ global.brain = new Chain({
       }); 
     },
     graphToken: function() {
+      var query = `mutation {
+        createClientToken {
+          clientToken
+        }
+      }`;
       var body = {
         method: "POST",
         headers: this.brainHeaders,
-        body: `mutation {
-          createClientToken {
-            clientToken
-          }
-        }`
+        body: `{ "query": "${query}" }`
       };
       
       var self = this;
