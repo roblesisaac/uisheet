@@ -104,7 +104,11 @@ global.brain = new Chain({
           }
         }`,
         "variables": {
-          "input": { "customerId": "5fac5276107aeb0009994b0b" }
+          "input": { 
+            "clientToken": { 
+              "customerId": "5fac5276107aeb0009994b0b" 
+            }
+          }
         }
       };
 
