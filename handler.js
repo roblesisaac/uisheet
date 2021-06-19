@@ -105,9 +105,7 @@ global.brain = new Chain({
         }`,
         "variables": {
           "input": { 
-            "clientToken": { 
-              "customerId": "5fac5276107aeb0009994b0b" 
-            }
+            "clientToken": this._body
           }
         }
       };
@@ -115,7 +113,7 @@ global.brain = new Chain({
       var body = {
         method: "POST",
         headers: this.brainHeaders,
-        body: query
+        body: JSON.stringify(query)
       };
       
       var self = this;
