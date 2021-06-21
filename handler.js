@@ -84,6 +84,24 @@ global.brain = new Chain({
       };
       this.next();
     },
+    buildTokenQuery: function() {
+      this.query = {
+        "query": `mutation GetClientToken($input: CreateClientTokenInput) {
+          createClientToken(input: $input) {
+            clientToken
+          }
+        }`,
+        "variables": {
+          "input": { 
+            "clientToken": this._body
+          }
+        }
+      };
+      this.next();
+    },
+    fetchCustomerById: function() {
+      
+    },
     fetchGraph: function() {
       var body = {
         method: "POST",
@@ -96,6 +114,18 @@ global.brain = new Chain({
         self.next(data);
       });
     },
+    fetchGraphql: function() {
+      var body = {
+        method: "POST",
+        headers: this.brainHeaders,
+        body: JSON.stringify(this.query)
+      };
+      
+      var self = this;
+      nodeFetch(this.endpoint, body).then(res=>res.json()).then(function(data) {
+        self.next(data);
+      });    
+    },
     graphToken: function() {
       var query = {
         "query": `mutation GetClientToken($input: CreateClientTokenInput) {
@@ -105,7 +135,7 @@ global.brain = new Chain({
         }`,
         "variables": {
           "input": { 
-            "clientToken": this._body || {}
+            "clientToken": this._body
           }
         }
       };
@@ -117,7 +147,7 @@ global.brain = new Chain({
       };
       
       var self = this;
-      nodeFetch(this.endpoint, body).then(res=>res.json()).then(function(data){
+      nodeFetch(this.endpoint, body).then(res=>res.json()).then(function(data) {
         self.next(data);
       }); 
     }
@@ -127,9 +157,11 @@ global.brain = new Chain({
     "buildBrainHeaders",
     {
       switch: "toBrainMethod",
-      graphql: "fetchGraph",
-      token: "graphToken"
-    }
+      // graphql: "fetchGraph",
+      lookupCustomer: "fetchCustomerById",
+      token: "buildTokenQuery"
+    },
+    "fetchGraphql"
   ]
 });
 global.braintree = new Chain({
