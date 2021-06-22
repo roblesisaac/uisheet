@@ -192,7 +192,7 @@ global.brain = new Chain({
             brainId: this.brainId
           };
           
-      models.users.findByIdAndUpdate(user.id, brainIdBody, { new: true }, function(err, data){
+      models.users.findByIdAndUpdate(user._id.toString(), brainIdBody, { new: true }, function(err, data){
         if(err) return self.error(err);
         self.next(data);
       });
