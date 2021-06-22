@@ -99,20 +99,26 @@ global.brain = new Chain({
       };
       this.next();
     },
-    fetchCustomerById: function() {
-      
-    },
-    fetchGraph: function() {
-      var body = {
-        method: "POST",
-        headers: this.brainHeaders,
-        body: typeof this._body == "string" ? this._body : JSON.stringify(this._body)
+    buildCustomerSearchQuery: function() {
+      this.query = {
+        "query": `query Search($input: CustomerSearchInput!) {
+          search {
+            customers(input: $input) {
+        			edges {
+                node {
+                  legacyId
+                  id
+                  firstName
+                }
+              }
+            }
+          }
+        }`,
+        "variables": {
+          "input": {}
+         }
       };
-      
-      var self = this;
-      nodeFetch(this.endpoint, body).then(res=>res.json()).then(function(data){
-        self.next(data);
-      });
+      this.next();
     },
     fetchGraphql: function() {
       var body = {
@@ -125,31 +131,6 @@ global.brain = new Chain({
       nodeFetch(this.endpoint, body).then(res=>res.json()).then(function(data) {
         self.next(data);
       });    
-    },
-    graphToken: function() {
-      var query = {
-        "query": `mutation GetClientToken($input: CreateClientTokenInput) {
-          createClientToken(input: $input) {
-            clientToken
-          }
-        }`,
-        "variables": {
-          "input": { 
-            "clientToken": this._body
-          }
-        }
-      };
-
-      var body = {
-        method: "POST",
-        headers: this.brainHeaders,
-        body: JSON.stringify(query)
-      };
-      
-      var self = this;
-      nodeFetch(this.endpoint, body).then(res=>res.json()).then(function(data) {
-        self.next(data);
-      }); 
     }
   },
   instruct: [
@@ -157,8 +138,7 @@ global.brain = new Chain({
     "buildBrainHeaders",
     {
       switch: "toBrainMethod",
-      // graphql: "fetchGraph",
-      lookupCustomer: "fetchCustomerById",
+      lookupCustomer: "buildCustomerSearchQuery",
       token: "buildTokenQuery"
     },
     "fetchGraphql"
