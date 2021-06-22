@@ -60,6 +60,49 @@ global.auth = new Chain({
     "lookupAuth"  
   ]
 });
+global._brainQueryCustomer = new Chain({
+  steps: {
+    announceNoBrainCustomer: function() {
+      this.next({
+        customer: "<(-_-)> Not having a braintree account, this user is."
+      });
+    },
+    buildCustomerSearchQuery: function() {
+      this.query = {
+        "query": ` query Search($input: CustomerSearchInput!) {
+          search {
+            customers(input: $input) {
+        			edges {
+                node {
+                  id
+                }
+              }
+            }
+          }
+        }`,
+        "variables": {
+          "input": {
+            "id": this.user.brainId
+          }
+         }
+      };
+      this.next();
+    },
+    userHasBrainId: function() {
+      this.next(!!this.user && !!this.user.brainId);
+    }
+  },
+  instruct: {
+    if: "userHasBrainId", 
+    true: [
+      "buildBrainAuth",
+      "buildBrainHeaders",
+      "buildCustomerSearchQuery",
+      "fetchGraphql"
+    ],
+    false: "announceNoBrainCustomer"
+  }
+});
 global.brain = new Chain({
   input: function() {
     return {
@@ -70,6 +113,9 @@ global.brain = new Chain({
     };
   },
   steps: {
+    alertHasBrainCustomer: function() {
+      this.next(`<(-_-)> Already with brain, ${this.user.username} is.`);
+    },
     buildBrainAuth: function() {
       var keys = this.brainPublic+":"+this.brainPrivate;
       this.brainAuth = "Basic " + Buffer.from(keys).toString("base64");
@@ -99,23 +145,19 @@ global.brain = new Chain({
       };
       this.next();
     },
-    buildCustomerSearchQuery: function() {
+    buildcreateCustomerQuery: function() {
       this.query = {
-        "query": `query Search($input: CustomerSearchInput!) {
-          search {
-            customers(input: $input) {
-        			edges {
-                node {
-                  legacyId
-                  id
-                  firstName
-                }
-              }
+        "query": `mutation CreateCustomerInput($input: CreateCustomerInput!) {
+          createCustomer(input: $input) {
+            customer {
+              id
             }
           }
         }`,
         "variables": {
-          "input": {}
+            "input": {
+          		"customer": this._body
+            }
          }
       };
       this.next();
@@ -131,6 +173,29 @@ global.brain = new Chain({
       nodeFetch(this.endpoint, body).then(res=>res.json()).then(function(data) {
         self.next(data);
       });    
+    },
+    hasCustomer: function(last) {
+      var data = last.data;
+      if(!data) return this.next(false);
+      
+      var customer = data.createCustomer 
+                     ? data.createCustomer.customer
+                     : false;
+      this.braindId = customer ? customer.id : false;
+      
+      this.next(this.braindId);
+    },
+    saveBrainIdToUser: function() {
+      var self = this,
+          user = this.user,
+          brainIdBody = {
+            brainId: this.brainId
+          };
+          
+      models.users.findByIdAndUpdate(user.id, brainIdBody, { new: true }, function(err, data){
+        if(err) return self.error(err);
+        self.next(data);
+      });
     }
   },
   instruct: [
@@ -138,10 +203,21 @@ global.brain = new Chain({
     "buildBrainHeaders",
     {
       switch: "toBrainMethod",
-      lookupCustomer: "buildCustomerSearchQuery",
-      token: "buildTokenQuery"
-    },
-    "fetchGraphql"
+      createNewCustomer: [
+        "_brainQueryCustomer",
+        { 
+          if: "hasCustomer",
+          true: "alertHasBrainCustomer",
+          false: [
+            "buildcreateCustomerQuery",
+            "fetchGraphql",
+            "saveBrainIdToUser"
+          ]
+        }
+      ],
+      queryCustomer: "_brainQueryCustomer",
+      token: ["buildTokenQuery", "fetchGraphql"]
+    }
   ]
 });
 global.braintree = new Chain({
@@ -967,6 +1043,10 @@ global.db = new Chain({
       delete this.filter._distinct;
       this.next();
     },
+    removeBrainId: function() {
+      delete this._body.brainId;
+      this.next();
+    },
     removePassword: function() {
       delete this._body.password;
       this.next();
@@ -1121,8 +1201,8 @@ global.db = new Chain({
                   if: "passwordAuthenticates",
                   true: { 
                     if: "hasNewPassword",
-                    true: ["setNewPassword", "updateItem", "createCookies", "sendCredentials"],
-                    false: ["removePassword", "updateItem"]
+                    true: ["setNewPassword", "removeBrainId", "updateItem", "createCookies", "sendCredentials"],
+                    false: ["removePassword", "removeBrainId", "updateItem"]
                   },
                   false: "alertPasswordsDontMatch"
                 }
