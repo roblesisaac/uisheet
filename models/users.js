@@ -32,3 +32,22 @@ userSchema.pre('save', function (next) {
     // override the cleartext password with the hased
     user.password = hash;
     next();
+  });
+});
+
+userSchema.methods.hashPassword = function(password, next) {
+  bcrypt.hash(password, salt, function (err, hash) {
+    if (err) return next(err);
+    next(hash);
+  });
+};
+
+userSchema.methods.comparePassword = function (candidatePassword, callback) {
+  bcrypt.compare(candidatePassword, this.password, function (err, isMatch) {
+    if (err) return callback(err);
+    callback(undefined, isMatch);
+  });
+};
+
+// set up a mongoose model and pass it using module.exports
+module.exports = mongoose.model('user', userSchema);
