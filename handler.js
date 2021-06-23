@@ -190,14 +190,12 @@ global.brain = new Chain({
       });    
     },
     hasCustomer: function(last) {
-      var data = last.search;
-      if(!data) return this.next(false);
+      var data = last.data || {};
+      var search = data.search || {};
+      var customers = search.customers || {};
+      var edges = customers.edges || [];
       
-      var customers = data.customers
-                     ? data.customers.edges
-                     : false;
-      
-      this.next(!!customers.length);
+      this.next(!!edges.length);
     },
     locateBrainId: function(last) {
       var customerData = last.data || {};
@@ -227,7 +225,7 @@ global.brain = new Chain({
       switch: "toBrainMethod",
       createNewCustomer: [
         "_brainQueryCustomer",
-        { 
+        {
           if: "hasCustomer",
           true: "alertHasBrainCustomer",
           false: [
