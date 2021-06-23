@@ -167,7 +167,10 @@ global.brain = new Chain({
               }
             }
           }
-        `
+        `,
+        variables: {
+          
+        }
       };
       this.next();
     },
@@ -242,6 +245,12 @@ global.brain = new Chain({
         if(err) return self.error(err);
         self.next(data);
       });
+    },
+    sendClientToken: function(last) {
+      var data = last.data || {};
+      var created = data.createClientToken || {};
+      var clientToken = created.createClientToken || null;
+      this.next(clientToken);
     }
   },
   instruct: [
@@ -270,7 +279,7 @@ global.brain = new Chain({
         }
       ],
       queryCustomer: "_brainQueryCustomer",
-      token: ["buildQueryGetClientToken", "fetchGraphql"]
+      token: ["buildQueryGetClientToken", "fetchGraphql", "sendClientToken"]
     }
   ]
 });
