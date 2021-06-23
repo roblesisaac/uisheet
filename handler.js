@@ -205,6 +205,7 @@ global.brain = new Chain({
     saveBrainIdToUser: function() {
       var self = this,
           brainId = this.brainId,
+          xbrainId = this.laster.data.createCustomer.customer.id,
           brainIdBody = {
             brainId: brainId
           };
@@ -216,7 +217,8 @@ global.brain = new Chain({
           userid: self.userid,
           brainId: brainId,
           brainIdBody: brainIdBody,
-          laster: self.laster
+          laster: self.laster,
+          xbrainId: xbrainId
         });
       });
     }
