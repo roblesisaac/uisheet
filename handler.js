@@ -61,6 +61,14 @@ global.auth = new Chain({
   ]
 });
 global._brainQueryCustomer = new Chain({
+  input: function() {
+    return {
+      brainMethod: this._arg1,
+      brainPublic: process.env.BTPUBLIC,
+      brainPrivate: process.env.BTPRIVATE,
+      endpoint: "https://payments.sandbox.braintree-api.com/graphql",
+    };
+  },
   steps: {
     announceNoBrainCustomer: function() {
       this.next({
