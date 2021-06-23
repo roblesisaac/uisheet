@@ -76,7 +76,7 @@ global._brainQueryCustomer = new Chain({
         customer: "<(-_-)> Not having a braintree account, this user is."
       });
     },
-    buildCustomerSearchQuery: function() {
+    buildQueryCustomerSearch: function() {
       var brainId = this.user.brainId;
       this.query = {
         "query": `query Search($input: CustomerSearchInput!) {
@@ -122,7 +122,7 @@ global._brainQueryCustomer = new Chain({
     true: [
       "buildBrainAuth",
       "buildBrainHeaders",
-      "buildCustomerSearchQuery",
+      "buildQueryCustomerSearch",
       "fetchGraphql",
       "defineBrainCustomer"
     ],
@@ -156,22 +156,22 @@ global.brain = new Chain({
       };
       this.next();
     },
-    buildTokenQuery: function() {
+    buildQueryChargePaymentMethod: function() {
       this.query = {
-        "query": `mutation GetClientToken($input: CreateClientTokenInput) {
-          createClientToken(input: $input) {
-            clientToken
+        query: `
+          mutation ExampleCharge($input: ChargePaymentMethodInput!) {
+            chargePaymentMethod(input: $input) {
+              transaction {
+                id
+                status
+              }
+            }
           }
-        }`,
-        "variables": {
-          "input": { 
-            "clientToken": this._body
-          }
-        }
+        `
       };
       this.next();
     },
-    buildcreateCustomerQuery: function() {
+    buildQueryCreateCustomer: function() {
       var u = this.user;
       this.query = {
         "query": `mutation CreateCustomerInput($input: CreateCustomerInput!) {
@@ -188,6 +188,23 @@ global.brain = new Chain({
           		}
             }
          }
+      };
+      this.next();
+    },
+    buildQueryGetClientToken: function() {
+      this.query = {
+        query: `
+        mutation GetClientToken($input: CreateClientTokenInput) {
+          createClientToken(input: $input) {
+            clientToken
+          }
+        }
+        `,
+        variables: {
+          input: { 
+            clientToken: this._body
+          }
+        }
       };
       this.next();
     },
@@ -232,13 +249,20 @@ global.brain = new Chain({
     "buildBrainHeaders",
     {
       switch: "toBrainMethod",
+      charge: {
+        if: "userHasBrainId",
+        false: "announceNoBrainCustomer",
+        // true: [
+        //   "buildQueryChargePaymentMethod"  
+        // ]
+      },
       createNewCustomer: [
         "_brainQueryCustomer",
         {
           if: "hasCustomer",
           true: "alertHasBrainCustomer",
           false: [
-            "buildcreateCustomerQuery",
+            "buildQueryCreateCustomer",
             "fetchGraphql",
             "locateBrainId",
             "saveBrainIdToUser"
@@ -246,7 +270,7 @@ global.brain = new Chain({
         }
       ],
       queryCustomer: "_brainQueryCustomer",
-      token: ["buildTokenQuery", "fetchGraphql"]
+      token: ["buildQueryGetClientToken", "fetchGraphql"]
     }
   ]
 });
