@@ -192,9 +192,16 @@ global.brain = new Chain({
       var data = last.data || {};
       var customer = data.createCustomer 
                      ? data.createCustomer.customer
-                     : false;
+                     : {};
+                     
       this.braindId = customer ? customer.id : false;
-      this.next();
+      
+      this.next({
+        data: last,
+        customer: customer,
+        id: this.braindId
+      });
+      // this.next();
     },
     saveBrainIdToUser: function() {
       var self = this,
@@ -222,7 +229,7 @@ global.brain = new Chain({
           false: [
             "buildcreateCustomerQuery",
             "fetchGraphql",
-            // "locateBrainId",
+            "locateBrainId",
             // "saveBrainIdToUser"
           ]
         }
