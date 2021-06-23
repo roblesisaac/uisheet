@@ -179,12 +179,8 @@ global.brain = new Chain({
           transaction: {
             amount: b.amount,
             customerId: customerId,
-            descriptor: {
-              name: siteName.toUpperCase()
-            },
-            riskData: {
-              deviceData: b.deviceData
-            },
+            descriptor: { name: siteName.toUpperCase() },
+            riskData: { deviceData: b.deviceData },
             vaultPaymentMethodAfterTransacting: {
               when: "ON_SUCCESSFUL_TRANSACTION"
             }
@@ -282,9 +278,10 @@ global.brain = new Chain({
       charge: {
         if: "userHasBrainId",
         false: "announceNoBrainCustomer",
-        // true: [
-        //   "buildQueryChargePaymentMethod"  
-        // ]
+        true: [
+          "buildQueryChargePaymentMethod",
+          "fetchGraphql"
+        ]
       },
       createNewCustomer: [
         "_brainQueryCustomer",
