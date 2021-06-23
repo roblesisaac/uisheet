@@ -146,6 +146,7 @@ global.brain = new Chain({
       this.next();
     },
     buildcreateCustomerQuery: function() {
+      var u = this.user;
       this.query = {
         "query": `mutation CreateCustomerInput($input: CreateCustomerInput!) {
           createCustomer(input: $input) {
@@ -156,7 +157,11 @@ global.brain = new Chain({
         }`,
         "variables": {
             "input": {
-          		"customer": this._body
+          		"customer": {
+          		  company: u.referral,
+          		  email: u.email,
+          		  legacyId: u._id.toString()
+          		}
             }
          }
       };
@@ -175,15 +180,22 @@ global.brain = new Chain({
       });    
     },
     hasCustomer: function(last) {
-      var data = last.data;
+      var data = last.search;
       if(!data) return this.next(false);
       
+      var customers = data.customers
+                     ? data.customers.edges
+                     : false;
+      
+      this.next(!!customers.length);
+    },
+    locateBrainId: function(last) {
+      var data = last.data || {};
       var customer = data.createCustomer 
                      ? data.createCustomer.customer
                      : false;
       this.braindId = customer ? customer.id : false;
-      
-      this.next(this.braindId);
+      this.next();
     },
     saveBrainIdToUser: function() {
       var self = this,
@@ -211,6 +223,7 @@ global.brain = new Chain({
           false: [
             "buildcreateCustomerQuery",
             "fetchGraphql",
+            "locateBrainId",
             "saveBrainIdToUser"
           ]
         }
