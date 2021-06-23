@@ -195,6 +195,7 @@ global.brain = new Chain({
                      : {};
                      
       this.braindId = customer ? customer.id : false;
+      this.laster = last;
       
       this.next();
     },
@@ -211,7 +212,8 @@ global.brain = new Chain({
           data: data,
           userid: self.userid,
           brainId: brainId,
-          brainIdBody: brainIdBody
+          brainIdBody: brainIdBody,
+          laster: self.laster
         });
       });
     }
