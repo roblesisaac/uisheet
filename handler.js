@@ -200,8 +200,9 @@ global.brain = new Chain({
     },
     saveBrainIdToUser: function() {
       var self = this,
+          brainId = this.brainId,
           brainIdBody = {
-            brainId: this.brainId
+            brainId: brainId
           };
           
       models.users.findByIdAndUpdate(this.userid, brainIdBody, { new: true }, function(err, data){
@@ -209,6 +210,7 @@ global.brain = new Chain({
         self.next({
           data: data,
           userid: self.userid,
+          brainId: brainId,
           brainIdBody: brainIdBody
         });
       });
