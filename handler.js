@@ -222,8 +222,8 @@ global.brain = new Chain({
           false: [
             "buildcreateCustomerQuery",
             "fetchGraphql",
-            "locateBrainId",
-            "saveBrainIdToUser"
+            // "locateBrainId",
+            // "saveBrainIdToUser"
           ]
         }
       ],
