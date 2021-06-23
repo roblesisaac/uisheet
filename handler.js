@@ -196,8 +196,11 @@ global.brain = new Chain({
                      
       this.braindId = customer ? customer.id : false;
       this.laster = last;
+      var self = this;
       
-      this.next();
+      setTimeout(function(){
+        self.next();
+      }, 1000);
     },
     saveBrainIdToUser: function() {
       var self = this,
