@@ -100,6 +100,13 @@ global._brainQueryCustomer = new Chain({
       };
       this.next();
     },
+    defineBrainCustomer: function(last) {
+      var data = last.data || {};
+      var search = data.search || {};
+      var customers = search.customers || {};
+      var edges = customers.edges || [];
+      this.brainCustomer = edges[0];
+    },
     userHasBrainId: function() {
       this.next(!!this.user && !!this.user.brainId);
     }
@@ -110,7 +117,8 @@ global._brainQueryCustomer = new Chain({
       "buildBrainAuth",
       "buildBrainHeaders",
       "buildCustomerSearchQuery",
-      "fetchGraphql"
+      "fetchGraphql",
+      "defineBrainCustomer"
     ],
     false: "announceNoBrainCustomer"
   }
@@ -189,13 +197,8 @@ global.brain = new Chain({
         self.next(data);
       });    
     },
-    hasCustomer: function(last) {
-      var data = last.data || {};
-      var search = data.search || {};
-      var customers = search.customers || {};
-      var edges = customers.edges || [];
-      
-      this.next(!!edges.length);
+    hasCustomer: function() {
+      this.next(!!this.brainCustomer);
     },
     locateBrainId: function(last) {
       var customerData = last.data || {};
