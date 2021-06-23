@@ -189,18 +189,14 @@ global.brain = new Chain({
       this.next(!!customers.length);
     },
     locateBrainId: function(last) {
-      var data = last.data || {};
-      var customer = data.createCustomer 
-                     ? data.createCustomer.customer
-                     : {};
+      var customerData = last.data || {};
+      var created = customerData.createCustomer || {};
+      var customer = created.customer;
                      
-      this.braindId = customer ? customer.id : false;
+      this.braindId = customer.id,
       this.laster = last;
-      var self = this;
       
-      setTimeout(function(){
-        self.next();
-      }, 1000);
+      this.next();
     },
     saveBrainIdToUser: function() {
       var self = this,
