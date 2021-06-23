@@ -196,23 +196,21 @@ global.brain = new Chain({
                      
       this.braindId = customer ? customer.id : false;
       
-      this.next({
-        data: last,
-        customer: customer,
-        id: this.braindId
-      });
-      // this.next();
+      this.next();
     },
     saveBrainIdToUser: function() {
       var self = this,
-          user = this.user,
           brainIdBody = {
             brainId: this.brainId
           };
           
-      models.users.findByIdAndUpdate(user._id.toString(), brainIdBody, { new: true }, function(err, data){
+      models.users.findByIdAndUpdate(this.userid, brainIdBody, { new: true }, function(err, data){
         if(err) return self.error(err);
-        self.next(data);
+        self.next({
+          data: data,
+          userid: self.userid,
+          brainIdBody: brainIdBody
+        });
       });
     }
   },
@@ -230,7 +228,7 @@ global.brain = new Chain({
             "buildcreateCustomerQuery",
             "fetchGraphql",
             "locateBrainId",
-            // "saveBrainIdToUser"
+            "saveBrainIdToUser"
           ]
         }
       ],
