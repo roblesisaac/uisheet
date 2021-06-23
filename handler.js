@@ -250,7 +250,7 @@ global.brain = new Chain({
       var data = last.data || {};
       var created = data.createClientToken || {};
       var clientToken = created.createClientToken || null;
-      this.next(clientToken);
+      this.next(last.data);
     }
   },
   instruct: [
