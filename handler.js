@@ -85,6 +85,12 @@ global._brainQueryCustomer = new Chain({
         			edges {
                 node {
                   id
+                  email
+                  firstName
+                  lastName
+                  company
+                  phoneNumber
+                  customeFields
                 }
               }
             }
