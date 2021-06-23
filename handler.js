@@ -79,7 +79,8 @@ global._brainQueryCustomer = new Chain({
     buildQueryCustomerSearch: function() {
       var brainId = this.user.brainId;
       this.query = {
-        "query": `query Search($input: CustomerSearchInput!) {
+        query: `
+        query Search($input: CustomerSearchInput!) {
           search {
             customers(input: $input) {
         			edges {
@@ -94,11 +95,12 @@ global._brainQueryCustomer = new Chain({
               }
             }
           }
-        }`,
-        "variables": {
-          "input": {
-            "id": {
-              "is": brainId
+        }
+        `,
+        variables: {
+          input: {
+            id: {
+              is: brainId
             }
           }
          }
@@ -177,16 +179,18 @@ global.brain = new Chain({
     buildQueryCreateCustomer: function() {
       var u = this.user;
       this.query = {
-        "query": `mutation CreateCustomerInput($input: CreateCustomerInput!) {
+        query: 
+        `mutation CreateCustomerInput($input: CreateCustomerInput!) {
           createCustomer(input: $input) {
             customer {
               id
             }
           }
-        }`,
-        "variables": {
-            "input": {
-          		"customer": {
+        }
+        `,
+        variables: {
+            input: {
+          		customer: {
           		  email: u.email
           		}
             }
