@@ -175,19 +175,21 @@ global.brain = new Chain({
           }
         `,
         variables: {
-          paymentMethodId: b.nonce,
-          transaction: {
-            amount: b.amount,
-            customerId: customerId,
-            descriptor: { name: siteName.toUpperCase() },
-            riskData: { deviceData: b.deviceData },
-            vaultPaymentMethodAfterTransacting: {
-              when: "ON_SUCCESSFUL_TRANSACTION"
+          input: {
+            paymentMethodId: b.nonce,
+            transaction: {
+              amount: b.amount,
+              customerId: customerId,
+              descriptor: { name: siteName.toUpperCase() },
+              riskData: { deviceData: b.deviceData },
+              vaultPaymentMethodAfterTransacting: {
+                when: "ON_SUCCESSFUL_TRANSACTION"
+              }
             }
           }
         }
       };
-      this.next(this.query);
+      this.next();
     },
     buildQueryCreateCustomer: function() {
       var u = this.user;
@@ -280,7 +282,7 @@ global.brain = new Chain({
         false: "announceNoBrainCustomer",
         true: [
           "buildQueryChargePaymentMethod",
-          // "fetchGraphql"
+          "fetchGraphql"
         ]
       },
       createNewCustomer: [
