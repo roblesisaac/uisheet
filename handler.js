@@ -193,29 +193,19 @@ global.brain = new Chain({
       var created = customerData.createCustomer || {};
       var customer = created.customer;
                      
-      this.braindId = customer.id,
-      this.laster = last;
+      this.brainId = customer.id,
       
       this.next();
     },
     saveBrainIdToUser: function() {
       var self = this,
-          brainId = this.brainId,
-          xbrainId = this.laster.data.createCustomer.customer.id,
           brainIdBody = {
-            brainId: brainId
+            brainId: this.brainId
           };
           
       models.users.findByIdAndUpdate(this.userid, brainIdBody, { new: true }, function(err, data){
         if(err) return self.error(err);
-        self.next({
-          data: data,
-          userid: self.userid,
-          brainId: brainId,
-          brainIdBody: brainIdBody,
-          laster: self.laster,
-          xbrainId: xbrainId
-        });
+        self.next(data);
       });
     }
   },
