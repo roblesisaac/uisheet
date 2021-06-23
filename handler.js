@@ -68,6 +68,20 @@ global._brainQueryCustomer = new Chain({
         customer: "<(-_-)> Not having a braintree account, this user is."
       });
     },
+    buildBrainAuth: function() {
+      var keys = this.brainPublic+":"+this.brainPrivate;
+      this.brainAuth = "Basic " + Buffer.from(keys).toString("base64");
+      
+      this.next();
+    },
+    buildBrainHeaders: function() {
+      this.brainHeaders = {
+        "Content-Type": "application/json",
+        "Authorization": this.brainAuth,
+        "Braintree-Version": "2018-05-08"
+      };
+      this.next();
+    },
     buildCustomerSearchQuery: function() {
       var brainId = this.user.brainId;
       this.query = {
