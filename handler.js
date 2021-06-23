@@ -72,7 +72,7 @@ global._brainQueryCustomer = new Chain({
   steps: {
     announceNoBrainCustomer: function() {
       this.next({
-        message: false,
+        success: false,
         customer: "<(-_-)> Not having a braintree account, this user is."
       });
     },
@@ -248,7 +248,8 @@ global.brain = new Chain({
       var created = customerData.createCustomer || {};
       var customer = created.customer;
                      
-      this.brainId = customer.id,
+      this.brainId = customer.id;
+      this.user.brainId = this.brainId;
       
       this.next();
     },
@@ -275,7 +276,7 @@ global.brain = new Chain({
     "buildBrainHeaders",
     {
       switch: "toBrainMethod",
-      charge: {
+      authorize: {
         if: "userHasBrainId",
         false: "announceNoBrainCustomer",
         true: [
@@ -283,6 +284,20 @@ global.brain = new Chain({
           "fetchGraphql"
         ]
       },
+      charge: [
+        {
+          if: "userHasBrainId",
+          false: [
+            "announceNoBrainCustomer",
+            "buildQueryCreateCustomer",
+            "fetchGraphql",
+            "locateBrainId",
+            "saveBrainIdToUser"
+          ]
+        },
+        "buildQueryChargePaymentMethod",
+        "fetchGraphql"
+      ],
       createNewCustomer: [
         "_brainQueryCustomer",
         {
