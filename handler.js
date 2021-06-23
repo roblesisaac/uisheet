@@ -90,7 +90,6 @@ global._brainQueryCustomer = new Chain({
                   lastName
                   company
                   phoneNumber
-                  customeFields
                 }
               }
             }
