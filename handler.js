@@ -64,6 +64,7 @@ global._brainQueryCustomer = new Chain({
   steps: {
     announceNoBrainCustomer: function() {
       this.next({
+        message: false,
         customer: "<(-_-)> Not having a braintree account, this user is."
       });
     },
@@ -158,9 +159,7 @@ global.brain = new Chain({
         "variables": {
             "input": {
           		"customer": {
-          		  company: u.referral,
-          		  email: u.email,
-          		  legacyId: u._id.toString()
+          		  email: u.email
           		}
             }
          }
