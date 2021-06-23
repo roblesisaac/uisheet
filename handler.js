@@ -187,7 +187,7 @@ global.brain = new Chain({
           }
         }
       };
-      this.next();
+      this.next(this.query);
     },
     buildQueryCreateCustomer: function() {
       var u = this.user;
@@ -280,7 +280,7 @@ global.brain = new Chain({
         false: "announceNoBrainCustomer",
         true: [
           "buildQueryChargePaymentMethod",
-          "fetchGraphql"
+          // "fetchGraphql"
         ]
       },
       createNewCustomer: [
