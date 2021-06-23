@@ -106,7 +106,7 @@ global._brainQueryCustomer = new Chain({
       var customers = search.customers || {};
       var edges = customers.edges || [];
       this.brainCustomer = edges[0];
-      this.next();
+      this.next(this.brainCustomer);
     },
     userHasBrainId: function() {
       this.next(!!this.user && !!this.user.brainId);
