@@ -249,8 +249,8 @@ global.brain = new Chain({
     sendClientToken: function(last) {
       var data = last.data || {};
       var created = data.createClientToken || {};
-      var clientToken = created.createClientToken || null;
-      this.next(last.data);
+      var clientToken = created.clientToken || null;
+      this.next(clientToken);
     }
   },
   instruct: [
