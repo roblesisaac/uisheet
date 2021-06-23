@@ -159,9 +159,13 @@ global.brain = new Chain({
       this.next();
     },
     buildQueryChargePaymentMethod: function() {
+      var b = this._body,
+          siteName = this._siteName || "",
+          customerId = this.user.brainId;
+          
       this.query = {
         query: `
-          mutation ExampleCharge($input: ChargePaymentMethodInput!) {
+          mutation ChargeBrain($input: ChargePaymentMethodInput!) {
             chargePaymentMethod(input: $input) {
               transaction {
                 id
@@ -171,7 +175,20 @@ global.brain = new Chain({
           }
         `,
         variables: {
-          
+          paymentMethodId: b.nonce,
+          transaction: {
+            amount: b.amount,
+            customerId: customerId,
+            descriptor: {
+              name: siteName.toUpperCase()
+            },
+            riskData: {
+              deviceData: b.deviceData
+            },
+            vaultPaymentMethodAfterTransacting: {
+              when: "ON_SUCCESSFUL_TRANSACTION"
+            }
+          }
         }
       };
       this.next();
