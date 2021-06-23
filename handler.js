@@ -160,7 +160,6 @@ global.brain = new Chain({
     },
     buildQueryChargePaymentMethod: function() {
       var b = this._body,
-          siteName = this._siteName || "",
           customerId = this.user.brainId;
           
       this.query = {
@@ -180,7 +179,6 @@ global.brain = new Chain({
             transaction: {
               amount: b.amount,
               customerId: customerId,
-              descriptor: { name: siteName.toUpperCase() },
               riskData: { deviceData: b.deviceData },
               vaultPaymentMethodAfterTransacting: {
                 when: "ON_SUCCESSFUL_TRANSACTION"
