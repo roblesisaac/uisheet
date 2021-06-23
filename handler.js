@@ -69,6 +69,7 @@ global._brainQueryCustomer = new Chain({
       });
     },
     buildCustomerSearchQuery: function() {
+      var brainId = this.user.brainId;
       this.query = {
         "query": ` query Search($input: CustomerSearchInput!) {
           search {
@@ -83,7 +84,7 @@ global._brainQueryCustomer = new Chain({
         }`,
         "variables": {
           "input": {
-            "id": this.user.brainId
+            "id": brainId
           }
          }
       };
