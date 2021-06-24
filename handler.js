@@ -189,6 +189,26 @@ global.brain = new Chain({
       };
       this.next(); 
     },
+    buildQueryCaptureTransaction: function() {
+      this.query = {
+        query: `
+        mutation CaptureIt($input: CaptureTransactionInput!) {
+          captureTransaction(input: $input) {
+            transaction {
+              id
+              status
+            }
+          }
+        }
+        `,
+        variables: {
+          input: {
+            transactionId: this._body.authCode
+          }
+        }
+      };
+      this.next(); 
+    },
     buildQueryChargePaymentMethod: function() {
       var b = this._body,
           customerId = this.user.brainId;
@@ -315,6 +335,14 @@ global.brain = new Chain({
           "buildQueryAuthorizePaymentMethod",
           "fetchGraphql"
         ]
+      },
+      capture: {
+        if: "userHasBrainId",
+        false: "announceNoBrainCustomer",
+        true: [
+          "buildQueryCaptureTransaction",
+          "fetchGraphql"
+        ] 
       },
       charge: {
         if: "userHasBrainId",
