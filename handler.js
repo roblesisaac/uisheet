@@ -158,6 +158,37 @@ global.brain = new Chain({
       };
       this.next();
     },
+    buildQueryAuthorizePaymentMethod: function() {
+      var b = this._body,
+          customerId = this.user.brainId;
+          
+      this.query = {
+        query: `
+          mutation AuthorizeBrain($input: AuthorizePaymentMethodInput!) {
+            authorizePaymentMethod(input: $input) {
+              transaction {
+                id
+                status
+              }
+            }
+          }
+        `,
+        variables: {
+          input: {
+            paymentMethodId: b.nonce,
+            transaction: {
+              amount: b.amount,
+              customerId: customerId,
+              riskData: { deviceData: b.deviceData },
+              vaultPaymentMethodAfterTransacting: {
+                when: "ON_SUCCESSFUL_TRANSACTION"
+              }
+            }
+          }
+        }
+      };
+      this.next(); 
+    },
     buildQueryChargePaymentMethod: function() {
       var b = this._body,
           customerId = this.user.brainId;
@@ -248,8 +279,7 @@ global.brain = new Chain({
       var created = customerData.createCustomer || {};
       var customer = created.customer;
                      
-      this.brainId = customer.id;
-      this.user.brainId = this.brainId;
+      this.brainId = customer.id,
       
       this.next();
     },
@@ -258,6 +288,8 @@ global.brain = new Chain({
           brainIdBody = {
             brainId: this.brainId
           };
+          
+      this.user.brainId = this.brainId;
           
       models.users.findByIdAndUpdate(this.userid, brainIdBody, { new: true }, function(err, data){
         if(err) return self.error(err);
@@ -284,20 +316,14 @@ global.brain = new Chain({
           "fetchGraphql"
         ]
       },
-      charge: [
-        {
-          if: "userHasBrainId",
-          false: [
-            "announceNoBrainCustomer",
-            "buildQueryCreateCustomer",
-            "fetchGraphql",
-            "locateBrainId",
-            "saveBrainIdToUser"
-          ]
-        },
-        "buildQueryChargePaymentMethod",
-        "fetchGraphql"
-      ],
+      charge: {
+        if: "userHasBrainId",
+        false: "announceNoBrainCustomer",
+        true: [
+          "buildQueryChargePaymentMethod",
+          "fetchGraphql"
+        ]
+      },
       createNewCustomer: [
         "_brainQueryCustomer",
         {
