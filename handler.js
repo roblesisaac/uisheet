@@ -2,7 +2,7 @@
 
 try {
 const AWS = require("aws-sdk");
-const braintree = require("braintree");
+// const braintree = require("braintree");
 const s3 = new AWS.S3();
 const mime = require("mime");
 const Utils = require("./scripts/utils");
@@ -370,103 +370,103 @@ global.brain = new Chain({
     }
   ]
 });
-global.braintree = new Chain({
-  input: function() {
-    return {
-      brainMethod: this._arg1
-    };
-  },
-  steps: {
-    buildPaymentObj: function() {
-      var payload = this._body,
-          payment = {},
-          validProps = [
-            "amount",
-            "paymentMethodNonce",
-            "customer",
-            "billing",
-            "deviceData",
-            "shipping",
-            "options",
-            "customerId"
-          ],
-          replace = {
-            nonce: "paymentMethodNonce"
-          };
+// global.braintree = new Chain({
+//   input: function() {
+//     return {
+//       brainMethod: this._arg1
+//     };
+//   },
+//   steps: {
+//     buildPaymentObj: function() {
+//       var payload = this._body,
+//           payment = {},
+//           validProps = [
+//             "amount",
+//             "paymentMethodNonce",
+//             "customer",
+//             "billing",
+//             "deviceData",
+//             "shipping",
+//             "options",
+//             "customerId"
+//           ],
+//           replace = {
+//             nonce: "paymentMethodNonce"
+//           };
           
-      for(var prop in payload) {
-        if(validProps.includes(prop)) {
-          payment[prop] = payload[prop];
-        } else if(replace[prop]) {
-          payment[replace[prop]] = payload[prop];
-        }
-      }
+//       for(var prop in payload) {
+//         if(validProps.includes(prop)) {
+//           payment[prop] = payload[prop];
+//         } else if(replace[prop]) {
+//           payment[replace[prop]] = payload[prop];
+//         }
+//       }
       
-      this.payment = payment;
-      this.next();
-    },
-    chargeCard: function() {
-      var self = this;
-      this.gateway.transaction.sale(this.payment, function (err, result) {
-        if (result) {
-          self.next(result);
-        } else {
-          self.error(err);
-        }
-      });
-    },
-    clientToken: function() {
-      var self = this;
-      this.gateway.clientToken.generate(this._body, function (err, response) {
-        self.next({
-          token: response.clientToken
-        });
-      });  
-    },
-    fetchCustomer: function() {
-      var self = this;
-      this._body.customer = this._body.customer || {};
-      this.gateway.customer.find(this._body.customerId, function(err, customer) {
-        self.next(customer || {id: false});
-      });
-    },
-    initGateway: function() {
-      this.gateway = braintree.connect({
-        environment: braintree.Environment.Sandbox,
-        merchantId: process.env.BTMERCHANTID,
-        publicKey: process.env.BTPUBLIC,
-        privateKey: process.env.BTPRIVATE
-      });
-      this.next();
-    },
-    saveCustomer: function() {
-      var self = this,
-          customer = this._body.customer;
-      this.gateway.customer.create(customer, function (err, result) {
-        if(err) {
-          self.error(err);
-          return;
-        }
-        self.next(result);
-      });
-    },
-    toBrainMethod: function() {
-      this.next(this.brainMethod || "getClientToken");
-    }
-  },
-  instruct: [
-    "initGateway",
-    {
-      switch: "toBrainMethod",
-      getCustomer: "fetchCustomer",
-      getClientToken: "clientToken",
-      charge: [
-        "buildPaymentObj",
-        "chargeCard"  
-      ]
-    }
-  ]
-});
+//       this.payment = payment;
+//       this.next();
+//     },
+//     chargeCard: function() {
+//       var self = this;
+//       this.gateway.transaction.sale(this.payment, function (err, result) {
+//         if (result) {
+//           self.next(result);
+//         } else {
+//           self.error(err);
+//         }
+//       });
+//     },
+//     clientToken: function() {
+//       var self = this;
+//       this.gateway.clientToken.generate(this._body, function (err, response) {
+//         self.next({
+//           token: response.clientToken
+//         });
+//       });  
+//     },
+//     fetchCustomer: function() {
+//       var self = this;
+//       this._body.customer = this._body.customer || {};
+//       this.gateway.customer.find(this._body.customerId, function(err, customer) {
+//         self.next(customer || {id: false});
+//       });
+//     },
+//     initGateway: function() {
+//       this.gateway = braintree.connect({
+//         environment: braintree.Environment.Sandbox,
+//         merchantId: process.env.BTMERCHANTID,
+//         publicKey: process.env.BTPUBLIC,
+//         privateKey: process.env.BTPRIVATE
+//       });
+//       this.next();
+//     },
+//     saveCustomer: function() {
+//       var self = this,
+//           customer = this._body.customer;
+//       this.gateway.customer.create(customer, function (err, result) {
+//         if(err) {
+//           self.error(err);
+//           return;
+//         }
+//         self.next(result);
+//       });
+//     },
+//     toBrainMethod: function() {
+//       this.next(this.brainMethod || "getClientToken");
+//     }
+//   },
+//   instruct: [
+//     "initGateway",
+//     {
+//       switch: "toBrainMethod",
+//       getCustomer: "fetchCustomer",
+//       getClientToken: "clientToken",
+//       charge: [
+//         "buildPaymentObj",
+//         "chargeCard"  
+//       ]
+//     }
+//   ]
+// });
 global._buildModel = new Chain({
   input: function() {
     return {
