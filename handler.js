@@ -312,7 +312,7 @@ global.brain = new Chain({
         if: "userHasBrainId",
         false: "announceNoBrainCustomer",
         true: [
-          "buildQueryChargePaymentMethod",
+          "buildQueryAuthorizePaymentMethod",
           "fetchGraphql"
         ]
       },
