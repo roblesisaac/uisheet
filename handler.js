@@ -359,8 +359,9 @@ global.brain = new Chain({
       var search = data.search || {};
       var transactions = search.transactions || {};
       var edges = transactions.edges || [];
-      var transaction = edges[0];
-      this.next(transaction);
+      var transaction = edges[0] || {};
+      var response = transaction.node || ("<(-_-)> Not found, "+this._body.authCode+" transaction is...");
+      this.next(response);
     },
     toBrainMethod: function() {
       this.next(this.brainMethod || "getClientToken");
