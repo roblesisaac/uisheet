@@ -278,6 +278,38 @@ global.brain = new Chain({
       };
       this.next();
     },
+    buildQueryTransaction: function() {
+      this.query = {
+        query: `
+          query Search($input: TransactionSearchInput!) {
+            search {
+              transactions(input: $input) {
+                edges {
+                  node {
+                    id
+                    orderId
+                    status
+                    customer {
+                      id
+                    }
+                    amount {
+                      value
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+        variables: {
+          "input": {
+        		"id": {
+              "is": this._body.authCode
+            }
+          }
+        }
+      };
+    },
     fetchGraphql: function() {
       var body = {
         method: "POST",
@@ -320,6 +352,14 @@ global.brain = new Chain({
       var created = data.createClientToken || {};
       var clientToken = created.clientToken || null;
       this.next(clientToken);
+    },
+    sendTransaction: function(last) {
+      var data = last.data || {};
+      var search = data.search || {};
+      var transactions = search.transactions || {};
+      var edges = transactions.edges || [];
+      var transaction = edges[0];
+      this.next(transaction);
     },
     toBrainMethod: function() {
       this.next(this.brainMethod || "getClientToken");
@@ -366,6 +406,11 @@ global.brain = new Chain({
             "saveBrainIdToUser"
           ]
         }
+      ],
+      transaction: [
+        "buildQueryTransaction",
+        "fetchGraphql",
+        "sendTransaction"
       ],
       queryCustomer: "_brainQueryCustomer",
       token: ["buildQueryGetClientToken", "fetchGraphql", "sendClientToken"]
