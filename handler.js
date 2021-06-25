@@ -309,6 +309,7 @@ global.brain = new Chain({
           }
         }
       };
+      this.next();
     },
     fetchGraphql: function() {
       var body = {
