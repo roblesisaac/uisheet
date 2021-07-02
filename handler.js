@@ -436,12 +436,12 @@ global.brain = new Chain({
       ],
       refund: [
         "buildQueryRefund",
-        "fetchGraphql",
-        "sendTransaction"
+        "fetchGraphql"
       ],
       transaction: [
         "buildQueryTransaction",
-        "fetchGraphql"
+        "fetchGraphql",
+        "sendTransaction"
       ],
       queryCustomer: "_brainQueryCustomer",
       token: ["buildQueryGetClientToken", "fetchGraphql", "sendClientToken"]
