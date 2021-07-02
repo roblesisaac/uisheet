@@ -278,6 +278,31 @@ global.brain = new Chain({
       };
       this.next();
     },
+    buildQueryRefund: function() {
+      this.query = {
+        query: `
+          mutation Refund($input: RefundTransactionInput!) {
+            refundTransaction(input: $input) {
+            	refund {
+                amount {
+                  value
+                }
+                status
+              }
+            }
+          }
+        `,
+        variables: {
+          "input": {
+        		"transactionId": this._body.authCode,
+            "refund": {
+              "amount": this._body.amount
+            }
+          }
+        }
+      };
+      this.next();      
+    },
     buildQueryTransaction: function() {
       this.query = {
         query: `
@@ -408,6 +433,11 @@ global.brain = new Chain({
             "saveBrainIdToUser"
           ]
         }
+      ],
+      refund: [
+        "buildQueryRefund",
+        "fetchGraphql",
+        "sendTransaction"
       ],
       transaction: [
         "buildQueryTransaction",
