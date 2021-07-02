@@ -314,6 +314,12 @@ global.brain = new Chain({
                     id
                     orderId
                     status
+                    refunds {
+                      id
+                      amount {
+                        value
+                      }
+                    }
                     customer {
                       id
                     }
