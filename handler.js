@@ -381,6 +381,29 @@ global.brain = new Chain({
       };
       this.next();
     },
+    buildQueryUpdateAmount: function() {
+      this.query = {
+        query: `
+        mutation Search($input: UpdateTransactionAmountInput!) {
+        	updateTransactionAmount(input:$input) {
+            transaction{
+              id
+              amount {
+                value
+              }
+            }
+          }
+        }
+        `,
+        variables: {
+          input: {
+						"amount": this._body.amount,
+          	"transactionId": this._body.authCode
+          }
+        }
+      };
+      this.next(); 
+    },
     fetchGraphql: function() {
       var body = {
         method: "POST",
