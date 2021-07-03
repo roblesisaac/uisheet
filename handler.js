@@ -354,6 +354,7 @@ global.brain = new Chain({
                     status
                     refunds {
                       id
+                      status
                       amount {
                         value
                       }
