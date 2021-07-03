@@ -278,6 +278,25 @@ global.brain = new Chain({
       };
       this.next();
     },
+    buildQueryCancel: function() {
+      this.query = {
+        query: `
+          mutation Reverse($input: ReverseTransactionInput!) {
+            reverseTransaction(input: $input) {
+      				reversal {
+                __typename
+              }
+            }
+          }
+        `,
+        variables: {
+          "input": {
+        		"transactionId": this._body.authCode
+          }
+        }
+      };
+      this.next();      
+    },
     buildQueryRefund: function() {
       this.query = {
         query: `
@@ -411,6 +430,10 @@ global.brain = new Chain({
           "fetchGraphql"
         ]
       },
+      cancel: [
+        "buildQueryCancel",
+        "fetchGraphql"
+      ],
       capture: {
         if: "userHasBrainId",
         false: "announceNoBrainCustomer",
