@@ -297,6 +297,25 @@ global.brain = new Chain({
       };
       this.next();      
     },
+    buildQueryReverseRefund: function() {
+      this.query = {
+        query: `
+        mutation ReverseRefund($input: ReverseRefundInput!) {
+          reverseRefund(input: $input) {
+    				refund {
+              id
+            }
+          }
+        }
+        `,
+        variables: {
+          "input": {
+            "refundId": this._body.refundId
+          }
+        }
+      };
+      this.next();    
+    },
     buildQueryRefund: function() {
       this.query = {
         query: `
@@ -465,6 +484,10 @@ global.brain = new Chain({
       ],
       refund: [
         "buildQueryRefund",
+        "fetchGraphql"
+      ],
+      reverseRefund:  [
+        "buildQueryReverseRefund",
         "fetchGraphql"
       ],
       transaction: [
