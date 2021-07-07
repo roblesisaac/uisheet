@@ -2651,6 +2651,29 @@ global.verify = new Chain({
     ]
   }
 });
+global.usps = new Chain({
+  steps: {
+    talkToUsps: function() {
+      var endpoint = this._query.path;
+      var url = `https://secure.shippingapis.com/ShippingAPI.dll?API=CarrierPickupAvailability&XML=<CarrierPickupAvailabilityRequest USERID="312UISHE1657"><FirmName>ABC Corp.</FirmName><SuiteOrApt>Suite 777</SuiteOrApt><Address2>1390 Market Street</Address2><Urbanization></Urbanization><City>Houston</City><State>TX</State><ZIP5>77058</ZIP5><ZIP4>1234</ZIP4>/CarrierPickupAvailabilityRequest>`;
+      var body = {
+        method: "POST",
+        headers: {
+          type: "application/xml"
+        },
+        body: body
+      };
+      
+      var self = this;
+      nodeFetch(url, {}).then(res=>res.json()).then(function(data) {
+        self.next(data);
+      });
+    }
+  },
+  instruct: [
+    "talkToUsps"
+  ]
+});
 global.port = new Chain({
   input: function() {
     return {
