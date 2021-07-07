@@ -468,30 +468,18 @@ global.brain = new Chain({
       authorize: {
         if: "userHasBrainId",
         false: "announceNoBrainCustomer",
-        true: [
-          "buildQueryAuthorizePaymentMethod",
-          "fetchGraphql"
-        ]
+        true: [ "buildQueryAuthorizePaymentMethod", "fetchGraphql" ]
       },
-      cancel: [
-        "buildQueryCancel",
-        "fetchGraphql"
-      ],
+      cancel: [ "buildQueryCancel", "fetchGraphql" ],
       capture: {
         if: "userHasBrainId",
         false: "announceNoBrainCustomer",
-        true: [
-          "buildQueryCaptureTransaction",
-          "fetchGraphql"
-        ] 
+        true: [ "buildQueryCaptureTransaction", "fetchGraphql" ] 
       },
       charge: {
         if: "userHasBrainId",
         false: "announceNoBrainCustomer",
-        true: [
-          "buildQueryChargePaymentMethod",
-          "fetchGraphql"
-        ]
+        true: [ "buildQueryChargePaymentMethod", "fetchGraphql" ]
       },
       createNewCustomer: [
         "_brainQueryCustomer",
@@ -506,21 +494,16 @@ global.brain = new Chain({
           ]
         }
       ],
-      refund: [
-        "buildQueryRefund",
-        "fetchGraphql"
-      ],
-      reverseRefund:  [
-        "buildQueryReverseRefund",
-        "fetchGraphql"
-      ],
+      refund: [ "buildQueryRefund", "fetchGraphql" ],
+      reverseRefund:  [ "buildQueryReverseRefund", "fetchGraphql" ],
       transaction: [
         "buildQueryTransaction",
         "fetchGraphql",
         "sendTransaction"
       ],
       queryCustomer: "_brainQueryCustomer",
-      token: ["buildQueryGetClientToken", "fetchGraphql", "sendClientToken"]
+      token: [ "buildQueryGetClientToken", "fetchGraphql", "sendClientToken" ],
+      update: [ "buildQueryUpdateAmount", "fetchGraphql" ]
     }
   ]
 });
