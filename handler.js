@@ -2654,14 +2654,21 @@ global.verify = new Chain({
 global.usps = new Chain({
   steps: {
     talkToUsps: function() {
-      var endpoint = this._query.path;
-      var url = `http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=<AddressValidateRequest USERID="312UISHE1657"><Address ID="0"><Address1></Address1><Address2>6406 Ivy Lane</Address2><City>Greenbelt</City><State>MD</State><Zip5></Zip5><Zip4></Zip4></Address></AddressValidateRequest>`;
+      var endpoint = 'http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=';  
+      var xml = `<AddressValidateRequest USERID="312UISHE1657"><Address ID="0"><Address1></Address1>
       
+      <Address2>6406 Ivy Lane</Address2><City>Greenbelt</City><State>MD</State>
+      
+      <Zip5></Zip5><Zip4></Zip4></Address></AddressValidateRequest>`;
+      
+      var url = endpoint+xml.replace(/(\r\n|\n|\r)/gm, "").replaceAll('&', '&amp;');
       var self = this;
-      self.next(url);
-      // nodeFetch(url).then(res=>res.json()).then(function(data) {
-      //   self.next(data);
-      // });
+      
+      fetch(url, {
+             method: 'get',
+         }).then(response => 
+             response.text()
+         ).then(t => self.next(t));
     }
   },
   instruct: [
