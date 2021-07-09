@@ -2664,7 +2664,7 @@ global.usps = new Chain({
       var url = endpoint+xml.replace(/(\r\n|\n|\r)/gm, "").replaceAll('&', '&amp;');
       var self = this;
       
-      fetch(url, {
+      nodeFetch(url, {
              method: 'get',
          }).then(response => 
              response.text()
