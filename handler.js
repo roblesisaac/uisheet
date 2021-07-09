@@ -2548,7 +2548,7 @@ global.sib = new Chain({
 });
 global.smartsheet = new Chain({
   input: {
-    ssKey: process.env.usp.SSKEY
+    ssKey: process.env.SSKEY
   },
   steps: {
     setupSmartSheet: function() {
@@ -2582,6 +2582,31 @@ global.smartsheet = new Chain({
     "setupSmartSheet",
     "renderSmartSheetData"  
   ]
+});
+global.usps = new Chain({
+  input: function() {
+    return {
+      uspsMethod: this._arg1
+    };
+  },
+  steps: {
+    buildValidateUrl: function() {
+      var endpoint = "http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=";  
+      var xml = `<AddressValidateRequest USERID="312UISHE1657">${this._body.xml}</AddressValidateRequest>`;
+      this.url = endpoint+xml.replace(/(\r\n|\n|\r)/gm, "").replaceAll("&", "&amp;");
+      this.next();
+    },
+    fetchUsps: function() {
+      nodeFetch(this.url, { method: "get" }).then(res => res.text()).then(t => this.next(t));
+    },
+    toUspsMethod: function() {
+      this.next(this.uspsMethod);
+    }
+  },
+  instruct: {
+    switch: "toUspsMethod",
+    validate: ["buildValidateUrl", "fetchUsps"]
+  }
 });
 global.verify = new Chain({
   input: function() {
