@@ -2548,7 +2548,7 @@ global.sib = new Chain({
 });
 global.smartsheet = new Chain({
   input: {
-    ssKey: process.env.SSKEY
+    ssKey: process.env.usp.SSKEY
   },
   steps: {
     setupSmartSheet: function() {
@@ -2586,14 +2586,23 @@ global.smartsheet = new Chain({
 global.usps = new Chain({
   input: function() {
     return {
+      endpoint: "http://production.shippingapis.com/ShippingAPI.dll?",
       uspsMethod: this._arg1
     };
   },
   steps: {
-    buildValidateUrl: function() {
-      var endpoint = "http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=";  
-      var xml = `<AddressValidateRequest USERID="312UISHE1657">${this._body.xml}</AddressValidateRequest>`;
-      this.url = endpoint+xml.replace(/(\r\n|\n|\r)/gm, "").replaceAll("&", "&amp;");
+    buildEstimatePath: function() {
+      this.path = "/ShippingAPI.dll?";
+      this.xml = `<RateV4Request USERID="${process.env.USPSID}"><Revision>2</Revision><Package ID="0"><Service>PRIORITY</Service><ZipOrigination>22201</ZipOrigination><ZipDestination>26301</ZipDestination><Pounds>8</Pounds><Ounces>2</Ounces><Container></Container><Width></Width><Length></Length><Height></Height><Girth></Girth><Machinable>TRUE</Machinable></Package></RateV4Request>`;
+      this.next();
+    },
+    buildValidatePath: function() {
+      this.path = this.endpoint+"API=Verify&XML=";  
+      this.xml = `<AddressValidateRequest USERID="${process.env.USPSID}">${this._body.xml}</AddressValidateRequest>`;
+      this.next();
+    },
+    buildUrl: function() {
+      this.url = this.endpoint+this.path+this.xml.replace(/(\r\n|\n|\r)/gm, "").replaceAll("&", "&amp;");
       this.next();
     },
     fetchUsps: function() {
@@ -2605,7 +2614,8 @@ global.usps = new Chain({
   },
   instruct: {
     switch: "toUspsMethod",
-    validate: ["buildValidateUrl", "fetchUsps"]
+    estimate: ["buildEstimatePath", "buildUrl", "fetchUsps"],
+    validate: ["buildValidatePath", "buildUrl", "fetchUsps"]
   }
 });
 global.verify = new Chain({
