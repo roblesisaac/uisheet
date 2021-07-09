@@ -2583,6 +2583,31 @@ global.smartsheet = new Chain({
     "renderSmartSheetData"  
   ]
 });
+global.usps = new Chain({
+  input: function() {
+    return {
+      uspsMethod: this._arg1
+    };
+  },
+  steps: {
+    buildValidateUrl: function() {
+      var endpoint = "http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=";  
+      var xml = `<AddressValidateRequest USERID="312UISHE1657">${this._body.xml}</AddressValidateRequest>`;
+      this.url = endpoint+xml.replace(/(\r\n|\n|\r)/gm, "").replaceAll("&", "&amp;");
+      this.next();
+    },
+    fetchUsps: function() {
+      nodeFetch(this.url, { method: "get" }).then(res => res.text()).then(t => this.next(t));
+    },
+    toUspsMethod: function() {
+      this.next(this.uspsMethod);
+    }
+  },
+  instruct: {
+    switch: "toUspsMethod",
+    validate: ["buildValidateUrl", "fetchUsps"]
+  }
+});
 global.verify = new Chain({
   input: function() {
     return {
@@ -2650,28 +2675,6 @@ global.verify = new Chain({
       }
     ]
   }
-});
-global.usps = new Chain({
-  steps: {
-    talkToUsps: function() {
-      var endpoint = "http://production.shippingapis.com/ShippingAPI.dll?API=Verify&XML=";  
-      var xml = `<AddressValidateRequest USERID="312UISHE1657">
-                  ${this._body.xml}
-                </AddressValidateRequest>`;
-      
-      var url = endpoint+xml.replace(/(\r\n|\n|\r)/gm, "").replaceAll("&", "&amp;");
-      var self = this;
-      
-      nodeFetch(url, {
-             method: "get",
-         }).then(response => 
-             response.text()
-         ).then(t => self.next(t));
-    }
-  },
-  instruct: [
-    "talkToUsps"
-  ]
 });
 global.port = new Chain({
   input: function() {
