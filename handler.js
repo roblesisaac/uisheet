@@ -2583,41 +2583,6 @@ global.smartsheet = new Chain({
     "renderSmartSheetData"  
   ]
 });
-global.usps = new Chain({
-  input: function() {
-    return {
-      endpoint: "http://production.shippingapis.com/ShippingAPI.dll?",
-      uspsMethod: this._arg1
-    };
-  },
-  steps: {
-    buildEstimatePath: function() {
-      this.path = "/ShippingAPI.dll?";
-      this.xml = `<RateV4Request USERID="${process.env.USPSID}"><Revision>2</Revision><Package ID="0"><Service>PRIORITY</Service><ZipOrigination>22201</ZipOrigination><ZipDestination>26301</ZipDestination><Pounds>8</Pounds><Ounces>2</Ounces><Container></Container><Width></Width><Length></Length><Height></Height><Girth></Girth><Machinable>TRUE</Machinable></Package></RateV4Request>`;
-      this.next();
-    },
-    buildValidatePath: function() {
-      this.path = this.endpoint+"API=Verify&XML=";  
-      this.xml = `<AddressValidateRequest USERID="${process.env.USPSID}">${this._body.xml}</AddressValidateRequest>`;
-      this.next();
-    },
-    buildUrl: function() {
-      this.url = this.endpoint+this.path+this.xml.replace(/(\r\n|\n|\r)/gm, "").replaceAll("&", "&amp;");
-      this.next();
-    },
-    fetchUsps: function() {
-      nodeFetch(this.url, { method: "get" }).then(res => res.text()).then(t => this.next(t));
-    },
-    toUspsMethod: function() {
-      this.next(this.uspsMethod);
-    }
-  },
-  instruct: {
-    switch: "toUspsMethod",
-    estimate: ["buildEstimatePath", "buildUrl", "fetchUsps"],
-    validate: ["buildValidatePath", "buildUrl", "fetchUsps"]
-  }
-});
 global.verify = new Chain({
   input: function() {
     return {
