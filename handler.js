@@ -384,7 +384,7 @@ global.brain = new Chain({
     buildQueryUpdateAmount: function() {
       this.query = {
         query: `
-        mutation Search($input: UpdateTransactionAmountInput!) {
+        mutation updateTotal($input: UpdateTransactionAmountInput!) {
         	updateTransactionAmount(input:$input) {
             transaction{
               id
