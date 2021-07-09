@@ -65,6 +65,7 @@ provider:
     BTPRIVATE: ${file(./variables.json):BT.PRIVATE}
     BTTOKEN: ${file(./variables.json):BT.TOKEN}
     BUCKET: ${self:custom.bucket}
+    USPSID: ${file(./variables.json):USPSID}
 
 package:
   individually: true
