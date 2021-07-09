@@ -2594,20 +2594,33 @@ global.usps = new Chain({
     buildEstimatePath: function() {
       this.path = "/ShippingAPI.dll?";
       this.xml = `<RateV4Request USERID="${process.env.USPSID}">
-                    <Revision>2</Revision>
-                    <Package ID="0">
-                      <Service>PRIORITY</Service>
-                      <ZipOrigination>22201</ZipOrigination>
-                      <ZipDestination>26301</ZipDestination>
-                      <Pounds>8</Pounds>
-                      <Ounces>2</Ounces>
-                      <Container></Container>
-                      <Width></Width>
-                      <Length></Length>
-                      <Height></Height>
-                      <Girth></Girth>
-                      <Machinable>TRUE</Machinable>
-                    </Package>
+<Revision>2</Revision>
+
+<Package ID="0">
+
+<Service>PRIORITY</Service>
+
+<ZipOrigination>22201</ZipOrigination>
+
+<ZipDestination>26301</ZipDestination>
+
+<Pounds>8</Pounds>
+
+<Ounces>2</Ounces>
+
+<Container></Container>
+
+<Width></Width>
+
+<Length></Length>
+
+<Height></Height>
+
+<Girth></Girth>
+
+<Machinable>TRUE</Machinable>
+
+</Package>
                   </RateV4Request>`;
       this.next();
     },
