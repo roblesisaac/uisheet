@@ -2598,7 +2598,7 @@ global.usps = new Chain({
     },
     buildValidatePath: function() {
       this.path = "API=Verify&XML=";  
-      this.xml = `<AddressValidateRequest USERID="312UISHE1657">${this._body.xml}</AddressValidateRequest>`;
+      this.xml = `<AddressValidateRequest USERID="${process.env.USPSID}">${this._body.xml}</AddressValidateRequest>`;
       this.next();
     },
     buildUrl: function() {
