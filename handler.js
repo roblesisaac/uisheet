@@ -2592,7 +2592,7 @@ global.usps = new Chain({
   },
   steps: {
     buildEstimatePath: function() {
-      this.path = "API=RateV4";
+      this.path = "API=RateV4&XML=";
       this.xml = `<RateV4Request USERID="${process.env.USPSID}">
 <Revision>2</Revision>
 
@@ -2645,7 +2645,7 @@ global.usps = new Chain({
   },
   instruct: {
     switch: "toUspsMethod",
-    estimate: ["buildEstimatePath", "buildUrl", "logUrl"],
+    estimate: ["buildEstimatePath", "buildUrl", "fetchUsps"],
     validate: ["buildValidatePath", "buildUrl", "fetchUsps"]
   }
 });
