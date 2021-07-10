@@ -2638,11 +2638,14 @@ global.usps = new Chain({
     },
     toUspsMethod: function() {
       this.next(this.uspsMethod);
+    },
+    logUrl: function() {
+      this.next(this.url);
     }
   },
   instruct: {
     switch: "toUspsMethod",
-    estimate: ["buildEstimatePath", "buildUrl", "fetchUsps"],
+    estimate: ["buildEstimatePath", "buildUrl", "logUrl"],
     validate: ["buildValidatePath", "buildUrl", "fetchUsps"]
   }
 });
