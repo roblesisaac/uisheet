@@ -1867,9 +1867,9 @@ global.login = new Chain({
         self.next(user);
       });
     },
-    passwordAuthenticates: function(user) {
+    passwordAuthenticates: function() {
       var self = this;
-			user.comparePassword(this._body.password, function(err, isMatch) {
+			this.user.comparePassword(this._body.password, function(err, isMatch) {
 			 err ? self.error(err) : self.next(!!isMatch && isMatch === true);
 			});  
     },
@@ -2610,9 +2610,6 @@ global.usps = new Chain({
     },
     toUspsMethod: function() {
       this.next(this.uspsMethod);
-    },
-    logUrl: function() {
-      this.next(this.url);
     }
   },
   instruct: {
