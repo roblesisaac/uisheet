@@ -66,6 +66,7 @@ provider:
     BTTOKEN: ${file(./variables.json):BT.TOKEN}
     BUCKET: ${self:custom.bucket}
     USPSID: ${file(./variables.json):USPSID}
+    EASYPOSTKEY: ${file(./variables.json):EASYPOSTKEY}
 
 package:
   individually: true
