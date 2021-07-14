@@ -2627,11 +2627,12 @@ global.po = new Chain({
   },
   steps: {
     buildAddress: function() {
-      var toAddress = new this.api.Address(this._body);
-      var self = this;
-      toAddress.save().then(function(addr){
-        self.next(addr); 
-      });
+      var address = new this.api.Address(this._body);
+      address.save().then( addr => this.next(addr) );
+    },
+    buildParcel: function() {
+      var parcel = new this.api.Parcel(this._body);
+      parcel.save().then( parce => this.next(parce) );
     },
     buildShipment: function(addr) {
       this.next(addr);
@@ -2647,7 +2648,10 @@ global.po = new Chain({
   instruct: [ "initPoApi", {
     switch: "toPoMethod",
     address: "buildAddress",
-    estimate: ["buildAddress", "buildShipment"]
+    parcel: "buildParcel",
+    estimate: [
+      "buildShipment"
+    ]
   }]
 });
 global.verify = new Chain({
