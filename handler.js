@@ -43,6 +43,7 @@ const loop = function(arr) {
 };
 const render = require("./render");
 const ssClient = require("smartsheet");
+const EasyPost = require("@easypost/api");
 
 global.auth = new Chain({
   steps: {
