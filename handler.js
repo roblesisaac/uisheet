@@ -2619,6 +2619,37 @@ global.usps = new Chain({
     validate: ["buildValidatePath", "buildUrl", "fetchUsps"]
   }
 });
+global.po = new Chain({
+  input: function() {
+    return {
+      poMethod: this._arg1
+    };
+  },
+  steps: {
+    buildAddress: function() {
+      var toAddress = new this.api.Address(this._body);
+      var self = this;
+      toAddress.save().then(function(addr){
+        self.next(addr); 
+      });
+    },
+    buildShipment: function(addr) {
+      this.next(addr);
+    },
+    initPoApi: function() {
+      this.api = new EasyPost(process.env.EASYPOSTKEY);
+      this.next();
+    },
+    toPoMethod: function() {
+      this.next(this.poMethod);
+    }
+  },
+  instruct: [ "initPoApi", {
+    switch: "toPoMethod",
+    address: "buildAddress",
+    estimate: ["buildAddress", "buildShipment"]
+  }]
+});
 global.verify = new Chain({
   input: function() {
     return {
