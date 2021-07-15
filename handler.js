@@ -2635,16 +2635,20 @@ global.po = new Chain({
       parcel.save().then( parce => this.next(parce) );
     },
     buildShipment: function(addr) {
-        // const toAddress = new this.api.Address(this._body.toAddress);
-        // const fromAddress = new this.api.Address({ ... });
-        // const parcel = new api.Parcel({ ... });
-        // const customsInfo = new api.CustomsInfo({ ... });
+      const b = this._body;
+      const toAddress = new this.api.Address(b.to);
+      const fromAddress = new this.api.Address(b.from);
+      const parcel = new this.api.Parcel(b.parcel);
+      
+      const shipment = new this.api.Shipment({
+        to_address: toAddress,
+        from_address: fromAddress,
+        parcel: parcel
+      });
         
-        const shipment = new this.api.Shipment(this._body);
-        
-        shipment.save().then( r => {
-          this.next(r);
-        });
+      shipment.save().then( r => {
+        this.next(r);
+      });
     },
     initPoApi: function() {
       this.api = new EasyPost(process.env.EASYPOSTKEY);
