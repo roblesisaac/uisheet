@@ -2688,9 +2688,9 @@ global.po = new Chain({
     parcel: "buildParcel",
     estimate: [
       "buildAddress",
-      "buildAddress",
-      "buildParcel",
-      "buildShipment"
+      // "buildAddress",
+      // "buildParcel",
+      // "buildShipment"
     ]
   }]
 });
