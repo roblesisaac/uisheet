@@ -2647,7 +2647,12 @@ global.po = new Chain({
       });
         
       shipment.save().then( r => {
-        this.next(r);
+        this.next({
+          createdShipment: r,
+          toAddress: toAddress,
+          fromAddress: fromAddress,
+          parcel: parcel
+        });
       });
     },
     initPoApi: function() {
