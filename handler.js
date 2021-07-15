@@ -2649,30 +2649,25 @@ global.po = new Chain({
       // const toAddress = new this.api.Address(b.to);
       // const fromAddress = new this.api.Address(b.from);
       // const parcel = new this.api.Parcel(b.parcel);
+      
       const toAddress = b.to_address;
       const fromAddress = b.from_address;
       const parcel = b.parcel;
       
-      this.next({
-        toAddress: toAddress,
-        fromAddress: fromAddress,
+      const shipment = new this.api.Shipment({
+        to_address: toAddress,
+        from_address: fromAddress,
         parcel: parcel
       });
-      
-      // const shipment = new this.api.Shipment({
-      //   to_address: toAddress,
-      //   from_address: fromAddress,
-      //   parcel: parcel
-      // });
         
-      // shipment.save().then( r => {
-      //   this.next({
-      //     createdShipment: r,
-      //     toAddress: toAddress,
-      //     fromAddress: fromAddress,
-      //     parcel: parcel
-      //   });
-      // });
+      shipment.save().then( r => {
+        this.next({
+          createdShipment: r,
+          toAddress: toAddress,
+          fromAddress: fromAddress,
+          parcel: parcel
+        });
+      });
     },
     initPoApi: function() {
       this.api = new EasyPost(process.env.EASYPOSTKEY);
@@ -2688,9 +2683,9 @@ global.po = new Chain({
     parcel: "buildParcel",
     estimate: [
       "buildAddress",
-      // "buildAddress",
-      // "buildParcel",
-      // "buildShipment"
+      "buildAddress",
+      "buildParcel",
+      "buildShipment"
     ]
   }]
 });
