@@ -2653,20 +2653,26 @@ global.po = new Chain({
       const fromAddress = b.from_address;
       const parcel = b.parcel;
       
-      const shipment = new this.api.Shipment({
-        to_address: toAddress,
-        from_address: fromAddress,
+      this.next({
+        toAddress: toAddress,
+        fromAddress: fromAddress,
         parcel: parcel
       });
+      
+      // const shipment = new this.api.Shipment({
+      //   to_address: toAddress,
+      //   from_address: fromAddress,
+      //   parcel: parcel
+      // });
         
-      shipment.save().then( r => {
-        this.next({
-          createdShipment: r,
-          toAddress: toAddress,
-          fromAddress: fromAddress,
-          parcel: parcel
-        });
-      });
+      // shipment.save().then( r => {
+      //   this.next({
+      //     createdShipment: r,
+      //     toAddress: toAddress,
+      //     fromAddress: fromAddress,
+      //     parcel: parcel
+      //   });
+      // });
     },
     initPoApi: function() {
       this.api = new EasyPost(process.env.EASYPOSTKEY);
