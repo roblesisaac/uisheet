@@ -2646,13 +2646,9 @@ global.po = new Chain({
     },
     buildShipment: function(addr) {
       const b = this._body;
-      const toAddress = new this.api.Address(b.to);
-      const fromAddress = new this.api.Address(b.from);
-      const parcel = new this.api.Parcel(b.parcel);
-      
-      // const toAddress = b.to_address;
-      // const fromAddress = b.from_address;
-      // const parcel = b.parcel;
+      const toAddress = b.to_address;
+      const fromAddress = b.from_address;
+      const parcel = b.parcel;
       
       const shipment = new this.api.Shipment({
         to_address: toAddress,
@@ -2662,7 +2658,7 @@ global.po = new Chain({
         
       shipment.save().then( r => {
         this.next({
-          createdShipment: r,
+          shipment: r,
           toAddress: toAddress,
           fromAddress: fromAddress,
           parcel: parcel
@@ -2673,6 +2669,12 @@ global.po = new Chain({
       this.api = new EasyPost(process.env.EASYPOSTKEY);
       this.next();
     },
+    smartRates: function(res) {
+      var id = res.shipment.id;
+      this.api.Shipment.retrieve(id).then(s => {
+        s.getSmartrates().then(this.next);
+      });
+    },
     toPoMethod: function() {
       this.next(this.poMethod);
     }
@@ -2682,10 +2684,17 @@ global.po = new Chain({
     address: "buildAddress",
     parcel: "buildParcel",
     estimate: [
-      // "buildAddress",
-      // "buildAddress",
-      // "buildParcel",
+      "buildAddress",
+      "buildAddress",
+      "buildParcel",
       "buildShipment"
+    ],
+    smart: [
+      "buildAddress",
+      "buildAddress",
+      "buildParcel",
+      "buildShipment",
+      "smartRates"
     ]
   }]
 });
