@@ -2627,18 +2627,28 @@ global.po = new Chain({
   },
   steps: {
     buildAddress: function() {
-      var address = new this.api.Address(this._body);
-      address.save().then( addr => this.next(addr) );
+      var prop = Object.keys(this._body).includes("to") ? "to" : "from";
+      var body = this._body[prop] || this._body;
+      var address = new this.api.Address(body);
+      
+      address.save().then( addr => {
+       delete this._body[prop];
+       this._body[prop+"_address"] = addr;
+       this.next(addr);
+      });
     },
     buildParcel: function() {
-      var parcel = new this.api.Parcel(this._body);
-      parcel.save().then( parce => this.next(parce) );
+      var parcel = new this.api.Parcel(this._body.parcel);
+      parcel.save().then( p => {
+        this._body.parcel = p;
+        this.next(p);
+      });
     },
     buildShipment: function(addr) {
       const b = this._body;
-      const toAddress = await new this.api.Address(b.to).then(r => r);
-      const fromAddress = await new this.api.Address(b.from.then(r => r));
-      const parcel = await new this.api.Parcel(b.parcel).then(r => r);
+      const toAddress = b.to_address;
+      const fromAddress = b.from_address;
+      const parcel = b.parcel;
       
       const shipment = new this.api.Shipment({
         to_address: toAddress,
@@ -2668,6 +2678,9 @@ global.po = new Chain({
     address: "buildAddress",
     parcel: "buildParcel",
     estimate: [
+      "buildAddress",
+      "buildAddress",
+      "buildParcel",
       "buildShipment"
     ]
   }]
