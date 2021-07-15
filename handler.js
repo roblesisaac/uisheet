@@ -2646,9 +2646,9 @@ global.po = new Chain({
     },
     buildShipment: function(addr) {
       const b = this._body;
-      const toAddress = b.to_address;
-      const fromAddress = b.from_address;
-      const parcel = b.parcel;
+      const toAddress = new this.api.Address(b.to).then(r => r);
+      const fromAddress = new this.api.Address(b.from.then(r => r));
+      const parcel = new this.api.Parcel(b.parcel).then(r => r);
       
       const shipment = new this.api.Shipment({
         to_address: toAddress,
@@ -2678,9 +2678,9 @@ global.po = new Chain({
     address: "buildAddress",
     parcel: "buildParcel",
     estimate: [
-      "buildAddress",
-      "buildAddress",
-      "buildParcel",
+      // "buildAddress",
+      // "buildAddress",
+      // "buildParcel",
       "buildShipment"
     ]
   }]
