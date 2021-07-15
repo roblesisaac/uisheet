@@ -2619,7 +2619,7 @@ global.usps = new Chain({
     validate: ["buildValidatePath", "buildUrl", "fetchUsps"]
   }
 });
-global.po = new Chain({
+global.easypost = new Chain({
   input: function() {
     return {
       poMethod: this._arg1
