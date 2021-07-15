@@ -2636,9 +2636,9 @@ global.po = new Chain({
     },
     buildShipment: function(addr) {
       const b = this._body;
-      const toAddress = new this.api.Address(b.to);
-      const fromAddress = new this.api.Address(b.from);
-      const parcel = new this.api.Parcel(b.parcel);
+      const toAddress = await new this.api.Address(b.to).then(r => r);
+      const fromAddress = await new this.api.Address(b.from.then(r => r));
+      const parcel = await new this.api.Parcel(b.parcel).then(r => r);
       
       const shipment = new this.api.Shipment({
         to_address: toAddress,
