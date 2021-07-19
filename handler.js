@@ -2702,7 +2702,7 @@ global.easypost = new Chain({
       });
     },
     retrieveOrder: function() {
-      this.api.Order.retrieve(this._body.id).then(res => {
+      new this.api.Order.retrieve(this._body.id).then(res => {
         this.next(res);
       });
     },
