@@ -2668,7 +2668,17 @@ global.easypost = new Chain({
         });
       });
     },
-    fetchOrder: function() {
+    initPoApi: function() {
+      this.api = new EasyPost(process.env.EASYPOSTKEY);
+      this.next();
+    },
+    fetchSmartRates: function(res) {
+      var id = this._body.id || res.shipment.id;
+      this.api.Shipment.retrieve(id).then(s => {
+        s.getSmartrates().then(this.next);
+      });
+    },
+    postOrder: function() {
       var body = this._body;
       var props = ["from_address", "to_address"];
       var input = {};
@@ -2691,14 +2701,9 @@ global.easypost = new Chain({
         this.next(Order);
       });
     },
-    initPoApi: function() {
-      this.api = new EasyPost(process.env.EASYPOSTKEY);
-      this.next();
-    },
-    fetchSmartRates: function(res) {
-      var id = this._body.id || res.shipment.id;
-      this.api.Shipment.retrieve(id).then(s => {
-        s.getSmartrates().then(this.next);
+    retrieveOrder: function() {
+      this.api.Order.retrieve(this._body.id).then(res => {
+        this.next(res);
       });
     },
     toPoMethod: function() {
@@ -2709,8 +2714,9 @@ global.easypost = new Chain({
     switch: "toPoMethod",
     address: "buildAddress",
     order: [
-      "fetchOrder"
+      "postOrder"
     ],
+    getOrder: "retrieveOrder",
     parcel: "buildParcel",
     estimate: [
       "buildAddress",
