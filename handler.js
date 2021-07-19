@@ -2665,6 +2665,23 @@ global.easypost = new Chain({
         });
       });
     },
+    fetchOrder: function() {
+      var body = this._body;
+      var props = ["from_address", "to_address", "shipments"];
+      var input = {};
+      
+      props.forEach(prop => {
+        var value = body[prop] || "";
+        value = value.id || value;
+        input[prop] = value;
+      });
+      
+      var order = new this.api.Order(input);
+      
+      order.save().then( Order => {
+        this.next(Order);
+      });
+    },
     initPoApi: function() {
       this.api = new EasyPost(process.env.EASYPOSTKEY);
       this.next();
@@ -2682,6 +2699,9 @@ global.easypost = new Chain({
   instruct: [ "initPoApi", {
     switch: "toPoMethod",
     address: "buildAddress",
+    order: [
+      "fetchOrder"
+    ],
     parcel: "buildParcel",
     estimate: [
       "buildAddress",
