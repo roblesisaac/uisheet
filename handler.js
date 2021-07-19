@@ -2683,9 +2683,14 @@ global.easypost = new Chain({
       
       var order = new this.api.Order(input);
       
-      order.save().then( Order => {
-        this.next(Order);
+      this.next({
+        body: body,
+        order: order
       });
+      
+      // order.save().then( Order => {
+      //   this.next(Order);
+      // });
     },
     initPoApi: function() {
       this.api = new EasyPost(process.env.EASYPOSTKEY);
