@@ -2626,6 +2626,9 @@ global.easypost = new Chain({
     };
   },
   steps: {
+    bodyHasId: function() {
+      this.next(!!this._body.id);
+    },
     buildAddress: function() {
       var prop = Object.keys(this._body).includes("to") ? "to" : "from";
       var body = this._body[prop] || this._body;
@@ -2692,8 +2695,10 @@ global.easypost = new Chain({
       this.api = new EasyPost(process.env.EASYPOSTKEY);
       this.next();
     },
-    smartRates: function(res) {
-      var id = res.shipment.id;
+    fetchSmartRates: function(res) {
+      res = res || {};
+      var body = res.shipment || {};
+      var id = body.id;
       this.api.Shipment.retrieve(id).then(s => {
         s.getSmartrates().then(this.next);
       });
@@ -2715,13 +2720,17 @@ global.easypost = new Chain({
       "buildParcel",
       "buildShipment"
     ],
-    smart: [
-      "buildAddress",
-      "buildAddress",
-      "buildParcel",
-      "buildShipment",
-      "smartRates"
-    ]
+    smart: {
+      if: "bodyHasId",
+      true: "fetchSmartRates",
+      false: [
+        "buildAddress",
+        "buildAddress",
+        "buildParcel",
+        "buildShipment",
+        "fetchSmartRates"  
+      ]
+    }
   }]
 });
 global.verify = new Chain({
