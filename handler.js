@@ -2676,10 +2676,15 @@ global.easypost = new Chain({
         input[prop] = value;
       });
       
-      input.shipments = [];
-      body.shipments.forEach( shpmnt => {
-        input.shipments.push(new this.api.Shipment(shpmnt));
+      input.shipments = body.shipments.map( shpmnt => {
+        return new this.api.Shipment({
+          length: shpmnt.length,
+          width: shpmnt.width,
+          height: shpmnt.height,
+          weight: shpmnt.weight
+        });
       });
+
       
       var order = new this.api.Order(input);
       
