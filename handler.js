@@ -2696,9 +2696,7 @@ global.easypost = new Chain({
       this.next();
     },
     fetchSmartRates: function(res) {
-      res = res || {};
-      var body = res.shipment || {};
-      var id = body.id;
+      var id = this._body.id || res.shipment.id;
       this.api.Shipment.retrieve(id).then(s => {
         s.getSmartrates().then(this.next);
       });
