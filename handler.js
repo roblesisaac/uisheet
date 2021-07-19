@@ -2676,9 +2676,13 @@ global.easypost = new Chain({
         input[prop] = value;
       });
       
-      var order = new this.api.Order(input);
+      input.shipments.forEach( shpmnt => {
+        shpmnt = new this.api.Shipment(shpmnt);
+      });
       
-      this.next(order);
+      this.next(input);
+      
+      // var order = new this.api.Order(input);
       
       // order.save().then( Order => {
       //   this.next(Order);
