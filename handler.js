@@ -2667,7 +2667,7 @@ global.easypost = new Chain({
     },
     fetchOrder: function() {
       var body = this._body;
-      var props = ["from_address", "to_address", "shipments"];
+      var props = ["from_address", "to_address"];
       var input = {};
       
       props.forEach(prop => {
@@ -2676,8 +2676,9 @@ global.easypost = new Chain({
         input[prop] = value;
       });
       
-      input.shipments.forEach( shpmnt => {
-        shpmnt = new this.api.Shipment(shpmnt);
+      input.shipments = [];
+      body.shipments.forEach( shpmnt => {
+        input.shipments.push(new this.api.Shipment(shpmnt));
       });
       
       this.next(input);
