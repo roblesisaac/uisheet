@@ -2681,13 +2681,11 @@ global.easypost = new Chain({
         input.shipments.push(new this.api.Shipment(shpmnt));
       });
       
-      this.next(input);
+      var order = new this.api.Order(input);
       
-      // var order = new this.api.Order(input);
-      
-      // order.save().then( Order => {
-      //   this.next(Order);
-      // });
+      order.save().then( Order => {
+        this.next(Order);
+      });
     },
     initPoApi: function() {
       this.api = new EasyPost(process.env.EASYPOSTKEY);
