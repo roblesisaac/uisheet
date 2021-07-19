@@ -2678,10 +2678,10 @@ global.easypost = new Chain({
       
       input.shipments = body.shipments.map( shpmnt => {
         return new this.api.Shipment({
-          length: shpmnt.length,
-          width: shpmnt.width,
-          height: shpmnt.height,
-          weight: shpmnt.weight
+          length: 1.00,
+          width: 2.00,
+          height: 3.00,
+          weight: 14.00
         });
       });
 
