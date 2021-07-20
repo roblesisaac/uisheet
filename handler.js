@@ -2697,11 +2697,8 @@ global.easypost = new Chain({
 
       
       var order = new this.api.Order(input);
-      var self = this;
       order.save().then( Order => {
-        Order.getSmartrates().then(o => {
-          self.next(Order);
-        });
+        this.next(Order);
       });
     },
     retrieveOrder: function() {
