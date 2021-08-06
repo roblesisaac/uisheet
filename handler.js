@@ -2714,6 +2714,11 @@ global.easypost = new Chain({
         this.next(Order);
       });
     },
+    purchaseTheOrder: function(order) {
+      order.buy(this._body.carrier, this._body.service).then(res => {
+        this.next(res);
+      });
+    },
     retrieveAddress: function() {
       this.api.Address.retrieve(this._body.id).then(res => {
         this.next(res);
@@ -2737,6 +2742,9 @@ global.easypost = new Chain({
     ],
     getOrder: "retrieveOrder",
     parcel: "buildParcel",
+    purchaseOrder: [
+      "retrieveOrder", "purchaseTheOrder"
+    ],
     estimate: [
       "buildAddress",
       "buildAddress",
