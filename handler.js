@@ -1099,8 +1099,18 @@ global.db = new Chain({
     },
     removeRule: function() {
       if(this._eventMethod == "get") {
-        this.options.select = this.options.select || "";
-        this.options.select += (" "+this.item);
+        var select = this.options.select || "",
+            isNegating = this.item.includes("-");
+        if(isNegating) {
+          var negator = this.item.replace("-", "");
+          if(select.includes(negator)) {
+            select = select.replaceAll(" "+negator, "");
+            select = select.replaceAll(negator, "");
+          }
+        } else {
+          select += (" "+this.item);
+        }
+        this.options.select = select;
       } else if(this.id == "updateMany") {
         delete this._body.update[this.item];
       } else if(Array.isArray(this._body)) {
@@ -2701,6 +2711,11 @@ global.easypost = new Chain({
         this.next(Order);
       });
     },
+    retrieveAddress: function() {
+      this.api.Address.retrieve(this._body.id).then(res => {
+        this.next(res);
+      });
+    },
     retrieveOrder: function() {
       this.api.Order.retrieve(this._body.id).then(res => {
         this.next(res);
@@ -2713,6 +2728,7 @@ global.easypost = new Chain({
   instruct: [ "initPoApi", {
     switch: "toPoMethod",
     address: "buildAddress",
+    getAddress: "retrieveAddress",
     order: [
       "postOrder"
     ],
