@@ -1107,7 +1107,7 @@ global.db = new Chain({
           if(select.includes(negator)) {
             select = select.replaceAll(" "+negator, "");
             select = select.replaceAll(negator, "");
-          } else if(select.includes("-")) {
+          } else if(select.includes("-") || select == "") {
             select += (" "+this.item);
           }
         } else {
