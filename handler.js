@@ -1101,12 +1101,13 @@ global.db = new Chain({
       if(this._eventMethod == "get") {
         var select = this.options.select || "",
             isNegating = this.item.includes("-");
+            
         if(isNegating) {
           var negator = this.item.replace("-", "");
           if(select.includes(negator)) {
             select = select.replaceAll(" "+negator, "");
             select = select.replaceAll(negator, "");
-          } else {
+          } else if(select.includes("-")) {
             select += (" "+this.item);
           }
         } else {
