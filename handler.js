@@ -2715,9 +2715,14 @@ global.easypost = new Chain({
       });
     },
     purchaseTheOrder: function(order) {
-      order.buy(this._body.carrier, this._body.service).then(res => {
-        this.next(res);
+      this.next({
+        order: order,
+        carrier: this._body.carrier,
+        service: this._body.service
       });
+      // order.buy(this._body.carrier, this._body.service).then(res => {
+      //   this.next(res);
+      // });
     },
     retrieveAddress: function() {
       this.api.Address.retrieve(this._body.id).then(res => {
