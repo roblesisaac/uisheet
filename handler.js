@@ -2525,6 +2525,23 @@ global.sib = new Chain({
         });
       });
     },
+    sendTestEmail: function() {
+      var self = this;
+      this.apiInstance.sendTransacEmail({
+        sender: "exhaustbarn@gmail.com",
+        to: "irobles1030@gmail.com",
+        htmlContent: "<div>Here is a test<br>Line two</div>"
+      }).then(function(data) {
+        self.next({
+          message: "API called successfully. Returned data: ",
+          data: data
+        });
+      }, function(error) {
+        self.next({
+          error: "<(-_-)>" + error
+        });
+      });      
+    },
     sendSms: function() {
       var self = this;
       this.apiInstance.sendTransacSms(this.sendTransacSms).then(function(data) {
@@ -2543,6 +2560,11 @@ global.sib = new Chain({
       "BuildSibApi",
       "createContactInstance",
       "contactSave"
+    ],
+    testEmail: [
+      "BuildSibApi",
+      "buildEmailInstance",
+      "sendTestEmail"
     ],
     email: [
       { if: "missingSibRecipient", true: "alertNeedRecipient" },
@@ -2691,7 +2713,7 @@ global.easypost = new Chain({
         s.getSmartrates().then(this.next);
       });
     },
-    postOrder: function() {
+    createOrder: function() {
       var body = this._body;
       var props = ["from_address", "to_address"];
       var input = {};
@@ -2736,6 +2758,9 @@ global.easypost = new Chain({
         this.next(res);
       });
     },
+    retrieveShipment: function() {
+      
+    },
     toPoMethod: function() {
       this.next(this.poMethod);
     }
@@ -2745,9 +2770,10 @@ global.easypost = new Chain({
     address: "buildAddress",
     getAddress: "retrieveAddress",
     order: [
-      "postOrder"
+      "createOrder"
     ],
     getOrder: "retrieveOrder",
+    getShipment: "retrieveShipment",
     parcel: "buildParcel",
     purchaseOrder: [
       "retrieveOrder", "purchaseTheOrder"
