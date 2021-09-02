@@ -2516,7 +2516,7 @@ global.sib = new Chain({
       var self = this;
       this.apiInstance.sendTransacEmail(this.sendSmtpEmail).then(function(data) {
         self.next({
-          message: "API called successfully. Returned data: ",
+          message: "API called successfully. Returned data:",
           data: data
         });
       }, function(error) {
@@ -2526,17 +2526,15 @@ global.sib = new Chain({
       });
     },
     sendTestEmail: function() {
-      var emailBody = new this.SibApiV3Sdk.SendSmtpEmail(),
-          self = this;
+      var self = this;
       
-      emailBody = {
+      this.sendSmtpEmail = {
         to: [{
-            email: "irobles1030@gmail.com",
-            name: "isaac robles"
+            email: "irobles1030@gmail.com"
         }],
         htmlContent: "<div>Here is a test<br>Line two</div>"
       };
-      this.apiInstance.sendTransacEmail(emailBody).then(function(data) {
+      this.apiInstance.sendTransacEmail(this.sendSmtpEmail).then(function(data) {
         self.next({
           message: "API called successfully. Returned data: ",
           data: data
