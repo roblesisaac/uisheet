@@ -2526,14 +2526,17 @@ global.sib = new Chain({
       });
     },
     sendTestEmail: function() {
-      var self = this;
-      this.apiInstance.sendTransacEmail({
+      var emailBody = new this.SibApiV3Sdk.SendSmtpEmail(),
+          self = this;
+      
+      emailBody = {
         to: [{
             email: "irobles1030@gmail.com",
             name: "isaac robles"
         }],
         htmlContent: "<div>Here is a test<br>Line two</div>"
-      }).then(function(data) {
+      };
+      this.apiInstance.sendTransacEmail(emailBody).then(function(data) {
         self.next({
           message: "API called successfully. Returned data: ",
           data: data
