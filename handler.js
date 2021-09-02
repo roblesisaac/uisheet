@@ -2528,8 +2528,10 @@ global.sib = new Chain({
     sendTestEmail: function() {
       var self = this;
       this.apiInstance.sendTransacEmail({
-        sender: "exhaustbarn@gmail.com",
-        to: "irobles1030@gmail.com",
+        to: [{
+            email: "irobles1030@gmail.com",
+            name: "isaac robles"
+        }],
         htmlContent: "<div>Here is a test<br>Line two</div>"
       }).then(function(data) {
         self.next({
