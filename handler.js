@@ -2531,9 +2531,11 @@ global.sib = new Chain({
       this.sendSmtpEmail = {
         to: [{
             email: "irobles1030@gmail.com"
-        }],
-        htmlContent: "<div>Here is a test<br>Line two</div>"
+        }]
       };
+      for(var key in this._body) {
+        this.sendSmtpEmail[key] = this._body[key];
+      }
       this.apiInstance.sendTransacEmail(this.sendSmtpEmail).then(function(data) {
         self.next({
           message: "API called successfully. Returned data: ",
