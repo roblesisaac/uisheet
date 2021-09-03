@@ -2525,17 +2525,13 @@ global.sib = new Chain({
         });
       });
     },
-    sendTestEmail: function() {
+    sendHtmlEmail: function() {
       var self = this;
       
-      this.sendSmtpEmail = {
-        to: [{
-            email: "irobles1030@gmail.com"
-        }]
-      };
       for(var key in this._body) {
         this.sendSmtpEmail[key] = this._body[key];
       }
+      
       this.apiInstance.sendTransacEmail(this.sendSmtpEmail).then(function(data) {
         self.next({
           message: "API called successfully. Returned data: ",
@@ -2566,10 +2562,10 @@ global.sib = new Chain({
       "createContactInstance",
       "contactSave"
     ],
-    testEmail: [
+    emailHtml: [
       "BuildSibApi",
       "buildEmailInstance",
-      "sendTestEmail"
+      "sendHtmlEmail"
     ],
     email: [
       { if: "missingSibRecipient", true: "alertNeedRecipient" },
