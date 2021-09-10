@@ -2934,7 +2934,7 @@ global.port = new Chain({
     renderLoggedOut: function() {
       this.next({
         body: render("login-portal", this),
-        type: "html"
+        type: "text/html"
       });
     },
     renderNoSiteExists: function(res, next) {
