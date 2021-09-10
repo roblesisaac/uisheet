@@ -2886,7 +2886,8 @@ global.port = new Chain({
     askingForLoginPage: function() {
       var params = this._event.pathParameters || {},
           site = params.site,
-          chainIsNotAskingForScripts = this._chain.excludes("scripts", "login", "signup");
+          chain = this._chain || "",
+          chainIsNotAskingForScripts = chain.excludes("scripts", "login", "signup");
           
       this.next(site == "login" && chainIsNotAskingForScripts);
     },
