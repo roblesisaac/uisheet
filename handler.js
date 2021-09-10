@@ -2887,7 +2887,7 @@ global.port = new Chain({
       var params = this._event.pathParameters || {},
           site = params.site,
           chain = this._chain || "",
-          chainIsNotAskingForScripts = chain.excludes("scripts", "login", "signup");
+          chainIsNotAskingForScripts = ["scripts", "login", "signup"].excludes(chain);
           
       this.next(site == "login" && chainIsNotAskingForScripts);
     },
@@ -3002,7 +3002,7 @@ global.port = new Chain({
         "getSiteName", 
         {
           if: "askingForLoginPage",
-          true: [function(){this.next(this._chain);}, "serve"]
+          true: ["renderLoggedOut", "serve"]
         }
       ]
     }, // remove this when not using custom domain yet
