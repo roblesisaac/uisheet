@@ -1887,6 +1887,9 @@ global.login = new Chain({
 			 err ? self.error(err) : self.next(!!isMatch && isMatch === true);
 			});  
     },
+    methodIsGet: function() {
+      this.next(this._eventMethod == "get");
+    },
     sendCredentials: function() {
       var self = this;
       this.next({
@@ -1909,6 +1912,10 @@ global.login = new Chain({
     }
   },
   instruct: [
+    { 
+      if: "methodIsGet",
+      true: ["renderLoggedOut", "server"]
+    },
     "fetchUser",
     {
       if: "userDoesntExist",
