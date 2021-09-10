@@ -1914,7 +1914,7 @@ global.login = new Chain({
   instruct: [
     { 
       if: "methodIsGet",
-      true: ["renderLoggedOut", "server"]
+      true: ["renderLoggedOut", "serve"]
     },
     "fetchUser",
     {
