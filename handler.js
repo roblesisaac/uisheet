@@ -2883,6 +2883,12 @@ global.port = new Chain({
       
       next(index);
     },
+    askingForLoginPage: function() {
+      var params = this._event.pathParameters || {},
+          site = params.site;
+          
+      this.next(site == "login");
+    },
     fetchSimpleSite: function(res) {
       var self = this,
           filter = { name: this._siteName };
@@ -2906,9 +2912,6 @@ global.port = new Chain({
       });
     },
     getSiteName: function() {
-      // this._siteName = this.customDomain;
-      // this.next();
-      
       var domainArray = this._domain.split(".");
       this._siteName = domainArray.length === 2 ? domainArray[0] : domainArray[1];
       this.next();
@@ -2978,23 +2981,29 @@ global.port = new Chain({
       this.next(this.user.username == "public");
     },
     usingCustomDomain: function() {
-      // var genericSiteNames = ["uisheet", "uisheet", "amazonaws"],
-      //     domainArray = this._domain.split(".");
-      // this.customDomain = domainArray.length === 2 ? domainArray[0] : domainArray[1];
-      // this.next(genericSiteNames.excludes(this.customDomain));
-      
       var genericSiteNames = ["uisheet.com", "amazonaws.com"],
-          usingCustomDomain = true;
-      for(var i=0; i<genericSiteNames.length; i++) {
-        var genericSiteName = genericSiteNames[i];
-        if(usingCustomDomain && this._domain.includes(genericSiteName)) usingCustomDomain = false;
-      }
-      this.next(usingCustomDomain);
+          domain = this._domain,
+          includesGeneric = 0;
+          
+      genericSiteNames.forEach(genericSite => {
+        if(!includesGeneric && domain.includes(genericSite)) includesGeneric++;
+      });
+      
+      this.next(includesGeneric==0);
     }
   },
   instruct: [
     "connectToDb",
-    { if: "usingCustomDomain", true: "getSiteName" }, // remove this when not using custom domain yet
+    { 
+      if: "usingCustomDomain",
+      true: [
+        "getSiteName", 
+        {
+          if: "askingForLoginPage",
+          true: ["renderLoggedOut", "serve"]
+        }
+      ]
+    }, // remove this when not using custom domain yet
     {
       if: "userHasCookies",
       true: [
