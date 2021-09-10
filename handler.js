@@ -3002,7 +3002,7 @@ global.port = new Chain({
         "getSiteName", 
         {
           if: "askingForLoginPage",
-          true: ["renderLoggedOut", "serve"]
+          true: [function(){this.next(this._chain);}, "serve"]
         }
       ]
     }, // remove this when not using custom domain yet
