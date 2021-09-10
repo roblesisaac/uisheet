@@ -2885,9 +2885,10 @@ global.port = new Chain({
     },
     askingForLoginPage: function() {
       var params = this._event.pathParameters || {},
-          site = params.site;
+          site = params.site,
+          chainIsNotAskingForScripts = this._chain !== "scripts";
           
-      this.next(site == "login");
+      this.next(site == "login" && chainIsNotAskingForScripts);
     },
     fetchSimpleSite: function(res) {
       var self = this,
