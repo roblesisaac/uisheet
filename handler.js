@@ -1947,18 +1947,21 @@ global.logout = new Chain({
     "sendLogout"
   ]
 });
-// global.plaid = new Chain({
-//   instruct: [
-//     "_initPlaid",
-//     {
-//       switch: "toPlaidMethod",
-//       get: [],
-//       put: [],
-//       post: [],
-//       delete: []
-//     }  
-//   ]
-// });
+global.plaid = new Chain({
+  instruct: [
+    function() {
+      this.next(process.env.PLAIDKEY);
+    }
+    // "_initPlaid",
+    // {
+    //   switch: "toPlaidMethod",
+    //   get: [],
+    //   put: [],
+    //   post: [],
+    //   delete: []
+    // }  
+  ]
+});
 global.renderUserLandingPage = new Chain({
   steps: {
     showIndex: function() {
