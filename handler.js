@@ -3132,9 +3132,14 @@ module.exports.port = function(event, context, callback) {
   
   var input = importParamaters(event, context, callback);
   
-  global.port.start(input).catch(function(error){
-    handleError(callback, error);
+  callback(null, {
+    statusCode: 200,
+    body: JSON.stringify("hi")
   });
+  
+  // global.port.start(input).catch(function(error){
+  //   handleError(callback, error);
+  // });
 };
 } catch (e) {
   module.exports.port = function(event, context, callback) {
