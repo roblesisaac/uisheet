@@ -59,6 +59,7 @@ module.exports = function(page, props) {
   
   <script src="${windowLocation}/scripts/data/${cacheStamp}"></script>
   <script src="${windowLocation}/scripts/js/${cacheStamp}"></script>
+  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
   <script defer src="https://js.braintreegateway.com/web/3.72.0/js/client.min.js"></script>
   <script defer src="https://js.braintreegateway.com/web/3.72.0/js/data-collector.min.js"></script>
   <script defer src="https://js.braintreegateway.com/web/dropin/1.26.0/js/dropin.min.js"></script>
