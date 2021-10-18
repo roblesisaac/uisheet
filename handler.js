@@ -45,21 +45,6 @@ const render = require("./render");
 const ssClient = require("smartsheet");
 const EasyPost = require("@easypost/api");
 
-// global.auth = new Chain({
-//   steps: {
-//     lookupAuth: function() {
-//       var AuthenticationClient = require("auth0");
-//       this.next({
-//         hello: "HI",
-//         type: typeof AuthenticationClient,
-//         keys: Object.keys(AuthenticationClient)
-//       });
-//     }
-//   },
-//   instruct: [
-//     "lookupAuth"  
-//   ]
-// });
 global._brainQueryCustomer = new Chain({
   input: function() {
     return {
@@ -2602,43 +2587,43 @@ global.sib = new Chain({
     ]
   }
 });
-// global.smartsheet = new Chain({
-//   input: {
-//     ssKey: process.env.SSKEY
-//   },
-//   steps: {
-//     setupSmartSheet: function() {
-//       this.smartsheet = ssClient.createClient({
-//         accessToken: this.ssKey,
-//         logLevel: "info"
-//       });
-//       this.next();
-//     },
-//     renderSmartSheetData: function() {
-//       var self = this;
-//       this.smartsheet.sheets.listSheets({})
-//         .then(function (result) {
-//           var sheetId = result.data[0].id;
+global.smartsheet = new Chain({
+  input: {
+    ssKey: process.env.SSKEY
+  },
+  steps: {
+    setupSmartSheet: function() {
+      this.smartsheet = ssClient.createClient({
+        accessToken: this.ssKey,
+        logLevel: "info"
+      });
+      this.next();
+    },
+    renderSmartSheetData: function() {
+      var self = this;
+      this.smartsheet.sheets.listSheets({})
+        .then(function (result) {
+          var sheetId = result.data[0].id;
       
-//           // Load one sheet
-//           self.smartsheet.sheets.getSheet({id: sheetId})
-//             .then(function(sheetInfo) {
-//               self.next(sheetInfo);
-//             })
-//             .catch(function(error) {
-//               self.error(error);
-//             });
-//         })
-//         .catch(function(error) {
-//           self.error(error);
-//         });
-//     }
-//   },
-//   instruct: [
-//     "setupSmartSheet",
-//     "renderSmartSheetData"  
-//   ]
-// });
+          // Load one sheet
+          self.smartsheet.sheets.getSheet({id: sheetId})
+            .then(function(sheetInfo) {
+              self.next(sheetInfo);
+            })
+            .catch(function(error) {
+              self.error(error);
+            });
+        })
+        .catch(function(error) {
+          self.error(error);
+        });
+    }
+  },
+  instruct: [
+    "setupSmartSheet",
+    "renderSmartSheetData"  
+  ]
+});
 global.usps = new Chain({
   input: function() {
     return {
