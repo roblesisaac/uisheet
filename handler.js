@@ -22,7 +22,6 @@ const emptyPermit = require("./utils/emptyPermit");
 const fs = require("fs");
 let favicon;
 const nodeFetch = require("node-fetch").default;
-const plaid = require("plaid");
 const scripts = {};
 if(!scripts.index) {
   fs.readdir("./scripts", function (err, data) {
@@ -1960,18 +1959,6 @@ global.logout = new Chain({
   instruct: [
     "createLogoutCookies",
     "sendLogout"
-  ]
-});
-global.plaid = new Chain({
-  instruct: [
-    "_initPlaid",
-    {
-      switch: "toPlaidMethod",
-      get: [],
-      put: [],
-      post: [],
-      delete: []
-    }  
   ]
 });
 global.renderUserLandingPage = new Chain({
