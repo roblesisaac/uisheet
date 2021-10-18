@@ -1948,11 +1948,16 @@ global.logout = new Chain({
   ]
 });
 global.plaid = new Chain({
-  instruct: [
-    function() {
-      this.next(process.env.PLAIDKEY);
+  steps: {
+    initPlaid: function() {
+      this.next({
+        message: "hi",
+        key: "process.env.PLAIDKEY"
+      });
     }
-    // "_initPlaid",
+  },
+  instruct: [
+    "_initPlaid",
     // {
     //   switch: "toPlaidMethod",
     //   get: [],
