@@ -1,49 +1,49 @@
 "use strict";
 
 try {
-// const AWS = require("aws-sdk");
-// const s3 = new AWS.S3();
-// const mime = require("mime");
-// const Utils = require("./scripts/utils");
-// const Chain = require("./scripts/chain");
-// const permits = require("./models/permits");
-// var models = {
-//   sheets: require("./models/sheets"),
-//   sites: require("./models/sites"), 
-//   users: require("./models/users"),
-//   permits: permits
-// };
-// const lambda = new AWS.Lambda({ region: "us-west-1" });
-// const mongoose = require("mongoose");
-// const cookie = require("cookie");
-// let isConnected;
-// const emptySheet = require("./utils/emptySheet");
-// const emptyPermit = require("./utils/emptyPermit");
-// const fs = require("fs");
-// let favicon;
-// const nodeFetch = require("node-fetch").default;
-// const Plaid = require("plaid");
-// const scripts = {};
-// if(!scripts.index) {
-//   fs.readdir("./scripts", function (err, data) {
-//     if(err) return err;
-//     for (var i=0; i<data.length; i++) {
-//       var fileName = data[i],
-//           templateName = data[i].split(".")[0],
-//           fileType = data[i].split(".")[1],
-//           text = fs.readFileSync("./scripts/" + fileName, "utf8");
-//       scripts[fileName] = text;
-//       if(fileType == "html") scripts[templateName] = text;
-//     }
-//   });
-// }
-// const jwt = require("jsonwebtoken");
-// const loop = function(arr) {
-//   return { async: arr };
-// };
-// const render = require("./render");
-// const ssClient = require("smartsheet");
-// const EasyPost = require("@easypost/api");
+const AWS = require("aws-sdk");
+const s3 = new AWS.S3();
+const mime = require("mime");
+const Utils = require("./scripts/utils");
+const Chain = require("./scripts/chain");
+const permits = require("./models/permits");
+var models = {
+  sheets: require("./models/sheets"),
+  sites: require("./models/sites"), 
+  users: require("./models/users"),
+  permits: permits
+};
+const lambda = new AWS.Lambda({ region: "us-west-1" });
+const mongoose = require("mongoose");
+const cookie = require("cookie");
+let isConnected;
+const emptySheet = require("./utils/emptySheet");
+const emptyPermit = require("./utils/emptyPermit");
+const fs = require("fs");
+let favicon;
+const nodeFetch = require("node-fetch").default;
+const Plaid = require("plaid");
+const scripts = {};
+if(!scripts.index) {
+  fs.readdir("./scripts", function (err, data) {
+    if(err) return err;
+    for (var i=0; i<data.length; i++) {
+      var fileName = data[i],
+          templateName = data[i].split(".")[0],
+          fileType = data[i].split(".")[1],
+          text = fs.readFileSync("./scripts/" + fileName, "utf8");
+      scripts[fileName] = text;
+      if(fileType == "html") scripts[templateName] = text;
+    }
+  });
+}
+const jwt = require("jsonwebtoken");
+const loop = function(arr) {
+  return { async: arr };
+};
+const render = require("./render");
+const ssClient = require("smartsheet");
+const EasyPost = require("@easypost/api");
 
 // global.auth = new Chain({
 //   steps: {
