@@ -2366,782 +2366,781 @@ global.serve = new Chain({
   	"sendToClient"
   ]
 });
-// global.signup = new Chain({
-//   input: function() {
-//     return {
-//       newUser: this._body
-//     };
+global.signup = new Chain({
+  input: function() {
+    return {
+      newUser: this._body
+    };
+  },
+  steps: {
+    addDefaultPropsToUser: function() {
+      this.newUser.referral = this._siteName;
+      this.newUser.params = this.newUser.params || {};
+      this.newUser.status = this.verifyId;
+      this.next();
+    },
+    errorNoBlanksAllowed: function() {
+      this.error("<(-_-)> Fill in email and password, you must.");
+    },
+    makeUniqueVerifyId: function() {
+      var result = "",
+          characters = "abcdefghijklmnopqrstuvwxyz0123456789",
+          charactersLength = characters.length;
+      for ( var i = 0; i < 12; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      }
+      
+      this.verifyId = result;
+      this.next();
+    },
+    saveUserToDb: function() {
+      var self = this;
+      models.users.create(this.newUser, function(err, newUser){
+        if(err) return self.error(err);
+        self.newUser = newUser;
+        self.next();
+      });
+    },
+    requiredPropsAreBlank: function() {
+      var thereIsABlank = false,
+          requiredProps = ["password", "email"];
+          
+      for(var i=0; i<requiredProps.length; i++) {
+        var prop = requiredProps[i];
+        if(!thereIsABlank && this.newUser[prop] == "") {
+          thereIsABlank = true;
+        }
+      }
+      
+      this.next(thereIsABlank);
+    },
+    sendConfirmationEmail: function() {
+      this.user = this.newUser || this.user;
+      var self = this,
+          verifyToken = jwt.sign({ token: this.verifyId, userid: this.user.id }, process.env.VERIFY, {	expiresIn: "2d" });
+          
+      global.sib.start({
+        _arg1: "email",
+        _body: {
+          email: "irobles1030@gmail.com",
+          template: 1,
+          params: {
+            host: this._host,
+            siteName: this._siteName,
+            token: verifyToken,
+            user: this.user
+          }
+        }
+      });
+          
+      global.sib.start({
+        _arg1: "email",
+        _body: {
+          email: this.user.email,
+          template: 1,
+          params: {
+            host: this._host,
+            siteName: this._siteName,
+            token: verifyToken,
+            user: this.user
+          }
+        }
+      }).then(function(res){
+        self.next("<(-_-)> Confirmation email at "+self.user.email+" you will find.");
+      }).catch(function(e){
+        self.error(e);
+      });
+    }
+  },
+  instruct: [
+    { if: "requiredPropsAreBlank", true: "errorNoBlanksAllowed" },
+    "makeUniqueVerifyId",
+    "addDefaultPropsToUser",
+    "saveUserToDb",
+    "sendConfirmationEmail",
+    "createCookies",
+    "sendCredentials"
+  ]
+});
+global.sib = new Chain({
+  steps: {
+    alertNeedNumber: function() {
+      this.error("<(-_-)> Missing phone number, you are.");
+    },
+    alertNeedRecipient: function() {
+      this.error("<(-_-)> Recipient for email, you must include");
+    },
+    BuildSibApi: function() {
+      this.SibApiV3Sdk = require("sib-api-v3-sdk");
+      this.defaultClient = this.SibApiV3Sdk.ApiClient.instance;
+      
+      this.apiKey = this.defaultClient.authentications["api-key"];
+      this.apiKey.apiKey = process.env.SIB;
+      this.next();
+    },
+    buildSmsInstance: function() {
+      this.apiInstance = new this.SibApiV3Sdk.TransactionalSMSApi();
+      this.sendTransacSms = new this.SibApiV3Sdk.SendTransacSms();
+      this.next();
+    },
+    buildSmsParams: function() {
+      var body = this._body;
+      this.sendTransacSms.sender = body.from;
+      this.sendTransacSms.recipient = body.to;
+      this.sendTransacSms.content = body.message;
+      this.next();
+    },
+    buildSibParams: function() {
+      var body = this._body;
+      this.sendSmtpEmail = {
+          to: [{
+              email: body.email,
+              name: body.name
+          }],
+          templateId: body.template || 1,
+          params: body.params
+      };
+      this.next();
+    },
+    buildEmailInstance: function() {
+      this.apiInstance = new this.SibApiV3Sdk.TransactionalEmailsApi();
+      this.sendSmtpEmail = new this.SibApiV3Sdk.SendSmtpEmail();
+      this.next();
+    },
+    contactSave: function() {
+      var createContact = new this.SibApiV3Sdk.CreateContact(),
+          self = this;
+      
+      createContact = this._body;
+      this.apiInstance.createContact(createContact).then(function(data) {
+        self.next({
+          body: self._body,
+          response: data
+        });
+      }, function(error) {
+        self.error(error);
+      });
+    },
+    createContactInstance: function() {
+      this.apiInstance = new this.SibApiV3Sdk.ContactsApi();
+      this.next();
+    },
+    missingNumber: function() {
+      this.next(!this._body.to);
+    },
+    missingSibRecipient: function() {
+      this.next(!this._body.email);
+    },
+    sendSibEmail: function() {
+      var self = this;
+      this.apiInstance.sendTransacEmail(this.sendSmtpEmail).then(function(data) {
+        self.next({
+          message: "API called successfully. Returned data:",
+          data: data
+        });
+      }, function(error) {
+        self.next({
+          error: "<(-_-)>" + error
+        });
+      });
+    },
+    sendHtmlEmail: function() {
+      var self = this;
+      
+      for(var key in this._body) {
+        this.sendSmtpEmail[key] = this._body[key];
+      }
+      
+      this.apiInstance.sendTransacEmail(this.sendSmtpEmail).then(function(data) {
+        self.next({
+          message: "API called successfully. Returned data: ",
+          data: data
+        });
+      }, function(error) {
+        self.next({
+          error: "<(-_-)>" + error
+        });
+      });      
+    },
+    sendSms: function() {
+      var self = this;
+      this.apiInstance.sendTransacSms(this.sendTransacSms).then(function(data) {
+        self.next(data);
+      }, function(error) {
+        self.error(error);
+      });
+    },
+    toSibMethod: function() {
+      this.next(this._arg1);
+    }
+  },
+  instruct: {
+    switch: "toSibMethod",
+    createContact: [
+      "BuildSibApi",
+      "createContactInstance",
+      "contactSave"
+    ],
+    emailHtml: [
+      "BuildSibApi",
+      "buildEmailInstance",
+      "sendHtmlEmail"
+    ],
+    email: [
+      { if: "missingSibRecipient", true: "alertNeedRecipient" },
+      "BuildSibApi",
+      "buildEmailInstance",
+      "buildSibParams",
+      "sendSibEmail"  
+    ],
+    sms: [
+      { if: "missingNumber", true: "alertNeedNumber"},
+      "BuildSibApi",
+      "buildSmsInstance",
+      "buildSmsParams",
+      "sendSms"
+    ]
+  }
+});
+// global.smartsheet = new Chain({
+//   input: {
+//     ssKey: process.env.SSKEY
 //   },
 //   steps: {
-//     addDefaultPropsToUser: function() {
-//       this.newUser.referral = this._siteName;
-//       this.newUser.params = this.newUser.params || {};
-//       this.newUser.status = this.verifyId;
+//     setupSmartSheet: function() {
+//       this.smartsheet = ssClient.createClient({
+//         accessToken: this.ssKey,
+//         logLevel: "info"
+//       });
 //       this.next();
 //     },
-//     errorNoBlanksAllowed: function() {
-//       this.error("<(-_-)> Fill in email and password, you must.");
-//     },
-//     makeUniqueVerifyId: function() {
-//       var result = "",
-//           characters = "abcdefghijklmnopqrstuvwxyz0123456789",
-//           charactersLength = characters.length;
-//       for ( var i = 0; i < 12; i++ ) {
-//         result += characters.charAt(Math.floor(Math.random() * charactersLength));
-//       }
-      
-//       this.verifyId = result;
-//       this.next();
-//     },
-//     saveUserToDb: function() {
+//     renderSmartSheetData: function() {
 //       var self = this;
-//       models.users.create(this.newUser, function(err, newUser){
-//         if(err) return self.error(err);
-//         self.newUser = newUser;
-//         self.next();
-//       });
-//     },
-//     requiredPropsAreBlank: function() {
-//       var thereIsABlank = false,
-//           requiredProps = ["password", "email"];
-          
-//       for(var i=0; i<requiredProps.length; i++) {
-//         var prop = requiredProps[i];
-//         if(!thereIsABlank && this.newUser[prop] == "") {
-//           thereIsABlank = true;
-//         }
-//       }
+//       this.smartsheet.sheets.listSheets({})
+//         .then(function (result) {
+//           var sheetId = result.data[0].id;
       
-//       this.next(thereIsABlank);
-//     },
-//     sendConfirmationEmail: function() {
-//       this.user = this.newUser || this.user;
-//       var self = this,
-//           verifyToken = jwt.sign({ token: this.verifyId, userid: this.user.id }, process.env.VERIFY, {	expiresIn: "2d" });
-          
-//       global.sib.start({
-//         _arg1: "email",
-//         _body: {
-//           email: "irobles1030@gmail.com",
-//           template: 1,
-//           params: {
-//             host: this._host,
-//             siteName: this._siteName,
-//             token: verifyToken,
-//             user: this.user
-//           }
-//         }
-//       });
-          
-//       global.sib.start({
-//         _arg1: "email",
-//         _body: {
-//           email: this.user.email,
-//           template: 1,
-//           params: {
-//             host: this._host,
-//             siteName: this._siteName,
-//             token: verifyToken,
-//             user: this.user
-//           }
-//         }
-//       }).then(function(res){
-//         self.next("<(-_-)> Confirmation email at "+self.user.email+" you will find.");
-//       }).catch(function(e){
-//         self.error(e);
-//       });
+//           // Load one sheet
+//           self.smartsheet.sheets.getSheet({id: sheetId})
+//             .then(function(sheetInfo) {
+//               self.next(sheetInfo);
+//             })
+//             .catch(function(error) {
+//               self.error(error);
+//             });
+//         })
+//         .catch(function(error) {
+//           self.error(error);
+//         });
 //     }
 //   },
 //   instruct: [
-//     { if: "requiredPropsAreBlank", true: "errorNoBlanksAllowed" },
-//     "makeUniqueVerifyId",
-//     "addDefaultPropsToUser",
-//     "saveUserToDb",
-//     "sendConfirmationEmail",
-//     "createCookies",
-//     "sendCredentials"
+//     "setupSmartSheet",
+//     "renderSmartSheetData"  
 //   ]
 // });
-// global.sib = new Chain({
-//   steps: {
-//     alertNeedNumber: function() {
-//       this.error("<(-_-)> Missing phone number, you are.");
-//     },
-//     alertNeedRecipient: function() {
-//       this.error("<(-_-)> Recipient for email, you must include");
-//     },
-//     BuildSibApi: function() {
-//       this.SibApiV3Sdk = require("sib-api-v3-sdk");
-//       this.defaultClient = this.SibApiV3Sdk.ApiClient.instance;
+global.usps = new Chain({
+  input: function() {
+    return {
+      endpoint: "http://production.shippingapis.com/ShippingAPI.dll?",
+      uspsMethod: this._arg1
+    };
+  },
+  steps: {
+    buildEstimatePath: function() {
+      this.path = "API=RateV4&XML=";
+      this.xml = `<RateV4Request USERID="${process.env.USPSID}">${this._body.xml}</RateV4Request>`;
+      this.next();
+    },
+    buildValidatePath: function() {
+      this.path = "API=Verify&XML=";  
+      this.xml = `<AddressValidateRequest USERID="${process.env.USPSID}">${this._body.xml}</AddressValidateRequest>`;
+      this.next();
+    },
+    buildUrl: function() {
+      this.url = this.endpoint+this.path+this.xml.replace(/(\r\n|\n|\r)/gm, "").replaceAll("&", "&amp;");
+      this.next();
+    },
+    fetchUsps: function() {
+      nodeFetch(this.url, { method: "get" }).then(res => res.text()).then(t => this.next(t));
+    },
+    toUspsMethod: function() {
+      this.next(this.uspsMethod);
+    }
+  },
+  instruct: {
+    switch: "toUspsMethod",
+    estimate: ["buildEstimatePath", "buildUrl", "fetchUsps"],
+    validate: ["buildValidatePath", "buildUrl", "fetchUsps"]
+  }
+});
+global.easypost = new Chain({
+  input: function() {
+    return {
+      poMethod: this._arg1
+    };
+  },
+  steps: {
+    bodyHasId: function() {
+      this.next(!!this._body.shipment_id);
+    },
+    buildAddress: function() {
+      var prop = Object.keys(this._body).includes("to") ? "to" : "from";
+      var body = this._body[prop] || this._body;
+      var address = new this.api.Address(body);
       
-//       this.apiKey = this.defaultClient.authentications["api-key"];
-//       this.apiKey.apiKey = process.env.SIB;
-//       this.next();
-//     },
-//     buildSmsInstance: function() {
-//       this.apiInstance = new this.SibApiV3Sdk.TransactionalSMSApi();
-//       this.sendTransacSms = new this.SibApiV3Sdk.SendTransacSms();
-//       this.next();
-//     },
-//     buildSmsParams: function() {
-//       var body = this._body;
-//       this.sendTransacSms.sender = body.from;
-//       this.sendTransacSms.recipient = body.to;
-//       this.sendTransacSms.content = body.message;
-//       this.next();
-//     },
-//     buildSibParams: function() {
-//       var body = this._body;
-//       this.sendSmtpEmail = {
-//           to: [{
-//               email: body.email,
-//               name: body.name
-//           }],
-//           templateId: body.template || 1,
-//           params: body.params
-//       };
-//       this.next();
-//     },
-//     buildEmailInstance: function() {
-//       this.apiInstance = new this.SibApiV3Sdk.TransactionalEmailsApi();
-//       this.sendSmtpEmail = new this.SibApiV3Sdk.SendSmtpEmail();
-//       this.next();
-//     },
-//     contactSave: function() {
-//       var createContact = new this.SibApiV3Sdk.CreateContact(),
-//           self = this;
+      address.save().then( addr => {
+      delete this._body[prop];
+      this._body[prop+"_address"] = addr;
+      this.next(addr);
+      });
+    },
+    buildParcel: function() {
+      var parcel = new this.api.Parcel(this._body.parcel);
+      parcel.save().then( p => {
+        this._body.parcel = p;
+        this.next(p);
+      });
+    },
+    buildShipment: function(addr) {
+      const b = this._body;
+      const toAddress = b.to_address;
+      const fromAddress = b.from_address;
+      const parcel = b.parcel;
       
-//       createContact = this._body;
-//       this.apiInstance.createContact(createContact).then(function(data) {
-//         self.next({
-//           body: self._body,
-//           response: data
-//         });
-//       }, function(error) {
-//         self.error(error);
-//       });
-//     },
-//     createContactInstance: function() {
-//       this.apiInstance = new this.SibApiV3Sdk.ContactsApi();
-//       this.next();
-//     },
-//     missingNumber: function() {
-//       this.next(!this._body.to);
-//     },
-//     missingSibRecipient: function() {
-//       this.next(!this._body.email);
-//     },
-//     sendSibEmail: function() {
-//       var self = this;
-//       this.apiInstance.sendTransacEmail(this.sendSmtpEmail).then(function(data) {
-//         self.next({
-//           message: "API called successfully. Returned data:",
-//           data: data
-//         });
-//       }, function(error) {
-//         self.next({
-//           error: "<(-_-)>" + error
-//         });
-//       });
-//     },
-//     sendHtmlEmail: function() {
-//       var self = this;
-      
-//       for(var key in this._body) {
-//         this.sendSmtpEmail[key] = this._body[key];
-//       }
-      
-//       this.apiInstance.sendTransacEmail(this.sendSmtpEmail).then(function(data) {
-//         self.next({
-//           message: "API called successfully. Returned data: ",
-//           data: data
-//         });
-//       }, function(error) {
-//         self.next({
-//           error: "<(-_-)>" + error
-//         });
-//       });      
-//     },
-//     sendSms: function() {
-//       var self = this;
-//       this.apiInstance.sendTransacSms(this.sendTransacSms).then(function(data) {
-//         self.next(data);
-//       }, function(error) {
-//         self.error(error);
-//       });
-//     },
-//     toSibMethod: function() {
-//       this.next(this._arg1);
-//     }
-//   },
-//   instruct: {
-//     switch: "toSibMethod",
-//     createContact: [
-//       "BuildSibApi",
-//       "createContactInstance",
-//       "contactSave"
-//     ],
-//     emailHtml: [
-//       "BuildSibApi",
-//       "buildEmailInstance",
-//       "sendHtmlEmail"
-//     ],
-//     email: [
-//       { if: "missingSibRecipient", true: "alertNeedRecipient" },
-//       "BuildSibApi",
-//       "buildEmailInstance",
-//       "buildSibParams",
-//       "sendSibEmail"  
-//     ],
-//     sms: [
-//       { if: "missingNumber", true: "alertNeedNumber"},
-//       "BuildSibApi",
-//       "buildSmsInstance",
-//       "buildSmsParams",
-//       "sendSms"
-//     ]
-//   }
-// });
-// // global.smartsheet = new Chain({
-// //   input: {
-// //     ssKey: process.env.SSKEY
-// //   },
-// //   steps: {
-// //     setupSmartSheet: function() {
-// //       this.smartsheet = ssClient.createClient({
-// //         accessToken: this.ssKey,
-// //         logLevel: "info"
-// //       });
-// //       this.next();
-// //     },
-// //     renderSmartSheetData: function() {
-// //       var self = this;
-// //       this.smartsheet.sheets.listSheets({})
-// //         .then(function (result) {
-// //           var sheetId = result.data[0].id;
-      
-// //           // Load one sheet
-// //           self.smartsheet.sheets.getSheet({id: sheetId})
-// //             .then(function(sheetInfo) {
-// //               self.next(sheetInfo);
-// //             })
-// //             .catch(function(error) {
-// //               self.error(error);
-// //             });
-// //         })
-// //         .catch(function(error) {
-// //           self.error(error);
-// //         });
-// //     }
-// //   },
-// //   instruct: [
-// //     "setupSmartSheet",
-// //     "renderSmartSheetData"  
-// //   ]
-// // });
-// global.usps = new Chain({
-//   input: function() {
-//     return {
-//       endpoint: "http://production.shippingapis.com/ShippingAPI.dll?",
-//       uspsMethod: this._arg1
-//     };
-//   },
-//   steps: {
-//     buildEstimatePath: function() {
-//       this.path = "API=RateV4&XML=";
-//       this.xml = `<RateV4Request USERID="${process.env.USPSID}">${this._body.xml}</RateV4Request>`;
-//       this.next();
-//     },
-//     buildValidatePath: function() {
-//       this.path = "API=Verify&XML=";  
-//       this.xml = `<AddressValidateRequest USERID="${process.env.USPSID}">${this._body.xml}</AddressValidateRequest>`;
-//       this.next();
-//     },
-//     buildUrl: function() {
-//       this.url = this.endpoint+this.path+this.xml.replace(/(\r\n|\n|\r)/gm, "").replaceAll("&", "&amp;");
-//       this.next();
-//     },
-//     fetchUsps: function() {
-//       nodeFetch(this.url, { method: "get" }).then(res => res.text()).then(t => this.next(t));
-//     },
-//     toUspsMethod: function() {
-//       this.next(this.uspsMethod);
-//     }
-//   },
-//   instruct: {
-//     switch: "toUspsMethod",
-//     estimate: ["buildEstimatePath", "buildUrl", "fetchUsps"],
-//     validate: ["buildValidatePath", "buildUrl", "fetchUsps"]
-//   }
-// });
-// global.easypost = new Chain({
-//   input: function() {
-//     return {
-//       poMethod: this._arg1
-//     };
-//   },
-//   steps: {
-//     bodyHasId: function() {
-//       this.next(!!this._body.shipment_id);
-//     },
-//     buildAddress: function() {
-//       var prop = Object.keys(this._body).includes("to") ? "to" : "from";
-//       var body = this._body[prop] || this._body;
-//       var address = new this.api.Address(body);
-      
-//       address.save().then( addr => {
-//       delete this._body[prop];
-//       this._body[prop+"_address"] = addr;
-//       this.next(addr);
-//       });
-//     },
-//     buildParcel: function() {
-//       var parcel = new this.api.Parcel(this._body.parcel);
-//       parcel.save().then( p => {
-//         this._body.parcel = p;
-//         this.next(p);
-//       });
-//     },
-//     buildShipment: function(addr) {
-//       const b = this._body;
-//       const toAddress = b.to_address;
-//       const fromAddress = b.from_address;
-//       const parcel = b.parcel;
-      
-//       const shipment = new this.api.Shipment({
-//         to_address: toAddress,
-//         from_address: fromAddress,
-//         parcel: parcel
-//       });
+      const shipment = new this.api.Shipment({
+        to_address: toAddress,
+        from_address: fromAddress,
+        parcel: parcel
+      });
         
-//       shipment.save().then( r => {
-//         this.next({
-//           shipment: r,
-//           toAddress: toAddress,
-//           fromAddress: fromAddress,
-//           parcel: parcel
-//         });
-//       });
-//     },
-//     initPoApi: function() {
-//       this.api = new EasyPost(process.env.EASYPOSTKEY);
-//       this.next();
-//     },
-//     fetchSmartRates: function(res) {
-//       var id = this._body.shipment_id;
-//       this.api.Shipment.retrieve(id).then(s => {
-//         s.getSmartrates().then(this.next);
-//       });
-//     },
-//     createOrder: function() {
-//       var body = this._body;
-//       var props = ["from_address", "to_address"];
-//       var input = {};
+      shipment.save().then( r => {
+        this.next({
+          shipment: r,
+          toAddress: toAddress,
+          fromAddress: fromAddress,
+          parcel: parcel
+        });
+      });
+    },
+    initPoApi: function() {
+      this.api = new EasyPost(process.env.EASYPOSTKEY);
+      this.next();
+    },
+    fetchSmartRates: function(res) {
+      var id = this._body.shipment_id;
+      this.api.Shipment.retrieve(id).then(s => {
+        s.getSmartrates().then(this.next);
+      });
+    },
+    createOrder: function() {
+      var body = this._body;
+      var props = ["from_address", "to_address"];
+      var input = {};
       
-//       props.forEach(prop => {
-//         var value = body[prop] || "";
-//         value = value.id || value;
-//         input[prop] = value;
-//       });
+      props.forEach(prop => {
+        var value = body[prop] || "";
+        value = value.id || value;
+        input[prop] = value;
+      });
       
-//       input.shipments = body.shipments.map( shpmnt => {
-//         return new this.api.Shipment({
-//           parcel: shpmnt
-//         });
-//       });
+      input.shipments = body.shipments.map( shpmnt => {
+        return new this.api.Shipment({
+          parcel: shpmnt
+        });
+      });
 
       
-//       var order = new this.api.Order(input);
-//       order.save().then( Order => {
-//         this.next(Order);
-//       });
-//     },
-//     purchaseTheOrder: function(order) {
-//       // this.next({
-//       //   order: order,
-//       //   carrier: this._body.carrier,
-//       //   service: this._body.service
-//       // });
-//       order.buy(this._body.carrier, this._body.service).then(res => {
-//         this.next(res);
-//       }).catch(e => {
-//         this.next(e);
-//       });
-//     },
-//     retrieveAddress: function() {
-//       this.api.Address.retrieve(this._body.id).then(res => {
-//         this.next(res);
-//       });
-//     },
-//     retrieveOrder: function() {
-//       this.api.Order.retrieve(this._body.id).then(res => {
-//         this.next(res);
-//       });
-//     },
-//     retrieveShipment: function() {
+      var order = new this.api.Order(input);
+      order.save().then( Order => {
+        this.next(Order);
+      });
+    },
+    purchaseTheOrder: function(order) {
+      // this.next({
+      //   order: order,
+      //   carrier: this._body.carrier,
+      //   service: this._body.service
+      // });
+      order.buy(this._body.carrier, this._body.service).then(res => {
+        this.next(res);
+      }).catch(e => {
+        this.next(e);
+      });
+    },
+    retrieveAddress: function() {
+      this.api.Address.retrieve(this._body.id).then(res => {
+        this.next(res);
+      });
+    },
+    retrieveOrder: function() {
+      this.api.Order.retrieve(this._body.id).then(res => {
+        this.next(res);
+      });
+    },
+    retrieveShipment: function() {
       
-//     },
-//     toPoMethod: function() {
-//       this.next(this.poMethod);
-//     }
-//   },
-//   instruct: [ "initPoApi", {
-//     switch: "toPoMethod",
-//     address: "buildAddress",
-//     getAddress: "retrieveAddress",
-//     order: [
-//       "createOrder"
-//     ],
-//     getOrder: "retrieveOrder",
-//     getShipment: "retrieveShipment",
-//     parcel: "buildParcel",
-//     purchaseOrder: [
-//       "retrieveOrder", "purchaseTheOrder"
-//     ],
-//     estimate: [
-//       "buildAddress",
-//       "buildAddress",
-//       "buildParcel",
-//       "buildShipment"
-//     ],
-//     smart: "fetchSmartRates"
-//   }]
-// });
-// global.verify = new Chain({
-//   input: function() {
-//     return {
-//       token: this._arg1
-//     };
-//   },
-//   steps: {
-//     alertFailedToVerify: function() {
-//       this.error("<(-_-)> Failed to verify, you have.");
-//     },
-//     alertMissingToken: function() {
-//       this.error("<(-_-)> Missing verification token, you are.");
-//     },
-//     decodeSuccessful: function() {
-//       this.next(this.decoded.token == this.dUser.status);
-//     },
-//     decodeToken: function() {
-//       var self = this;
-//       jwt.verify(this.token, process.env.VERIFY, function (tokenErr, decoded) {
-//         if(tokenErr) return self.error(tokenErr);
-//         self.decoded = decoded;
-//   			self.next();
-//   		});
-//     },
-//     lookupDecodedUser: function() {
-//       var self = this;
-//       models.users.findById(this.decoded.userid, function(err, user){
-//         if(err) return self.error(err);
-//         self.dUser = user;
-//         self.next();
-//       });
-//     },
-//     noToken: function() {
-//       this.next(!this.token);
-//     },
-//     redirectToDomain: function() {
-//       this._callback(null, {
-//         statusCode: 301,
-//         headers: {
-//           Location: "https://"+this._domain,
-//         }
-//       });
-//     },
-//     verifyUser: function() {
-//       var self = this;
-//       models.users.findByIdAndUpdate(this.dUser.id, { status:"verified" }, { new: true }, function(err, data){
-//         if(err) return self.error(err);
-//         self.next("<(-_-)> Successfully verified, you are. Continue to https://"+self._domain);
-//       });
-//     }
-//   },
-//   instruct: {
-//     if: "noToken",
-//     true: "alertMissingToken",
-//     false: [
-//       "decodeToken",
-//       "lookupDecodedUser",
-//       {
-//         if: "decodeSuccessful",
-//         true: [
-//           "verifyUser",
-//           // "redirectToDomain"
-//           ],
-//         false: "alertFailedToVerify"
-//       }
-//     ]
-//   }
-// });
-// global.port = new Chain({
-//   input: function() {
-//     return {
-//       permits: [],
-//       sheets: [],
-//       user: {
-//         username: "public"
-//       }
-//     };
-//   },
-//   steps: {
-//     addDetails: function(last, next) {
-//       var index = Object.assign({}, this._memory.storage),
-//           removers = [
-//             "callback", 
-//             "brainAuth", 
-//             "brainPublic", 
-//             "brainPrivate", 
-//             "brainHeaders"
-//           ];
+    },
+    toPoMethod: function() {
+      this.next(this.poMethod);
+    }
+  },
+  instruct: [ "initPoApi", {
+    switch: "toPoMethod",
+    address: "buildAddress",
+    getAddress: "retrieveAddress",
+    order: [
+      "createOrder"
+    ],
+    getOrder: "retrieveOrder",
+    getShipment: "retrieveShipment",
+    parcel: "buildParcel",
+    purchaseOrder: [
+      "retrieveOrder", "purchaseTheOrder"
+    ],
+    estimate: [
+      "buildAddress",
+      "buildAddress",
+      "buildParcel",
+      "buildShipment"
+    ],
+    smart: "fetchSmartRates"
+  }]
+});
+global.verify = new Chain({
+  input: function() {
+    return {
+      token: this._arg1
+    };
+  },
+  steps: {
+    alertFailedToVerify: function() {
+      this.error("<(-_-)> Failed to verify, you have.");
+    },
+    alertMissingToken: function() {
+      this.error("<(-_-)> Missing verification token, you are.");
+    },
+    decodeSuccessful: function() {
+      this.next(this.decoded.token == this.dUser.status);
+    },
+    decodeToken: function() {
+      var self = this;
+      jwt.verify(this.token, process.env.VERIFY, function (tokenErr, decoded) {
+        if(tokenErr) return self.error(tokenErr);
+        self.decoded = decoded;
+  			self.next();
+  		});
+    },
+    lookupDecodedUser: function() {
+      var self = this;
+      models.users.findById(this.decoded.userid, function(err, user){
+        if(err) return self.error(err);
+        self.dUser = user;
+        self.next();
+      });
+    },
+    noToken: function() {
+      this.next(!this.token);
+    },
+    redirectToDomain: function() {
+      this._callback(null, {
+        statusCode: 301,
+        headers: {
+          Location: "https://"+this._domain,
+        }
+      });
+    },
+    verifyUser: function() {
+      var self = this;
+      models.users.findByIdAndUpdate(this.dUser.id, { status:"verified" }, { new: true }, function(err, data){
+        if(err) return self.error(err);
+        self.next("<(-_-)> Successfully verified, you are. Continue to https://"+self._domain);
+      });
+    }
+  },
+  instruct: {
+    if: "noToken",
+    true: "alertMissingToken",
+    false: [
+      "decodeToken",
+      "lookupDecodedUser",
+      {
+        if: "decodeSuccessful",
+        true: [
+          "verifyUser",
+          // "redirectToDomain"
+          ],
+        false: "alertFailedToVerify"
+      }
+    ]
+  }
+});
+global.port = new Chain({
+  input: function() {
+    return {
+      permits: [],
+      sheets: [],
+      user: {
+        username: "public"
+      }
+    };
+  },
+  steps: {
+    addDetails: function(last, next) {
+      var index = Object.assign({}, this._memory.storage),
+          removers = [
+            "callback", 
+            "brainAuth", 
+            "brainPublic", 
+            "brainPrivate", 
+            "brainHeaders"
+          ];
           
-//       removers.forEach(function(r){
-//         delete index[r];
-//       });
+      removers.forEach(function(r){
+        delete index[r];
+      });
       
-//       next(index);
-//     },
-//     askingForLoginPage: function() {
-//       var params = this._event.pathParameters || {},
-//           site = params.site,
-//           chain = this._chain || "",
-//           chainIsNotAskingForScripts = ["scripts", "login", "signup"].excludes(chain);
+      next(index);
+    },
+    askingForLoginPage: function() {
+      var params = this._event.pathParameters || {},
+          site = params.site,
+          chain = this._chain || "",
+          chainIsNotAskingForScripts = ["scripts", "login", "signup"].excludes(chain);
           
-//       this.next(site == "login" && chainIsNotAskingForScripts);
-//     },
-//     fetchSimpleSite: function(res) {
-//       var self = this,
-//           filter = { name: this._siteName };
+      this.next(site == "login" && chainIsNotAskingForScripts);
+    },
+    fetchSimpleSite: function(res) {
+      var self = this,
+          filter = { name: this._siteName };
 
-//       models.sites.findOne(filter, "-scripts" , function(err, siteObj){
-//         if(siteObj) {
-//           self.siteObj = siteObj;
-//           self.siteId = siteObj._id;
-//         }
-//         self.next(siteObj);
-//       });
-//     },
-//     fetchUserFromCookie: function() {
-//       var self = this;
-//       this.userid = this._cookies.userid;
-//       models.users.findById(this.userid, function(err, user){
-//         if(err) return self.error(err);
-//         if(!user) return self.error("<(-_-)> Not existing in archives, user "+ self.userid +" is.");
-//         self.user = user;
-//         self.next();
-//       });
-//     },
-//     getSiteName: function() {
-//       var domainArray = this._domain.split(".");
-//       this._siteName = domainArray.length === 2 ? domainArray[0] : domainArray[1];
-//       this.next();
-//     },
-//     isVerbose: function(res, next) {
-//       next(this._query._verbose);
-//     },
-//     loggedOut: function() {
-//       var self = this;
-//       jwt.verify(this._cookies.token, this.user.password, function (tokenErr, decoded) {
-//   			self.next(!!tokenErr);
-//   		});
-//     },
-//     noSiteExists: function(siteObj, next) {
-//       next(!siteObj);
-//     },
-//     noSiteSpecified: function() {
-//       this.next(!this._siteName);
-//     },
-//     renderLoggedOut: function() {
-//       this.next({
-//         body: render("login-portal", this),
-//         type: "text/html"
-//       });
-//     },
-//     renderNoSiteExists: function(res, next) {
-//       next({
-//         body: "<h1><(-_-)> Not Existing In Archives Site, " + this._siteName + " Is.</h1>", 
-//         type: "text/html"
-//       });
-//     },
-//     renderNoPermitsExistForSite: function() {
-//       this.next({
-//         body: render("login-portal", this),
-//         type: "text/html"
-//       });
-//     },
-//     renderWelocomeToUiSheet: function() {
-//       this.next({
-//         body: render("login-portal", this),
-//         type: "html"
-//       });
-//     },
-//     runChain: function(res, next) {
-//       var self = this,
-//           chainName = this._chain,
-//           chain = global[chainName];
-//       if(!chain) return this.error("<(-_-)> Not existing in archives, chain " + chainName + " is.");
-//       chain.import(this._memory.storage).start().then(function(memory){
-//         memory._endChain = false;
-//         self._memory.import(memory);
-//         self.next(memory.last);
-//       }).catch(function(err){
-//         self.error(err);
-//       });
-//     },
-//     urlHasAChain: function(res, next) {
-//       next(!!this._chain);
-//     },
-//     userHasCookies: function() {
-//       this.next(!!this._cookies.userid);
-//     },
-//     userHasNoPermitsForSiteAndNotUisheet: function() {
-//       this.next(this.permits.length == 0 && this.siteObj.name !== "uisheet");
-//     },
-//     userIsPublic: function() {
-//       this.next(this.user.username == "public");
-//     },
-//     usingCustomDomain: function() {
-//       var genericSiteNames = ["uisheet.com", "amazonaws.com"],
-//           domain = this._domain,
-//           includesGeneric = 0;
+      models.sites.findOne(filter, "-scripts" , function(err, siteObj){
+        if(siteObj) {
+          self.siteObj = siteObj;
+          self.siteId = siteObj._id;
+        }
+        self.next(siteObj);
+      });
+    },
+    fetchUserFromCookie: function() {
+      var self = this;
+      this.userid = this._cookies.userid;
+      models.users.findById(this.userid, function(err, user){
+        if(err) return self.error(err);
+        if(!user) return self.error("<(-_-)> Not existing in archives, user "+ self.userid +" is.");
+        self.user = user;
+        self.next();
+      });
+    },
+    getSiteName: function() {
+      var domainArray = this._domain.split(".");
+      this._siteName = domainArray.length === 2 ? domainArray[0] : domainArray[1];
+      this.next();
+    },
+    isVerbose: function(res, next) {
+      next(this._query._verbose);
+    },
+    loggedOut: function() {
+      var self = this;
+      jwt.verify(this._cookies.token, this.user.password, function (tokenErr, decoded) {
+  			self.next(!!tokenErr);
+  		});
+    },
+    noSiteExists: function(siteObj, next) {
+      next(!siteObj);
+    },
+    noSiteSpecified: function() {
+      this.next(!this._siteName);
+    },
+    renderLoggedOut: function() {
+      this.next({
+        body: render("login-portal", this),
+        type: "text/html"
+      });
+    },
+    renderNoSiteExists: function(res, next) {
+      next({
+        body: "<h1><(-_-)> Not Existing In Archives Site, " + this._siteName + " Is.</h1>", 
+        type: "text/html"
+      });
+    },
+    renderNoPermitsExistForSite: function() {
+      this.next({
+        body: render("login-portal", this),
+        type: "text/html"
+      });
+    },
+    renderWelocomeToUiSheet: function() {
+      this.next({
+        body: render("login-portal", this),
+        type: "html"
+      });
+    },
+    runChain: function(res, next) {
+      var self = this,
+          chainName = this._chain,
+          chain = global[chainName];
+      if(!chain) return this.error("<(-_-)> Not existing in archives, chain " + chainName + " is.");
+      chain.import(this._memory.storage).start().then(function(memory){
+        memory._endChain = false;
+        self._memory.import(memory);
+        self.next(memory.last);
+      }).catch(function(err){
+        self.error(err);
+      });
+    },
+    urlHasAChain: function(res, next) {
+      next(!!this._chain);
+    },
+    userHasCookies: function() {
+      this.next(!!this._cookies.userid);
+    },
+    userHasNoPermitsForSiteAndNotUisheet: function() {
+      this.next(this.permits.length == 0 && this.siteObj.name !== "uisheet");
+    },
+    userIsPublic: function() {
+      this.next(this.user.username == "public");
+    },
+    usingCustomDomain: function() {
+      var genericSiteNames = ["uisheet.com", "amazonaws.com"],
+          domain = this._domain,
+          includesGeneric = 0;
           
-//       genericSiteNames.forEach(genericSite => {
-//         if(!includesGeneric && domain.includes(genericSite)) includesGeneric++;
-//       });
+      genericSiteNames.forEach(genericSite => {
+        if(!includesGeneric && domain.includes(genericSite)) includesGeneric++;
+      });
       
-//       this.next(includesGeneric==0);
-//     }
-//   },
-//   instruct: [
-//     "connectToDb",
-//     { 
-//       if: "usingCustomDomain",
-//       true: [
-//         "getSiteName", 
-//         {
-//           if: "askingForLoginPage",
-//           true: ["renderLoggedOut", "serve"]
-//         }
-//       ]
-//     }, // remove this when not using custom domain yet
-//     {
-//       if: "userHasCookies",
-//       true: [
-//         "fetchUserFromCookie",
-//         { if: "loggedOut", true: ["renderLoggedOut", "serve"] }
-//       ]
-//     },
-//     {
-//       if: "noSiteSpecified",
-//       true: [
-//         {
-//           if: "userIsPublic",
-//           true: "renderWelocomeToUiSheet",
-//           false: "renderUserLibrary"
-//         },
-//         "serve"
-//       ]
-//     },
-//     "fetchSimpleSite",
-//     { if: "noSiteExists", true: [ "renderNoSiteExists", "serve" ] },
-//     {
-//       if: "urlHasAChain",
-//       true: "runChain",
-//       false: "renderUserLandingPage"
-//     },
-//     { if: "isVerbose", true: "addDetails" },
-//     "serve"  
-//   ]
-// });
+      this.next(includesGeneric==0);
+    }
+  },
+  instruct: [
+    "connectToDb",
+    { 
+      if: "usingCustomDomain",
+      true: [
+        "getSiteName", 
+        {
+          if: "askingForLoginPage",
+          true: ["renderLoggedOut", "serve"]
+        }
+      ]
+    }, // remove this when not using custom domain yet
+    {
+      if: "userHasCookies",
+      true: [
+        "fetchUserFromCookie",
+        { if: "loggedOut", true: ["renderLoggedOut", "serve"] }
+      ]
+    },
+    {
+      if: "noSiteSpecified",
+      true: [
+        {
+          if: "userIsPublic",
+          true: "renderWelocomeToUiSheet",
+          false: "renderUserLibrary"
+        },
+        "serve"
+      ]
+    },
+    "fetchSimpleSite",
+    { if: "noSiteExists", true: [ "renderNoSiteExists", "serve" ] },
+    {
+      if: "urlHasAChain",
+      true: "runChain",
+      false: "renderUserLandingPage"
+    },
+    { if: "isVerbose", true: "addDetails" },
+    "serve"  
+  ]
+});
 
-// var handleError = function(callback, error) {
-//   callback(null, {
-//     statusCode: 400,
-//     body: error.stack || error
-//   });
-// };
-// var importParamaters = function(event, context, callback) {
-//   context.callbackWaitsForEmptyEventLoop = false;
+var handleError = function(callback, error) {
+  callback(null, {
+    statusCode: 400,
+    body: error.stack || error
+  });
+};
+var importParamaters = function(event, context, callback) {
+  context.callbackWaitsForEmptyEventLoop = false;
   
-//   var params = event.pathParameters || {},
-//       siteName = params.site || "uisheet",
-//       hostPath = event.headers.Host.includes("amazonaws.com")
-//                 ? "/dev"+hostPath
-//                 : "/"+siteName;
+  var params = event.pathParameters || {},
+      siteName = params.site || "uisheet",
+      hostPath = event.headers.Host.includes("amazonaws.com")
+                ? "/dev"+hostPath
+                : "/"+siteName;
   
-//   return {
-//     _arg1: params.arg1,
-//     _arg2: params.arg2,
-//     _body: JSON.parse(event.body || "{}"),
-//     _callback: callback,
-//     _chain: params.chain,
-//     _context: context,
-//     _cookie: event.headers.Cookie || "not having cookie, you are.",
-//     _cookies: cookie.parse(event.headers.Cookie || "{}") || "not having cookie, you are.",
-//     _domain: event.requestContext.domainName,
-//     _event: event,
-//     _eventMethod: event.httpMethod.toLowerCase(),
-//     _headers: event.headers || {},
-//     _host: "https://"+event.headers.Host+hostPath,
-//     _query: event.queryStringParameters || {},
-//     _siteName: params.site
-//   };
-// };
+  return {
+    _arg1: params.arg1,
+    _arg2: params.arg2,
+    _body: JSON.parse(event.body || "{}"),
+    _callback: callback,
+    _chain: params.chain,
+    _context: context,
+    _cookie: event.headers.Cookie || "not having cookie, you are.",
+    _cookies: cookie.parse(event.headers.Cookie || "{}") || "not having cookie, you are.",
+    _domain: event.requestContext.domainName,
+    _event: event,
+    _eventMethod: event.httpMethod.toLowerCase(),
+    _headers: event.headers || {},
+    _host: "https://"+event.headers.Host+hostPath,
+    _query: event.queryStringParameters || {},
+    _siteName: params.site
+  };
+};
 
-// module.exports.bulk = function(event, context, callback) {
-//   var input = importParamaters(event, context, callback);
+module.exports.bulk = function(event, context, callback) {
+  var input = importParamaters(event, context, callback);
   
-//   new Chain({
-//     steps: {
-//       postBulkItems: function() {
-//         var self = this,
-//             options = { ordered: false };
+  new Chain({
+    steps: {
+      postBulkItems: function() {
+        var self = this,
+            options = { ordered: false };
         
-//         this.model.insertMany(this._body, options, function(err, doc) {
-//           if(err) {
-//             self.next({message: err});
-//             return;
-//           }
-//           self.next({
-//             bulky: "Success",
-//             doc: doc
-//           });
-//         });
-//       }
-//     },
-//     instruct: [
-//       "connectToDb",
-//       { if: "usingCustomDomain", true: "getSiteName" },
-//       { if: "userHasCookies", true: "fetchUserFromCookie" },
-//       "fetchSimpleSite",
-//       "_buildModel",
-//       "postBulkItems",
-//       "serve"
-//     ]
-//   }).start(input).catch(function(error){
-//     handleError(callback, error);
-//   });
-// };
+        this.model.insertMany(this._body, options, function(err, doc) {
+          if(err) {
+            self.next({message: err});
+            return;
+          }
+          self.next({
+            bulky: "Success",
+            doc: doc
+          });
+        });
+      }
+    },
+    instruct: [
+      "connectToDb",
+      { if: "usingCustomDomain", true: "getSiteName" },
+      { if: "userHasCookies", true: "fetchUserFromCookie" },
+      "fetchSimpleSite",
+      "_buildModel",
+      "postBulkItems",
+      "serve"
+    ]
+  }).start(input).catch(function(error){
+    handleError(callback, error);
+  });
+};
 
 module.exports.port = function(event, context, callback) {
-  context.callbackWaitsForEmptyEventLoop = false;
   
   if (event.source === "serverless-plugin-warmup") {
     console.log("<(-_-)> WarmUp - Lambda is warm!");
     return callback(null, "Lambda is warm!");
   }
   
-  // var input = importParamaters(event, context, callback);
+  var input = importParamaters(event, context, callback);
   
   callback(null, {
     statusCode: 200,
     body: JSON.stringify("hi1")
   });
   
-  // global.port.start(input).catch(function(error){
-  //   handleError(callback, error);
-  // });
+  global.port.start(input).catch(function(error){
+    handleError(callback, error);
+  });
 };
 } catch (e) {
   module.exports.port = function(event, context, callback) {
