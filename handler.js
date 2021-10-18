@@ -45,21 +45,21 @@ const render = require("./render");
 const ssClient = require("smartsheet");
 const EasyPost = require("@easypost/api");
 
-// global.auth = new Chain({
-//   steps: {
-//     lookupAuth: function() {
-//       var AuthenticationClient = require("auth0");
-//       this.next({
-//         hello: "HI",
-//         type: typeof AuthenticationClient,
-//         keys: Object.keys(AuthenticationClient)
-//       });
-//     }
-//   },
-//   instruct: [
-//     "lookupAuth"  
-//   ]
-// });
+global.auth = new Chain({
+  steps: {
+    lookupAuth: function() {
+      var AuthenticationClient = require("auth0");
+      this.next({
+        hello: "HI",
+        type: typeof AuthenticationClient,
+        keys: Object.keys(AuthenticationClient)
+      });
+    }
+  },
+  instruct: [
+    "lookupAuth"  
+  ]
+});
 // global._brainQueryCustomer = new Chain({
 //   input: function() {
 //     return {
