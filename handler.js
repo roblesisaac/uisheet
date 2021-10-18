@@ -3125,12 +3125,14 @@ module.exports.bulk = function(event, context, callback) {
 };
 
 module.exports.port = function(event, context, callback) {
+  context.callbackWaitsForEmptyEventLoop = false;
+  
   if (event.source === "serverless-plugin-warmup") {
     console.log("<(-_-)> WarmUp - Lambda is warm!");
     return callback(null, "Lambda is warm!");
   }
   
-  var input = importParamaters(event, context, callback);
+  // var input = importParamaters(event, context, callback);
   
   callback(null, {
     statusCode: 200,
