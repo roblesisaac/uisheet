@@ -45,21 +45,21 @@ const render = require("./render");
 const ssClient = require("smartsheet");
 const EasyPost = require("@easypost/api");
 
-global.auth = new Chain({
-  steps: {
-    lookupAuth: function() {
-      var AuthenticationClient = require("auth0");
-      this.next({
-        hello: "HI",
-        type: typeof AuthenticationClient,
-        keys: Object.keys(AuthenticationClient)
-      });
-    }
-  },
-  instruct: [
-    "lookupAuth"  
-  ]
-});
+// global.auth = new Chain({
+//   steps: {
+//     lookupAuth: function() {
+//       var AuthenticationClient = require("auth0");
+//       this.next({
+//         hello: "HI",
+//         type: typeof AuthenticationClient,
+//         keys: Object.keys(AuthenticationClient)
+//       });
+//     }
+//   },
+//   instruct: [
+//     "lookupAuth"  
+//   ]
+// });
 // global._brainQueryCustomer = new Chain({
 //   input: function() {
 //     return {
@@ -2265,107 +2265,107 @@ global.auth = new Chain({
 //     }  
 //   ]
 // });
-// global.serve = new Chain({
-//   input: {
-// 		types: {
-// 			css: "text/css",
-// 			html: "text/html",
-// 			icon: "image/x-icon",
-// 			js: "application/javascript",
-// 			javascript: "application/javascript",
-// 			script: "application/javascript",
-// 			default: "application/javascript"
-// 		},
-// 		format: { 
-// 		  headers:{
-// 		    "Access-Control-Allow-Origin": "*",
-// 		    "Cache-Control": "no-cache"
-// 		  },
-// 		  statusCode: 200
-// 		}
-//   },
-//   steps: {
-//     addContentTypeToHeaders: function(res) {
-//       if(res.type || res["Content-Type"]) {
-//         this.format.headers["Content-Type"] = res.type || res["Content-Type"];  
-//       }
-//       this.next(res.body || "// <(-_-)> Empty, your body content is.");
-//     },
-//     addBodyToFormatObj: function(res) {
-//       this.format.body = res;
-//       this.next();
-//     },
-//     assignCustomHeadersObj: function(res) {
-//       this.format.headers = res.headers;
-//       this.next(res);
-//     },
-//     assignFullyCustomResponse: function(res) {
-//       this.format = res;
-//       this.next();
-//     },
-//     bodyIsNotString: function() {
-//       this.next(typeof this.format.body !== "string");
-//     },
-//     convertSimpleTypeToMimeType: function(res) {
-//     	var type = this.types[res.type] || res.type;
-//     	res.type = type || this.types.default;
-//     	this.next();
-//     },
-//     hasCustomHeadersObj: function(res) {
-//       this.next(!!res.headers);    
-//     },
-//     isFullyCustom: function(res) {
-//       this.next(!!res.statusCode);
-//     },
-//     itDoesntHaveFormatting: function(res) {
-//       var hasId = res && !!res._id; // if it hasId it doesnt have formatting
-//       this.next(hasId || !res || (!res.type && !res.headers));
-//     },
-//     renderVariables: function(res) {
-//       for(var key in res.data) {
-//         if(!!res.data[key]) {
-//           var replacer = new RegExp("{{ "+key+" }}", "g"),
-//               replacement = res.data[key];
-//           if(typeof replacement !== "string") replacement = JSON.stringify(replacement);
-// 					res.body = res.body.replace(replacer, replacement);  
-//         }
-//       }
-//       this.next(res);
-//     },
-//     sendToClient: function() {
-//       this._callback(null, this.format);
-//     },
-//     stringifyBody: function() {
-//       this.format.body = JSON.stringify(this.format.body);
-//       this.next();
-//     },
-//     thereAreVariables: function(res) {
-//       this.next(!!res.data);
-//     }
-//   },
-//   instruct: [
-//   	{
-//   	  if: "itDoesntHaveFormatting",
-//   	  true: "addBodyToFormatObj",
-//   	  false: {
-// 	      if: "isFullyCustom",
-// 	      true: "assignFullyCustomResponse",
-// 	      false: [
-// 	        "convertSimpleTypeToMimeType",
-// 	        { if: "thereAreVariables", true: "renderVariables" },
-//           {
-//     	      if: "hasCustomHeadersObj",
-//     	      true: ["assignCustomHeadersObj", "addContentTypeToHeaders"],
-//     	      false: "addContentTypeToHeaders"
-//     	    },
-//     	    "addBodyToFormatObj"
-//         ]
-// 	    }
-//   	},
-//     { if: "bodyIsNotString", true: "stringifyBody" },
-//   	"sendToClient"
-//   ]
-// });
+global.serve = new Chain({
+  input: {
+		types: {
+			css: "text/css",
+			html: "text/html",
+			icon: "image/x-icon",
+			js: "application/javascript",
+			javascript: "application/javascript",
+			script: "application/javascript",
+			default: "application/javascript"
+		},
+		format: { 
+		  headers:{
+		    "Access-Control-Allow-Origin": "*",
+		    "Cache-Control": "no-cache"
+		  },
+		  statusCode: 200
+		}
+  },
+  steps: {
+    addContentTypeToHeaders: function(res) {
+      if(res.type || res["Content-Type"]) {
+        this.format.headers["Content-Type"] = res.type || res["Content-Type"];  
+      }
+      this.next(res.body || "// <(-_-)> Empty, your body content is.");
+    },
+    addBodyToFormatObj: function(res) {
+      this.format.body = res;
+      this.next();
+    },
+    assignCustomHeadersObj: function(res) {
+      this.format.headers = res.headers;
+      this.next(res);
+    },
+    assignFullyCustomResponse: function(res) {
+      this.format = res;
+      this.next();
+    },
+    bodyIsNotString: function() {
+      this.next(typeof this.format.body !== "string");
+    },
+    convertSimpleTypeToMimeType: function(res) {
+    	var type = this.types[res.type] || res.type;
+    	res.type = type || this.types.default;
+    	this.next();
+    },
+    hasCustomHeadersObj: function(res) {
+      this.next(!!res.headers);    
+    },
+    isFullyCustom: function(res) {
+      this.next(!!res.statusCode);
+    },
+    itDoesntHaveFormatting: function(res) {
+      var hasId = res && !!res._id; // if it hasId it doesnt have formatting
+      this.next(hasId || !res || (!res.type && !res.headers));
+    },
+    renderVariables: function(res) {
+      for(var key in res.data) {
+        if(!!res.data[key]) {
+          var replacer = new RegExp("{{ "+key+" }}", "g"),
+              replacement = res.data[key];
+          if(typeof replacement !== "string") replacement = JSON.stringify(replacement);
+					res.body = res.body.replace(replacer, replacement);  
+        }
+      }
+      this.next(res);
+    },
+    sendToClient: function() {
+      this._callback(null, this.format);
+    },
+    stringifyBody: function() {
+      this.format.body = JSON.stringify(this.format.body);
+      this.next();
+    },
+    thereAreVariables: function(res) {
+      this.next(!!res.data);
+    }
+  },
+  instruct: [
+  	{
+  	  if: "itDoesntHaveFormatting",
+  	  true: "addBodyToFormatObj",
+  	  false: {
+	      if: "isFullyCustom",
+	      true: "assignFullyCustomResponse",
+	      false: [
+	        "convertSimpleTypeToMimeType",
+	        { if: "thereAreVariables", true: "renderVariables" },
+          {
+    	      if: "hasCustomHeadersObj",
+    	      true: ["assignCustomHeadersObj", "addContentTypeToHeaders"],
+    	      false: "addContentTypeToHeaders"
+    	    },
+    	    "addBodyToFormatObj"
+        ]
+	    }
+  	},
+    { if: "bodyIsNotString", true: "stringifyBody" },
+  	"sendToClient"
+  ]
+});
 // global.signup = new Chain({
 //   input: function() {
 //     return {
