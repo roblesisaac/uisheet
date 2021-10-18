@@ -22,6 +22,7 @@ const emptyPermit = require("./utils/emptyPermit");
 const fs = require("fs");
 let favicon;
 const nodeFetch = require("node-fetch").default;
+const Plaid = require("plaid");
 const scripts = {};
 if(!scripts.index) {
   fs.readdir("./scripts", function (err, data) {
@@ -41,8 +42,8 @@ const loop = function(arr) {
   return { async: arr };
 };
 const render = require("./render");
-const ssClient = require("smartsheet");
-const EasyPost = require("@easypost/api");
+// const ssClient = require("smartsheet");
+// const EasyPost = require("@easypost/api");
 
 global.auth = new Chain({
   steps: {
@@ -1961,6 +1962,18 @@ global.logout = new Chain({
     "sendLogout"
   ]
 });
+// global.plaid = new Chain({
+//   instruct: [
+//     "_initPlaid",
+//     {
+//       switch: "toPlaidMethod",
+//       get: [],
+//       put: [],
+//       post: [],
+//       delete: []
+//     }  
+//   ]
+// });
 global.renderUserLandingPage = new Chain({
   steps: {
     showIndex: function() {
@@ -2301,9 +2314,6 @@ global.serve = new Chain({
     hasCustomHeadersObj: function(res) {
       this.next(!!res.headers);    
     },
-    sendToClient: function() {
-      this._callback(null, this.format);
-    },
     isFullyCustom: function(res) {
       this.next(!!res.statusCode);
     },
@@ -2321,6 +2331,9 @@ global.serve = new Chain({
         }
       }
       this.next(res);
+    },
+    sendToClient: function() {
+      this._callback(null, this.format);
     },
     stringifyBody: function() {
       this.format.body = JSON.stringify(this.format.body);
@@ -2589,43 +2602,43 @@ global.sib = new Chain({
     ]
   }
 });
-global.smartsheet = new Chain({
-  input: {
-    ssKey: process.env.SSKEY
-  },
-  steps: {
-    setupSmartSheet: function() {
-      this.smartsheet = ssClient.createClient({
-        accessToken: this.ssKey,
-        logLevel: "info"
-      });
-      this.next();
-    },
-    renderSmartSheetData: function() {
-      var self = this;
-      this.smartsheet.sheets.listSheets({})
-        .then(function (result) {
-          var sheetId = result.data[0].id;
+// global.smartsheet = new Chain({
+//   input: {
+//     ssKey: process.env.SSKEY
+//   },
+//   steps: {
+//     setupSmartSheet: function() {
+//       this.smartsheet = ssClient.createClient({
+//         accessToken: this.ssKey,
+//         logLevel: "info"
+//       });
+//       this.next();
+//     },
+//     renderSmartSheetData: function() {
+//       var self = this;
+//       this.smartsheet.sheets.listSheets({})
+//         .then(function (result) {
+//           var sheetId = result.data[0].id;
       
-          // Load one sheet
-          self.smartsheet.sheets.getSheet({id: sheetId})
-            .then(function(sheetInfo) {
-              self.next(sheetInfo);
-            })
-            .catch(function(error) {
-              self.error(error);
-            });
-        })
-        .catch(function(error) {
-          self.error(error);
-        });
-    }
-  },
-  instruct: [
-    "setupSmartSheet",
-    "renderSmartSheetData"  
-  ]
-});
+//           // Load one sheet
+//           self.smartsheet.sheets.getSheet({id: sheetId})
+//             .then(function(sheetInfo) {
+//               self.next(sheetInfo);
+//             })
+//             .catch(function(error) {
+//               self.error(error);
+//             });
+//         })
+//         .catch(function(error) {
+//           self.error(error);
+//         });
+//     }
+//   },
+//   instruct: [
+//     "setupSmartSheet",
+//     "renderSmartSheetData"  
+//   ]
+// });
 global.usps = new Chain({
   input: function() {
     return {
@@ -3032,18 +3045,6 @@ global.port = new Chain({
     },
     "fetchSimpleSite",
     { if: "noSiteExists", true: [ "renderNoSiteExists", "serve" ] },
-    // {
-    //   if: "userHasNoPermitsForSiteAndNotUisheet",
-    //   true: [
-    //     {
-    //       if: "urlHasAChain",
-    //       true: "runChain",
-    //       false: "renderNoPermitsExistForSite"
-    //     },
-    //     "serve"
-    //   ]
-    // },
-    // "_fetchSheetForEachPermit",
     {
       if: "urlHasAChain",
       true: "runChain",
