@@ -67,7 +67,7 @@ provider:
     BUCKET: ${self:custom.bucket}
     USPSID: ${file(./variables.json):USPSID}
     EASYPOSTKEY: ${file(./variables.json):EASYPOSTKEY}
-    PLADIKEY: ${file(./variables.json):PLAIDKEY}
+    PLAIDKEY: ${file(./variables.json):PLAIDKEY}
 
 package:
   individually: true
