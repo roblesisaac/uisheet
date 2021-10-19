@@ -1962,21 +1962,19 @@ global.plaid = new Chain({
       this.next();
     },
     sendToken: function() {
-      let b = this._body;
+      var b = this._body;
       
-      var linkToken = this.plaidClient.createLinkToken({
-          user: {
-              client_user_id: b.userId,
-          },
+      this.plaidClient.createLinkToken({
+          user: { client_user_id: b.userId },
           client_name: b.siteName,
           products: ["auth", "identity"],
           country_codes: ["US"],
           language: "en",
-      });
-  
-      this.next({
-        message: "Hi",
-        linkToken: linkToken
+      }).then(r => {
+        this.next({
+          message: "hello",
+          body: r
+        });
       });
     },
     toPlaidMethod: function() {
