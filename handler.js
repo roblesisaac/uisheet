@@ -1953,20 +1953,42 @@ global.plaid = new Chain({
       var pClient = process.env.PLAIDCLIENT,
           pKey = process.env.PLAIDKEY;
           
-      this.next({
-        pClient: pClient,
-        pKey: pKey
+      this.plaidClient = new plaid.Client({
+          clientID: pClient,
+          secret: pKey,
+          env: plaid.environments.sandbox,
       });
       
-      // this.plaidClient = new plaid.Client({
-      //   clientID: process.env.CLIENT_ID,
-      //   secret: process.env.SECRET,
-      //   env: plaid.environments.sandbox,
-      // });
+      this.next();
+    },
+    sendToken: function() {
+      let b = this._body;
+      
+      var linkToken = this.plaidClient.createLinkToken({
+          user: {
+              client_user_id: b.userId,
+          },
+          client_name: b.siteName,
+          products: ["auth", "identity"],
+          country_codes: ["US"],
+          language: "en",
+      });
+  
+      this.next({
+        message: "Hi",
+        linkToken: linkToken
+      });
+    },
+    toPlaidMethod: function() {
+      this.next(this._arg1);
     }
   },
   instruct: [
     "initPlaid",
+    {
+      switch: "toPlaidMethod",
+      token: "sendToken"
+    }
     // {
     //   switch: "toPlaidMethod",
     //   get: [],
