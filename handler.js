@@ -1949,6 +1949,29 @@ global.logout = new Chain({
 });
 global.plaid = new Chain({
   steps: {
+    doStuff: function() {
+      const { publicToken } = this._body;
+      this.plaidClient.exchangePublicToken(publicToken).then(r => {
+        this.next({
+          message: "hola",
+          r: r
+        });
+      });
+  
+      // const authResponse = await plaidClient.getAuth(accessToken);
+      // console.log('Auth response:');
+      // console.log(util.inspect(authResponse, false, null, true));
+      // console.log('---------------');
+  
+      // const identityResponse = await plaidClient.getIdentity(accessToken);
+      // console.log('Identity response:');
+      // console.log(util.inspect(identityResponse, false, null, true));
+      // console.log('---------------');
+  
+      // const balanceResponse = await plaidClient.getBalance(accessToken);
+      // console.log('Balance response');
+      // console.log(util.inspect(balanceResponse, false, null, true));
+    },
     initPlaid: function() {
       var pClient = process.env.PLAIDCLIENT,
           pKey = process.env.PLAIDKEY;
@@ -1982,7 +2005,8 @@ global.plaid = new Chain({
     "initPlaid",
     {
       switch: "toPlaidMethod",
-      token: "sendToken"
+      getToken: "sendToken",
+      useToken: "doStuff"
     }
     // {
     //   switch: "toPlaidMethod",
