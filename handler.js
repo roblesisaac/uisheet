@@ -1957,7 +1957,7 @@ global.plaid = new Chain({
     }
   },
   instruct: [
-    "_initPlaid",
+    "initPlaid",
     // {
     //   switch: "toPlaidMethod",
     //   get: [],
