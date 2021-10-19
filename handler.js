@@ -22,7 +22,7 @@ const emptyPermit = require("./utils/emptyPermit");
 const fs = require("fs");
 let favicon;
 const nodeFetch = require("node-fetch").default;
-const Plaid = require("plaid");
+const plaid = require("plaid");
 const scripts = {};
 if(!scripts.index) {
   fs.readdir("./scripts", function (err, data) {
@@ -1950,10 +1950,19 @@ global.logout = new Chain({
 global.plaid = new Chain({
   steps: {
     initPlaid: function() {
+      var pClient = process.env.PLAIDCLIENT,
+          pKey = process.env.PLAIDKEY;
+          
       this.next({
-        message: "hi",
-        key: process.env.PLAIDKEY
+        pClient: pClient,
+        pKey: pKey
       });
+      
+      // this.plaidClient = new plaid.Client({
+      //   clientID: process.env.CLIENT_ID,
+      //   secret: process.env.SECRET,
+      //   env: plaid.environments.sandbox,
+      // });
     }
   },
   instruct: [
