@@ -1953,11 +1953,13 @@ global.plaid = new Chain({
       var pClient = process.env.PLAIDCLIENT,
           pKey = process.env.PLAIDKEY;
           
-      this.plaidClient = new plaid.Client({
+      if(!this.plaidClient) {
+        this.plaidClient = new plaid.Client({
           clientID: pClient,
           secret: pKey,
           env: plaid.environments.sandbox,
-      });
+        });
+      }
       
       this.next();
     },
@@ -1970,12 +1972,7 @@ global.plaid = new Chain({
           products: ["auth", "identity"],
           country_codes: ["US"],
           language: "en",
-      }).then(r => {
-        this.next({
-          message: "hello",
-          body: r
-        });
-      });
+      }).then(this.next);
     },
     toPlaidMethod: function() {
       this.next(this._arg1);
