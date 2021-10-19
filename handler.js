@@ -1952,7 +1952,7 @@ global.plaid = new Chain({
     initPlaid: function() {
       this.next({
         message: "hi",
-        key: "process.env.PLAIDKEY"
+        key: process.env.PLAIDKEY
       });
     }
   },
