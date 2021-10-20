@@ -1960,13 +1960,16 @@ global.plaid = new Chain({
     getAuth: function() {
       this.plaidClient.getAuth(this.accessToken).then(r => {
         this.auth = r;
-        this.next();
+        this.next({ auth: this.auth });
       }); 
     },
     getIdentity: function() {
       this.plaidClient.getIdentity(this.accessToken).next(r => {
         this.identity = r;
-        this.next();
+        this.next({
+          auth: this.auth,
+          identity: this.identity
+        });
       });
     },
     getBalance: function() {
@@ -2016,16 +2019,9 @@ global.plaid = new Chain({
       useToken: [
         "getAccessToken",
         "getAuth",
-        "getBalance"
+        // "getBalance"
       ]
     }
-    // {
-    //   switch: "toPlaidMethod",
-    //   get: [],
-    //   put: [],
-    //   post: [],
-    //   delete: []
-    // }  
   ]
 });
 global.renderUserLandingPage = new Chain({
