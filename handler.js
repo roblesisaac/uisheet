@@ -2002,7 +2002,7 @@ global.plaid = new Chain({
       this.plaidClient.createLinkToken({
           user: { client_user_id: b.userId },
           client_name: b.siteName,
-          products: ["auth", "identity", "balance"],
+          products: ["auth", "identity"],
           country_codes: ["US"],
           language: "en",
       }).then(this.next);
@@ -2019,7 +2019,7 @@ global.plaid = new Chain({
       useToken: [
         "getAccessToken",
         "getAuth",
-        "getBalance"
+        // "getBalance"
       ]
     }
   ]
