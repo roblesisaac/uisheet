@@ -1949,28 +1949,35 @@ global.logout = new Chain({
 });
 global.plaid = new Chain({
   steps: {
-    doStuff: function() {
+    getAccessToken: function() {
       const { publicToken } = this._body;
+      
       this.plaidClient.exchangePublicToken(publicToken).then(r => {
+        this.accessToken = r.access_token;
+        this.next();
+      });
+    },
+    getAuth: function() {
+      this.plaidClient.getAuth(this.accessToken).then(r => {
+        this.auth = r;
+        this.next();
+      }); 
+    },
+    getIdentity: function() {
+      this.plaidClient.getIdentity(this.accessToken).next(r => {
+        this.identity = r;
+        this.next();
+      });
+    },
+    getBalance: function() {
+      this.plaidClient.getBalance(this.accessToken).next(r => {
+        this.balance = r;
         this.next({
-          message: "hola",
-          r: r
+          auth: this.auth,
+          identity: this.identity,
+          balance: this.balance
         });
       });
-  
-      // const authResponse = await plaidClient.getAuth(accessToken);
-      // console.log('Auth response:');
-      // console.log(util.inspect(authResponse, false, null, true));
-      // console.log('---------------');
-  
-      // const identityResponse = await plaidClient.getIdentity(accessToken);
-      // console.log('Identity response:');
-      // console.log(util.inspect(identityResponse, false, null, true));
-      // console.log('---------------');
-  
-      // const balanceResponse = await plaidClient.getBalance(accessToken);
-      // console.log('Balance response');
-      // console.log(util.inspect(balanceResponse, false, null, true));
     },
     initPlaid: function() {
       var pClient = process.env.PLAIDCLIENT,
@@ -2006,7 +2013,11 @@ global.plaid = new Chain({
     {
       switch: "toPlaidMethod",
       getToken: "sendToken",
-      useToken: "doStuff"
+      useToken: [
+        "getAccessToken",
+        "getAuth",
+        "getBalance"
+      ]
     }
     // {
     //   switch: "toPlaidMethod",
