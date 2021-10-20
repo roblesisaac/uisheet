@@ -2019,7 +2019,7 @@ global.plaid = new Chain({
       useToken: [
         "getAccessToken",
         "getAuth",
-        // "getBalance"
+        "getBalance"
       ]
     }
   ]
