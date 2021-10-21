@@ -1970,12 +1970,9 @@ global.plaid = new Chain({
       var b = this._body,
           accessToken = b.accessToken,
           method = this._arg2;
+          
       this.plaidClient[method](accessToken).then(res => {
-        this.next({
-          method: method,
-          accessToken: accessToken,
-          response: res
-        });
+        this.next(res);
       });
     },
     sendAccessToken: function() {
