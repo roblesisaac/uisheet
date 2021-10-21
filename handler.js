@@ -1997,7 +1997,7 @@ global.plaid = new Chain({
       
       this.next();
     },
-    sendToken: function() {
+    sendLinkToken: function() {
       var b = this._body;
       
       this.plaidClient.createLinkToken({
@@ -2016,7 +2016,7 @@ global.plaid = new Chain({
     "initPlaid",
     {
       switch: "toPlaidMethod",
-      getToken: "sendToken",
+      getLinkToken: "sendLinkToken",
       useToken: [
         "getAccessToken",
         "getAuth",
