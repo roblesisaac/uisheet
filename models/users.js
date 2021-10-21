@@ -2015,7 +2015,7 @@ global.plaid = new Chain({
     "initPlaid",
     {
       switch: "toPlaidMethod",
-      get: "plaidAction",
+      fetch: "plaidAction",
       getLinkToken: "sendLinkToken",
       getAccessToken: "getAccessToken",
       getAuth: "getAuth",
