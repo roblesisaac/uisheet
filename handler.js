@@ -1949,7 +1949,10 @@ global.logout = new Chain({
 });
 global.plaid = new Chain({
   steps: {
-    getAccessToken: function() {
+    defineAccessToken: function() {
+      this.accessToken = this.accessToken || this._body.accessToken;
+    },
+    getAccessToken_: function() {
       const { publicToken } = this._body;
       
       this.plaidClient.exchangePublicToken(publicToken).then(r => {
@@ -1957,23 +1960,20 @@ global.plaid = new Chain({
         this.next(this.accessToken);
       });
     },
-    getAuth: function() {
-      var accessToken = this._body.accessToken;
-      this.plaidClient.getAuth(accessToken).then(auth => {
+    getAuth_: function() {
+      this.plaidClient.getAuth(this.accessToken).then(auth => {
         this.auth = auth;
         this.next(auth);
       }); 
     },
     getIdentity_: function() {
-      var accessToken = this._body.accessToken || this.accessToken;
-      this.plaidClient.getIdentity(accessToken).then(identity => {
+      this.plaidClient.getIdentity(this.accessToken).then(identity => {
         this.identity = identity;
         this.next(identity);
       });
     },
-    getBalance: function() {
-      var accessToken = this._body.accessToken;
-      this.plaidClient.getBalance(accessToken).then(balance => {
+    getBalance_: function() {
+      this.plaidClient.getBalance(this.accessToken).then(balance => {
         this.balance = balance;
         this.next(balance);
       });
@@ -2034,15 +2034,15 @@ global.plaid = new Chain({
       switch: "toPlaidMethod",
       fetch: "plaidAction",
       getLinkToken: "sendLinkToken",
-      getAccessToken: "getAccessToken",
-      getAuth: "getAuth",
-      getBalance: "getBalance",
-      getIdentity: "getIdentity_",
+      getAccessToken: "getAccessToken_",
+      getAuth: ["defineAccessToken", "getAuth_"],
+      getBalance: ["defineAccessToken", "getBalance_"],
+      getIdentity: ["defineAccessToken", "getIdentity_"],
       getAll: [
-        "getAccessToken",
+        "getAccessToken_",
         "getIdentity_",
-        "getAuth",
-        "getBalance",
+        "getAuth_",
+        "getBalance_",
         "sendAll"
       ]
     }
