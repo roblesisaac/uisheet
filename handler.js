@@ -1976,6 +1976,7 @@ global.plaid = new Chain({
       this.plaidClient.getBalance(this.accessToken).then(r => {
         this.balance = r;
         this.next({
+          accessToken: this.accessToken,
           auth: this.auth,
           identity: this.identity,
           balance: this.balance
