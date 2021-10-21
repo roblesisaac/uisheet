@@ -1953,24 +1953,28 @@ global.plaid = new Chain({
       const { publicToken } = this._body;
       
       this.plaidClient.exchangePublicToken(publicToken).then(r => {
-        this.next(r.access_token);
+        this.accessToken = r.access_token;
+        this.next(this.accessToken);
       });
     },
     getAuth: function() {
       var accessToken = this._body.accessToken;
       this.plaidClient.getAuth(accessToken).then(auth => {
+        this.auth = auth;
         this.next(auth);
       }); 
     },
     getIdentity_: function() {
-      var accessToken = this._body.accessToken;
+      var accessToken = this._body.accessToken || this.accessToken;
       this.plaidClient.getIdentity(accessToken).then(identity => {
+        this.identity = identity;
         this.next(identity);
       });
     },
     getBalance: function() {
       var accessToken = this._body.accessToken;
       this.plaidClient.getBalance(accessToken).then(balance => {
+        this.balance = balance;
         this.next(balance);
       });
     },
@@ -2013,6 +2017,15 @@ global.plaid = new Chain({
     },
     toPlaidMethod: function() {
       this.next(this._arg1);
+    },
+    sendAll: function() {
+      this.next({
+        message: "you got all",
+        accessToken: this.accessToken,
+        identity: this.identity,
+        auth: this.auth,
+        balance: this.balance
+      });
     }
   },
   instruct: [
@@ -2024,7 +2037,14 @@ global.plaid = new Chain({
       getAccessToken: "getAccessToken",
       getAuth: "getAuth",
       getBalance: "getBalance",
-      getIdentity: "getIdentity_"
+      getIdentity: "getIdentity_",
+      getAll: [
+        "getAccessToken",
+        "getIdentity_",
+        "getAuth",
+        "getBalance",
+        "sendAll"
+      ]
     }
   ]
 });
