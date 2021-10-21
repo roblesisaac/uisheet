@@ -1952,32 +1952,6 @@ global.plaid = new Chain({
     defineAccessToken: function() {
       this.accessToken = this.accessToken || this._body.accessToken;
     },
-    getAccessToken_: function() {
-      const { publicToken } = this._body;
-      
-      this.plaidClient.exchangePublicToken(publicToken).then(r => {
-        this.accessToken = r.access_token;
-        this.next(this.accessToken);
-      });
-    },
-    getAuth_: function() {
-      this.plaidClient.getAuth(this.accessToken).then(auth => {
-        this.auth = auth;
-        this.next(auth);
-      }); 
-    },
-    getIdentity_: function() {
-      this.plaidClient.getIdentity(this.accessToken).then(identity => {
-        this.identity = identity;
-        this.next(identity);
-      });
-    },
-    getBalance_: function() {
-      this.plaidClient.getBalance(this.accessToken).then(balance => {
-        this.balance = balance;
-        this.next(balance);
-      });
-    },
     initPlaid: function() {
       var pClient = process.env.PLAIDCLIENT,
           pKey = process.env.PLAIDKEY;
@@ -1992,7 +1966,7 @@ global.plaid = new Chain({
       
       this.next();
     },
-    plaidAction: function() {
+    callPlaidMethod: function() {
       var b = this._body,
           accessToken = b.accessToken,
           method = this._arg2;
@@ -2002,6 +1976,14 @@ global.plaid = new Chain({
           accessToken: accessToken,
           response: res
         });
+      });
+    },
+    sendAccessToken: function() {
+      const { publicToken } = this._body;
+      
+      this.plaidClient.exchangePublicToken(publicToken).then(r => {
+        this.accessToken = r.access_token;
+        this.next(this.accessToken);
       });
     },
     sendLinkToken: function() {
@@ -2017,34 +1999,15 @@ global.plaid = new Chain({
     },
     toPlaidMethod: function() {
       this.next(this._arg1);
-    },
-    sendAll: function() {
-      this.next({
-        message: "you got all",
-        accessToken: this.accessToken,
-        identity: this.identity,
-        auth: this.auth,
-        balance: this.balance
-      });
     }
   },
   instruct: [
     "initPlaid",
     {
       switch: "toPlaidMethod",
-      fetch: "plaidAction",
+      fetch: ["defineAccessToken", "callPlaidMethod"],
       getLinkToken: "sendLinkToken",
-      getAccessToken: "getAccessToken_",
-      getAuth: ["defineAccessToken", "getAuth_"],
-      getBalance: ["defineAccessToken", "getBalance_"],
-      getIdentity: ["defineAccessToken", "getIdentity_"],
-      getAll: [
-        "getAccessToken_",
-        "getIdentity_",
-        "getAuth_",
-        "getBalance_",
-        "sendAll"
-      ]
+      getAccessToken: "sendAccessToken"
     }
   ]
 });
