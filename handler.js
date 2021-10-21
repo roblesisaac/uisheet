@@ -1988,6 +1988,14 @@ global.plaid = new Chain({
       
       this.next();
     },
+    plaidAction: function() {
+      var b = this._body,
+          accessToken = b.accessToken,
+          method = this._arg2;
+      this.plaidClient[method](accessToken).then(res => {
+        this.next(res);
+      });
+    },
     sendLinkToken: function() {
       var b = this._body;
       
@@ -2007,6 +2015,7 @@ global.plaid = new Chain({
     "initPlaid",
     {
       switch: "toPlaidMethod",
+      fetch: "plaidAction",
       getLinkToken: "sendLinkToken",
       getAccessToken: "getAccessToken",
       getAuth: "getAuth",
