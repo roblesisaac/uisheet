@@ -1953,7 +1953,7 @@ global.plaid = new Chain({
       const { publicToken } = this._body;
       
       this.plaidClient.exchangePublicToken(publicToken).then(r => {
-        this.next(this.access_token);
+        this.next(r.access_token);
       });
     },
     getAuth: function() {
