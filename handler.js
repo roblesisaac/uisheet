@@ -1993,7 +1993,11 @@ global.plaid = new Chain({
           accessToken = b.accessToken,
           method = this._arg2;
       this.plaidClient[method](accessToken).then(res => {
-        this.next(res);
+        this.next({
+          method: method,
+          accessToken: accessToken,
+          response: res
+        });
       });
     },
     sendLinkToken: function() {
