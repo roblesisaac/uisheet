@@ -1962,7 +1962,7 @@ global.plaid = new Chain({
         this.next(auth);
       }); 
     },
-    getIdentity: function() {
+    getIdentity_: function() {
       var accessToken = this._body.accessToken;
       this.plaidClient.getIdentity(accessToken).then(identity => {
         this.next(identity);
@@ -2024,7 +2024,7 @@ global.plaid = new Chain({
       getAccessToken: "getAccessToken",
       getAuth: "getAuth",
       getBalance: "getBalance",
-      getIdentity: "getIdentity"
+      getIdentity: "getIdentity_"
     }
   ]
 });
