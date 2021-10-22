@@ -1974,6 +1974,10 @@ global.plaid = new Chain({
           
       this.plaidClient[method](accessToken).then(res => {
         this.next(res);
+      }).catch(e => {
+        this.next({
+          error: e
+        });
       });
     },
     sendAccessToken: function() {
