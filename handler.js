@@ -2012,9 +2012,7 @@ global.plaid = new Chain({
       };
       
       this.plaidClient.linkTokenCreate(request).then(r => {
-        this.next({
-          message: "data"
-        });
+        this.next(r.data);
       }).catch(e => {
         this.next({
           error: e
