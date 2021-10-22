@@ -1981,13 +1981,18 @@ global.plaid = new Chain({
           method = this._arg2,
           access_token = this.access_token;
           
-      this.plaidClient[method]({ access_token }).then(res => {
-        this.next(res);
-      }).catch(e => {
-        this.next({
-          error: e
-        });
+      this.next({
+        method: method,
+        body: { access_token }
       });
+          
+      // this.plaidClient[method]({ access_token }).then(res => {
+      //   this.next(res.data);
+      // }).catch(e => {
+      //   this.next({
+      //     error: e
+      //   });
+      // });
     },
     sendAccessToken: function() {
       const { public_token } = this._body;
