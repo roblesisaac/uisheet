@@ -22,7 +22,7 @@ const emptyPermit = require("./utils/emptyPermit");
 const fs = require("fs");
 let favicon;
 const nodeFetch = require("node-fetch").default;
-const plaid = require("plaid");
+const { Configuration, PlaidApi, PlaidEnvironments } = require("plaid");
 const scripts = {};
 if(!scripts.index) {
   fs.readdir("./scripts", function (err, data) {
@@ -1954,27 +1954,25 @@ global.plaid = new Chain({
       this.next();
     },
     initPlaid: function() {
+      if(this.plaidClient) {
+        this.next();
+        return;
+      }
+      
       var pClient = process.env.PLAIDCLIENT,
           pKey = process.env.PLAIDKEY;
           
-      if(!this.plaidClient) {
-      var config = new plaid.Configuration({
-        basePath: plaid.PlaidEnvironments.sandbox,
+      var configuration = new Configuration({
+        basePath: PlaidEnvironments.sandbox,
         baseOptions: {
           headers: {
             "PLAID-CLIENT-ID": pClient,
-            "PLAID-SECRET": pKey,
-          },
-        },
+            "PLAID-SECRET": pKey
+          }
+        }
       });
       
-      this.plaidClient = new plaid.PlaidApi(config);
-        // this.plaidClient = new plaid.Client({
-        //   clientID: pClient,
-        //   secret: pKey,
-        //   env: plaid.environments.sandbox,
-        // });
-      }
+      this.plaidClient = new PlaidApi(configuration);
       
       this.next();
     },
@@ -2002,14 +2000,24 @@ global.plaid = new Chain({
     sendLinkToken: function() {
       var b = this._body,
           products = b.products || ["auth", "identity"];
+          
+      // const user = await User.find(...);
+      const request = {
+        user: {
+          // This should correspond to a unique id for the current user.
+          client_user_id: b.userId,
+        },
+        client_name: b.siteName,
+        products: products,
+        language: "en",
+        country_codes: ["US"],
+      };
       
-      this.plaidClient.createLinkToken({
-          user: { client_user_id: b.userId },
-          client_name: b.siteName,
-          products: products,
-          country_codes: ["US"],
-          language: "en",
-      }).then(this.next);
+      this.plaidClient.linkTokenCreate(request).then(this.next).catch(e => {
+        this.next({
+          error: e
+        });
+      });
     },
     toPlaidMethod: function() {
       this.next(this._arg1);
