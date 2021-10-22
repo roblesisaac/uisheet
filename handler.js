@@ -1978,10 +1978,10 @@ global.plaid = new Chain({
     },
     callPlaidMethod: function() {
       var b = this._body,
-          accessToken = b.accessToken,
-          method = this._arg2;
+          method = this._arg2,
+          access_token = this.access_token;
           
-      this.plaidClient[method](accessToken).then(res => {
+      this.plaidClient[method]({ access_token }).then(res => {
         this.next(res);
       }).catch(e => {
         this.next({
@@ -1990,11 +1990,10 @@ global.plaid = new Chain({
       });
     },
     sendAccessToken: function() {
-      const { publicToken } = this._body;
+      const { public_token } = this._body;
       
-      this.plaidClient.exchangePublicToken(publicToken).then(r => {
-        this.accessToken = r.access_token;
-        this.next(this.accessToken);
+      this.plaidClient.itemPublicTokenExchange({ public_token }).then(r => {
+        this.next(r.data);
       });
     },
     sendLinkToken: function() {
