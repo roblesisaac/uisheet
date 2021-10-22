@@ -1985,12 +1985,13 @@ global.plaid = new Chain({
       });
     },
     sendLinkToken: function() {
-      var b = this._body;
+      var b = this._body,
+          products = b.products || ["auth", "identity"];
       
       this.plaidClient.createLinkToken({
           user: { client_user_id: b.userId },
           client_name: b.siteName,
-          products: ["auth", "identity"],
+          products: products,
           country_codes: ["US"],
           language: "en",
       }).then(this.next);
