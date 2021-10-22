@@ -1979,20 +1979,15 @@ global.plaid = new Chain({
     callPlaidMethod: function() {
       var b = this._body,
           method = this._arg2,
-          access_token = this.access_token;
+          access_token = this.accessToken;
           
-      this.next({
-        method: method,
-        body: { access_token }
+      this.plaidClient[method]({ access_token }).then(res => {
+        this.next(res);
+      }).catch(e => {
+        this.next({
+          error: e
+        });
       });
-          
-      // this.plaidClient[method]({ access_token }).then(res => {
-      //   this.next(res.data);
-      // }).catch(e => {
-      //   this.next({
-      //     error: e
-      //   });
-      // });
     },
     sendAccessToken: function() {
       const { public_token } = this._body;
