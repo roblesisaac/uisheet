@@ -1982,7 +1982,7 @@ global.plaid = new Chain({
           access_token = this.accessToken;
           
       this.plaidClient[method]({ access_token }).then(res => {
-        this.next(res);
+        this.next(res.data);
       }).catch(e => {
         this.next({
           error: e
