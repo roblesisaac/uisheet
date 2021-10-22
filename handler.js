@@ -1979,7 +1979,7 @@ global.plaid = new Chain({
         this.next(res.data);
       }).catch(e => {
         this.next({
-          error: e
+          plaidError: e
         });
       });
     },
