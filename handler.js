@@ -1958,11 +1958,20 @@ global.plaid = new Chain({
           pKey = process.env.PLAIDKEY;
           
       if(!this.plaidClient) {
-        this.plaidClient = new plaid.Client({
-          clientID: pClient,
-          secret: pKey,
-          env: plaid.environments.sandbox,
-        });
+      this.plaidClient = new plaid.Configuration({
+        basePath: plaid.PlaidEnvironments.sandbox,
+        baseOptions: {
+          headers: {
+            "PLAID-CLIENT-ID": pClient,
+            "PLAID-SECRET": pKey,
+          },
+        },
+      });
+        // this.plaidClient = new plaid.Client({
+        //   clientID: pClient,
+        //   secret: pKey,
+        //   env: plaid.environments.sandbox,
+        // });
       }
       
       this.next();
