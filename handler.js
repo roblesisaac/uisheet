@@ -2013,8 +2013,7 @@ global.plaid = new Chain({
       
       this.plaidClient.linkTokenCreate(request).then(r => {
         this.next({
-          message: "data",
-          data: r
+          message: "data"
         });
       }).catch(e => {
         this.next({
