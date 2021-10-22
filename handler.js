@@ -1951,6 +1951,7 @@ global.plaid = new Chain({
   steps: {
     defineAccessToken: function() {
       this.accessToken = this.accessToken || this._body.accessToken;
+      this.next();
     },
     initPlaid: function() {
       var pClient = process.env.PLAIDCLIENT,
