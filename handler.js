@@ -2011,13 +2011,16 @@ global.plaid = new Chain({
         country_codes: ["US"],
       };
       
-      this.next(request);
-      
-      // this.plaidClient.linkTokenCreate(request).then(this.next).catch(e => {
-      //   this.next({
-      //     error: e
-      //   });
-      // });
+      this.plaidClient.linkTokenCreate(request).then(r => {
+        this.next({
+          message: "data",
+          data: r
+        });
+      }).catch(e => {
+        this.next({
+          error: e
+        });
+      });
     },
     toPlaidMethod: function() {
       this.next(this._arg1);
