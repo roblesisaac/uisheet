@@ -2004,15 +2004,13 @@ global.plaid = new Chain({
         country_codes: ["US"],
       };
       
-      this.next(request);
-      
-      // this.plaidClient.linkTokenCreate(request).then(r => {
-      //   this.next(r.data);
-      // }).catch(e => {
-      //   this.next({
-      //     error: e
-      //   });
-      // });
+      this.plaidClient.linkTokenCreate(request).then(r => {
+        this.next(r.data);
+      }).catch(e => {
+        this.next({
+          plaidError: e
+        });
+      });
     },
     toPlaidMethod: function() {
       this.next(this._arg1);
