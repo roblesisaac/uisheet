@@ -2001,10 +2001,8 @@ global.plaid = new Chain({
       var b = this._body,
           products = b.products || ["auth", "identity"];
           
-      // const user = await User.find(...);
       const request = {
         user: {
-          // This should correspond to a unique id for the current user.
           client_user_id: b.userId,
         },
         client_name: b.siteName,
@@ -2013,11 +2011,13 @@ global.plaid = new Chain({
         country_codes: ["US"],
       };
       
-      this.plaidClient.linkTokenCreate(request).then(this.next).catch(e => {
-        this.next({
-          error: e
-        });
-      });
+      this.next(request);
+      
+      // this.plaidClient.linkTokenCreate(request).then(this.next).catch(e => {
+      //   this.next({
+      //     error: e
+      //   });
+      // });
     },
     toPlaidMethod: function() {
       this.next(this._arg1);
