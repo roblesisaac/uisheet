@@ -2005,15 +2005,13 @@ global.plaid = new Chain({
         access_token: b.accessToken,
       };
       
-      this.next(request);
-      
-      // this.plaidClient.linkTokenCreate(request).then(r => {
-      //   this.next(r.data);
-      // }).catch(e => {
-      //   this.next({
-      //     plaidError: e.response.data
-      //   });
-      // });
+      this.plaidClient.linkTokenCreate(request).then(r => {
+        this.next(r.data);
+      }).catch(e => {
+        this.next({
+          plaidError: e.response.data
+        });
+      });
     },
     toPlaidMethod: function() {
       this.next(this._arg1);
