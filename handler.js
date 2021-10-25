@@ -2005,14 +2005,16 @@ global.plaid = new Chain({
         access_token: b.accessToken,
       };
       
-      this.plaidClient.linkTokenCreate(request).then(r => {
-        this.next(r.data);
-      }).catch(e => {
-        this.next({
-          type: "hi"+e.error_type,
-          plaidError: e
-        });
-      });
+      this.next(request);
+      
+      // this.plaidClient.linkTokenCreate(request).then(r => {
+      //   this.next(r.data);
+      // }).catch(e => {
+      //   this.next({
+      //     type: "hi"+e.error_type,
+      //     plaidError: e
+      //   });
+      // });
     },
     toPlaidMethod: function() {
       this.next(this._arg1);
