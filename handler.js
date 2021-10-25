@@ -2001,9 +2001,13 @@ global.plaid = new Chain({
         client_name: b.siteName,
         products: products,
         language: "en",
-        country_codes: ["US"],
-        access_token: b.accessToken,
+        country_codes: ["US"]
       };
+      
+      if(b.accessToken) {
+        delete request.products;
+        request.access_token = b.accessToken;
+      }
       
       this.plaidClient.linkTokenCreate(request).then(r => {
         this.next(r.data);
