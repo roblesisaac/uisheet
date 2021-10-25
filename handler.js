@@ -1977,15 +1977,8 @@ global.plaid = new Chain({
       
       this.plaidClient[method](this._body).then(res => {
         this.next(res.data);
-      }).catch(pErr => {
-        this.next({
-          errorKeys: Object.keys(pErr),
-          json: pErr.toJSON(),
-          responseKeys: Object.keys(pErr.response),
-          response: pErr.response.data,
-          errorType: pErr.error_type,
-          plaidError: pErr
-        });
+      }).catch(e => {
+        this.next(e.response.data);
       });
     },
     sendAccessToken: function() {
