@@ -1975,13 +1975,18 @@ global.plaid = new Chain({
     callPlaidMethod: function() {
       var method = this._arg2;
           
-      this.plaidClient[method](this._body).then(res => {
-        this.next(res.data);
-      }).catch(e => {
-        this.next({
-          plaidError: e
-        });
+      this.next({
+        message: "sanddev",
+        method: method,
+        body: this._body
       });
+      // this.plaidClient[method](this._body).then(res => {
+      //   this.next(res.data);
+      // }).catch(e => {
+      //   this.next({
+      //     plaidError: e
+      //   });
+      // });
     },
     sendAccessToken: function() {
       const { public_token } = this._body;
