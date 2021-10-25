@@ -2008,6 +2008,7 @@ global.plaid = new Chain({
         this.next(r.data);
       }).catch(e => {
         this.next({
+          type: "hi"+e.error_type,
           plaidError: e
         });
       });
