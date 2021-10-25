@@ -1973,12 +1973,13 @@ global.plaid = new Chain({
       this.next();
     },
     callPlaidMethod: function() {
-      var method = this._arg2;
+      var method = this._arg2,
+          self = this;
       
       this.plaidClient[method](this._body).then(res => {
         this.next(res.data);
       }).catch(function(pErr) {
-        this.next({
+        self.next({
           errorKeys: Object.keys(pErr),
           errorType: pErr.error_type,
           plaidError: pErr
