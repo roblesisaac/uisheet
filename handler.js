@@ -1977,10 +1977,11 @@ global.plaid = new Chain({
       
       this.plaidClient[method](this._body).then(res => {
         this.next(res.data);
-      }).catch(e => {
+      }).catch(function(pErr) {
         this.next({
-          errorType: "hi"+e.error_type,
-          plaidError: e
+          errorKeys: Object.keys(pErr),
+          errorType: pErr.error_type,
+          plaidError: pErr
         });
       });
     },
