@@ -2002,6 +2002,7 @@ global.plaid = new Chain({
         products: products,
         language: "en",
         country_codes: ["US"],
+        access_token: b.accessToken,
       };
       
       this.plaidClient.linkTokenCreate(request).then(r => {
