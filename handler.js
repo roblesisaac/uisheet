@@ -1981,6 +1981,7 @@ global.plaid = new Chain({
         this.next({
           errorKeys: Object.keys(pErr),
           json: pErr.toJSON(),
+          response: pErr.response,
           errorType: pErr.error_type,
           plaidError: pErr
         });
