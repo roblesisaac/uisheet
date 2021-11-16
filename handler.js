@@ -664,7 +664,7 @@ global._checkPermit = new Chain({
     return {
       sheetName: this._arg1 || "sheets",
       id: this._arg2,
-      validDefaults: ["users", "sites"]
+      validDefaults: ["accounts", "users", "sites"]
     };
   },
   steps: {
@@ -921,6 +921,10 @@ global.db = new Chain({
     },
     addToOptions: function() {
       this.options[this.key] = this.nativeOptions[this.key](this.value);
+      this.next();
+    },
+    addUserIdToFilter: function() {
+      this.filter.userId = this.userid;
       this.next();
     },
     addUsernameToFilter: function() {
@@ -1339,10 +1343,11 @@ global.db = new Chain({
         { if: "hasId", true: ["findById", "serve"] },
         {
           switch: "toCaveats",
+          accounts: "addUserIdToFilter",
           sites: ["_fetchAllUserSites", "serve"],
           sheets: "addSiteIdToFilter",
           permits: ["addSiteIdToFilter", "removeSheetNameFromFilter"],
-          users: "addUsernameToFilter"
+          //users: "addUsernameToFilter"
         },
         {
             if: "isDistinct",
