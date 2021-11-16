@@ -8,6 +8,7 @@ const Utils = require("./scripts/utils");
 const Chain = require("./scripts/chain");
 const permits = require("./models/permits");
 var models = {
+  accounts: require("./models/accounts"),
   sheets: require("./models/sheets"),
   sites: require("./models/sites"), 
   users: require("./models/users"),
@@ -1978,9 +1979,7 @@ global.plaid = new Chain({
       this.plaidClient[method](this._body).then(res => {
         this.next(res.data);
       }).catch(e => {
-        this.next({
-          plaidError: e.response.data
-        });
+        this.next({ plaidError: e.response.data });
       });
     },
     sendAccessToken: function() {
@@ -1988,6 +1987,8 @@ global.plaid = new Chain({
       
       this.plaidClient.itemPublicTokenExchange({ public_token }).then(r => {
         this.next(r.data);
+      }).catch(e => {
+        this.next({ plaidError: e.response.data });
       });
     },
     sendLinkToken: function() {
@@ -1995,13 +1996,13 @@ global.plaid = new Chain({
           products = b.products || ["auth", "identity"];
           
       const request = {
-        user: {
-          client_user_id: b.userId,
-        },
+        user: { client_user_id: b.userId },
         client_name: b.siteName,
         products: products,
         language: "en",
-        country_codes: ["US"]
+        country_codes: ["US"],
+        // link_customization_name: "account_selection_v2_customization",
+        // update: { account_selection_enabled: true }
       };
       
       if(b.accessToken) {
@@ -2012,9 +2013,7 @@ global.plaid = new Chain({
       this.plaidClient.linkTokenCreate(request).then(r => {
         this.next(r.data);
       }).catch(e => {
-        this.next({
-          plaidError: e.response.data
-        });
+        this.next({ plaidError: e.response.data });
       });
     },
     toPlaidMethod: function() {
