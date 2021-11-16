@@ -1343,7 +1343,7 @@ global.db = new Chain({
         { if: "hasId", true: ["findById", "serve"] },
         {
           switch: "toCaveats",
-          accounts: "addUserIdToFilter",
+          // accounts: "addUserIdToFilter",
           sites: ["_fetchAllUserSites", "serve"],
           sheets: "addSiteIdToFilter",
           permits: ["addSiteIdToFilter", "removeSheetNameFromFilter"],
