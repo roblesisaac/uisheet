@@ -1180,7 +1180,7 @@ global.db = new Chain({
       this.next(!!this._body.newPassword);
     },
     hasSpecialCaveates: function () {
-      var caveats = ["sites", "users", "sheets", "permits"];
+      var caveats = ["accounts","sites", "users", "sheets", "permits"];
       this.next(caveats.indexOf(this.sheetName)>-1);
     },
     hasId: function(res, next) {
