@@ -1398,7 +1398,8 @@ global.db = new Chain({
               "findById",
               {
                 if: "userIdDoesntMatch",
-                true: "alertNeedPermissionFromAuthor"
+                true: "alertNeedPermissionFromAuthor",
+                false: "updateItem"
               }
             ],
             permits: ["updateAndSaveSiteCacheStamp", "updateItem"],
