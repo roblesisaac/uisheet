@@ -924,7 +924,7 @@ global.db = new Chain({
       this.next();
     },
     addUserIdToFilter: function() {
-      this.filter.userId = this.userid;
+      this.filter.userIds = '"/'+this.userid+'/"';
       this.next();
     },
     addUsernameToFilter: function() {
@@ -1336,6 +1336,10 @@ global.db = new Chain({
     {
       switch: "toRouteMethod",
       get: [
+        {
+          switch: "toCaveats",
+          accounts: "addUserIdToFilter"
+        },
         "forEachQueryKey", [
           {
             if: "isANativeOption",
@@ -1373,7 +1377,6 @@ global.db = new Chain({
         },
         {
           switch: "toCaveats",
-          accounts: "addUserIdToFilter",
           sites: ["_fetchAllUserSites", "serve"],
           sheets: "addSiteIdToFilter",
           permits: ["addSiteIdToFilter", "removeSheetNameFromFilter"],
