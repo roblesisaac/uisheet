@@ -8,7 +8,7 @@ const Utils = require("./scripts/utils");
 const Chain = require("./scripts/chain");
 const permits = require("./models/permits");
 var models = {
-  accounts: require("./models/accounts"),
+  // accounts: require("./models/accounts"),
   sheets: require("./models/sheets"),
   sites: require("./models/sites"), 
   users: require("./models/users"),
@@ -664,7 +664,9 @@ global._checkPermit = new Chain({
     return {
       sheetName: this._arg1 || "sheets",
       id: this._arg2,
-      validDefaults: ["accounts", "users", "sites"]
+      validDefaults: [
+      // "accounts", 
+      "users", "sites"]
     };
   },
   steps: {
@@ -1180,7 +1182,9 @@ global.db = new Chain({
       this.next(!!this._body.newPassword);
     },
     hasSpecialCaveates: function () {
-      var caveats = ["accounts","sites", "users", "sheets", "permits"];
+      var caveats = [
+        // "accounts",
+        "sites", "users", "sheets", "permits"];
       this.next(caveats.indexOf(this.sheetName)>-1);
     },
     hasId: function(res, next) {
@@ -1336,10 +1340,10 @@ global.db = new Chain({
     {
       switch: "toRouteMethod",
       get: [
-        {
-          switch: "toCaveats",
-          accounts: "addUserIdToQuery"
-        },
+        // {
+        //   switch: "toCaveats",
+        //   accounts: "addUserIdToQuery"
+        // },
         "forEachQueryKey", [
           {
             if: "isANativeOption",
@@ -1363,10 +1367,10 @@ global.db = new Chain({
           "findById", 
           {
             switch: "toCaveats",
-            accounts: {
-              if: "userIdDoesntHaveAccess",
-              true: "alertNeedPermissionFromAuthor"
-            },
+            // accounts: {
+            //   if: "userIdDoesntHaveAccess",
+            //   true: "alertNeedPermissionFromAuthor"
+            // },
             users: {
               if: "userIdDoesntMatch",
               true: "alertNeedPermissionFromAuthor"              
@@ -1403,14 +1407,14 @@ global.db = new Chain({
           if: "hasSpecialCaveates",
           true: {
             switch: "toCaveats",
-            accounts: [
-              "findById",
-              {
-                if: "userIdDoesntHaveAccess",
-                true: "alertNeedPermissionFromAuthor",
-                false: "updateItem"
-              }
-            ],
+            // accounts: [
+            //   "findById",
+            //   {
+            //     if: "userIdDoesntHaveAccess",
+            //     true: "alertNeedPermissionFromAuthor",
+            //     false: "updateItem"
+            //   }
+            // ],
             permits: ["updateAndSaveSiteCacheStamp", "updateItem"],
             sites: [
               "lookupSiteAuthor",
