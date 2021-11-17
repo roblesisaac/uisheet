@@ -924,7 +924,7 @@ global.db = new Chain({
       this.next();
     },
     addUserIdToFilter: function() {
-      this.filter.userIds = '"/'+this.userid+'/"';
+      this.filter.userIds = '/'+this.userid+'/';
       this.next();
     },
     addUsernameToFilter: function() {
