@@ -1151,6 +1151,7 @@ global.db = new Chain({
       var self = this;
       this.model.findById(this.id, null, this.options, function(err, item) {
         if(err) return self.error(err);
+        self.itemFound = item;
         next(item);
       });
     },
@@ -1303,6 +1304,12 @@ global.db = new Chain({
         self.next();
       });
     },
+    userIdDoesntMatch: function() {
+      var item = this.itemFound,
+          itemUserId = item.userId || item._id;
+          
+      this.next(this.userid != itemUserId);
+    },
     userIsAuthorOfSite: function(author) {
       this.next(this.user._id.toString() == author);
     },
@@ -1340,7 +1347,24 @@ global.db = new Chain({
         "forEachAddRules", [ "addRule" ],
         "forEachRemoveRules", [ "removeRule" ],
         { if: "isDbCount", true: ["getCount", "serve"] },
-        { if: "hasId", true: ["findById", "serve"] },
+        { 
+          if: "hasId", 
+          true: [
+          "findById", 
+          {
+            switch: "toCaveats",
+            accounts: {
+              if: "userIdDoesntMatch",
+              true: "alertNeedPermissionFromAuthor"
+            },
+            users: {
+              if: "userIdDoesntMatch",
+              true: "alertNeedPermissionFromAuthor"              
+            }
+          },
+          "serve"
+          ]
+        },
         {
           switch: "toCaveats",
           accounts: "addUserIdToFilter",
