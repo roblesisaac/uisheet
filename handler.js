@@ -1,4 +1,4 @@
-"use strict";
+\"use strict";
 
 try {
 const AWS = require("aws-sdk");
@@ -1394,6 +1394,13 @@ global.db = new Chain({
           if: "hasSpecialCaveates",
           true: {
             switch: "toCaveats",
+            accounts: [
+              "findById",
+              {
+                if: "userIdDoesntMatch",
+                true: "alertNeedPermissionFromAuthor"
+              }
+            ],
             permits: ["updateAndSaveSiteCacheStamp", "updateItem"],
             sites: [
               "lookupSiteAuthor",
