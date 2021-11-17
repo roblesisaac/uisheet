@@ -936,7 +936,7 @@ global.db = new Chain({
       this.next();
     },
     alertNeedPermissionFromAuthor: function() {
-      this.error("<(-_-)> Permission from site author, you must have.");
+      this.error("<(-_-)> Permission from author, you must have.");
     },
     bulkImport: function() {
       var self = this;
@@ -1310,6 +1310,12 @@ global.db = new Chain({
           
       this.next(this.userid != itemUserId);
     },
+    userIdDoesntHaveAccess: function() {
+      var item = this.itemFound || {},
+          itemUserIds = item.userIds;
+          
+      this.next(itemUserIds.excludes(this.userid));
+    },
     userIsAuthorOfSite: function(author) {
       this.next(this.user._id.toString() == author);
     },
@@ -1354,7 +1360,7 @@ global.db = new Chain({
           {
             switch: "toCaveats",
             accounts: {
-              if: "userIdDoesntMatch",
+              if: "userIdDoesntHaveAccess",
               true: "alertNeedPermissionFromAuthor"
             },
             users: {
@@ -1397,7 +1403,7 @@ global.db = new Chain({
             accounts: [
               "findById",
               {
-                if: "userIdDoesntMatch",
+                if: "userIdDoesntHaveAccess",
                 true: "alertNeedPermissionFromAuthor",
                 false: "updateItem"
               }
