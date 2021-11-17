@@ -923,8 +923,8 @@ global.db = new Chain({
       this.options[this.key] = this.nativeOptions[this.key](this.value);
       this.next();
     },
-    addUserIdToFilter: function() {
-      this.filter.userIds = '/'+this.userid+'/';
+    addUserIdToQuery: function() {
+      this._query.userIds = "/"+this.userid+"/";
       this.next();
     },
     addUsernameToFilter: function() {
@@ -1338,7 +1338,7 @@ global.db = new Chain({
       get: [
         {
           switch: "toCaveats",
-          accounts: "addUserIdToFilter"
+          accounts: "addUserIdToQuery"
         },
         "forEachQueryKey", [
           {
