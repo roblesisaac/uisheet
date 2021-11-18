@@ -7,6 +7,14 @@ const AccountSchema = new mongoose.Schema({
   institutionId: {
     type: String,
     required: true
+  },
+  userId: {
+    type: String,
+    required: true
+  },
+  siteId: {
+    type: String,
+    required: true
   }
 });
 module.exports = Account = mongoose.model("account", AccountSchema);
