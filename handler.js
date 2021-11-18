@@ -1279,7 +1279,9 @@ global.db = new Chain({
       var savedAccount = this._postedItem,
           account = {
             institutionId: savedAccount.institutionId,
-            userId: savedAccount.userId
+            userId: savedAccount.userId,
+            siteId: this.siteId,
+            sheetId: this.sheet._id
           };
           
       accounts.create(account, (err, data) => {
@@ -2031,7 +2033,7 @@ global.plaid = new Chain({
           pKey = process.env.PLAIDKEY;
           
       var configuration = new Configuration({
-        basePath: PlaidEnvironments.development,
+        basePath: PlaidEnvironments.sandbox,
         baseOptions: {
           headers: {
             "PLAID-CLIENT-ID": pClient,
