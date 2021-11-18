@@ -63,7 +63,10 @@ global.accounts = new Chain({
           
       models.accounts.findOne(filters, function(error, pAccount) {
         if(error) return self.error(error);
-        self.next(!!pAccount._id);
+        self.next({
+          data: pAccount,
+          boolean: !!pAccount
+        });
       });
     }
   },
