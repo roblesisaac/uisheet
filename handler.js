@@ -1,4 +1,4 @@
-"use strict";
+\"use strict";
 
 try {
 const AWS = require("aws-sdk");
@@ -2033,7 +2033,7 @@ global.plaid = new Chain({
           pKey = process.env.PLAIDKEY;
           
       var configuration = new Configuration({
-        basePath: PlaidEnvironments.sandbox,
+        basePath: PlaidEnvironments.development,
         baseOptions: {
           headers: {
             "PLAID-CLIENT-ID": pClient,
