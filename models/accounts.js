@@ -8,7 +8,7 @@ const AccountSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  userId: {
+  sheetId: {
     type: String,
     required: true
   },
