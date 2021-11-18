@@ -7,8 +7,8 @@ const mime = require("mime");
 const Utils = require("./scripts/utils");
 const Chain = require("./scripts/chain");
 const permits = require("./models/permits");
+const accounts = require("./models/accounts");
 var models = {
-  accounts: require("./models/accounts"),
   sheets: require("./models/sheets"),
   sites: require("./models/sites"), 
   users: require("./models/users"),
@@ -61,7 +61,7 @@ global.accounts = new Chain({
             userId: this.userId
           };
           
-      models.accounts.findOne(filters, function(error, pAccount) {
+      accounts.findOne(filters, function(error, pAccount) {
         if(error) return self.error(error);
         self.next({
           existingAccount: !!pAccount
@@ -689,9 +689,7 @@ global._checkPermit = new Chain({
     return {
       sheetName: this._arg1 || "sheets",
       id: this._arg2,
-      validDefaults: [
-      // "accounts", 
-      "users", "sites"]
+      validDefaults: ["users", "sites"]
     };
   },
   steps: {
@@ -1207,9 +1205,7 @@ global.db = new Chain({
       this.next(!!this._body.newPassword);
     },
     hasSpecialCaveates: function () {
-      var caveats = [
-        // "accounts",
-        "sites", "users", "sheets", "permits"];
+      var caveats = ["sites", "users", "sheets", "permits"];
       this.next(caveats.indexOf(this.sheetName)>-1);
     },
     hasId: function(res, next) {
@@ -1286,7 +1282,7 @@ global.db = new Chain({
             userId: savedAccount.userId
           };
           
-      models.accounts.create(account, (err, data) => {
+      accounts.create(account, (err, data) => {
         if(err) return this.error(err);
         this.next({
           saved: savedAccount,
@@ -1380,10 +1376,6 @@ global.db = new Chain({
     {
       switch: "toRouteMethod",
       get: [
-        // {
-        //   switch: "toCaveats",
-        //   accounts: "addUserIdToQuery"
-        // },
         "forEachQueryKey", [
           {
             if: "isANativeOption",
@@ -1407,10 +1399,6 @@ global.db = new Chain({
           "findById", 
           {
             switch: "toCaveats",
-            // accounts: {
-            //   if: "userIdDoesntHaveAccess",
-            //   true: "alertNeedPermissionFromAuthor"
-            // },
             users: {
               if: "userIdDoesntMatch",
               true: "alertNeedPermissionFromAuthor"              
@@ -1447,14 +1435,6 @@ global.db = new Chain({
           if: "hasSpecialCaveates",
           true: {
             switch: "toCaveats",
-            // accounts: [
-            //   "findById",
-            //   {
-            //     if: "userIdDoesntHaveAccess",
-            //     true: "alertNeedPermissionFromAuthor",
-            //     false: "updateItem"
-            //   }
-            // ],
             permits: ["updateAndSaveSiteCacheStamp", "updateItem"],
             sites: [
               "lookupSiteAuthor",
