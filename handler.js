@@ -50,7 +50,7 @@ global.accounts = new Chain({
   input: function() {
     return {
       insId: this._arg1,
-      userId: this._arg2
+      userId: this._arg2 || this.userid
     };
   },
   steps: {
