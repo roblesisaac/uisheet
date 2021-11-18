@@ -1279,6 +1279,21 @@ global.db = new Chain({
       delete this.filter._sheetName;
       this.next();
     },
+    saveToGlobalPlaid: function() {
+      var savedAccount = this._postedItem,
+          account = {
+            institutionId: savedAccount.institutionId,
+            userId: savedAccount.userId
+          };
+          
+      models.accounts.create(account, (err, data) => {
+        if(err) return this.error(err);
+        this.next({
+          saved: savedAccount,
+          simple: data
+        });
+      });
+    },
     setNewPassword: function() {
       var self = this;
       this.user.hashPassword(this._body.newPassword, function(hashed){
@@ -1493,6 +1508,7 @@ global.db = new Chain({
             "postItem",
             {
               switch: "toCaveats",
+              accounts: "saveToGlobalPlaid",
               sites: [ "createSheetForNewSite", "createPermitForNewSite" ],
               sheets: [ "createPermitForSheet" ]
             }
