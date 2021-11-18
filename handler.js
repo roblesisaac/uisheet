@@ -8,7 +8,7 @@ const Utils = require("./scripts/utils");
 const Chain = require("./scripts/chain");
 const permits = require("./models/permits");
 var models = {
-  // accounts: require("./models/accounts"),
+  accounts: require("./models/accounts"),
   sheets: require("./models/sheets"),
   sites: require("./models/sites"), 
   users: require("./models/users"),
@@ -46,6 +46,29 @@ const render = require("./render");
 const ssClient = require("smartsheet");
 const EasyPost = require("@easypost/api");
 
+global.accounts = new Chain({
+  input: function() {
+    return {
+      insId: this._arg1,
+      userId: this._arg2
+    };
+  },
+  steps: {
+    lookupPlaidAccount: function() {
+      var self = this,
+          filters = {
+            institutionId: this.insId,
+            userId: this.userId
+          };
+          
+      models.accounts.findOne(filters, function(error, pAccount) {
+        if(error) return self.error(error);
+        self.next(pAccount);
+      });
+    }
+  },
+  instruct: "lookupPlaidAccount"
+});
 global._brainQueryCustomer = new Chain({
   input: function() {
     return {
