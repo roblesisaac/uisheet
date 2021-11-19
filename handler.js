@@ -148,7 +148,7 @@ global.brain = new Chain({
       brainMethod: this._arg1,
       brainPublic: process.env.BTPUBLIC,
       brainPrivate: process.env.BTPRIVATE,
-      endpoint: "https://payments.sandbox.braintree-api.com/graphql",
+      endpoint: "https://payments.braintree-api.com/graphql",
     };
   },
   steps: {
