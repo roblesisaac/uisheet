@@ -457,8 +457,7 @@ global.brain = new Chain({
       var data = last.data || {};
       var created = data.createClientToken || {};
       var clientToken = created.clientToken || null;
-      // this.next(clientToken);
-      this.next(last);
+      this.next(clientToken);
     },
     sendTransaction: function(last) {
       var data = last.data || {};
