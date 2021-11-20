@@ -165,7 +165,7 @@ global.brain = new Chain({
       this.brainHeaders = {
         "Content-Type": "application/json",
         "Authorization": this.brainAuth,
-        "Braintree-Version": "2018-05-08"
+        "Braintree-Version": "2019-01-01"
       };
       this.next();
     },
