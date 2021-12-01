@@ -2637,60 +2637,43 @@ global.sib = new Chain({
       this.next();
     },
     contactSave: function() {
-      // const SibApiV3Sdk = require("sib-api-v3-sdk");
-      // var self = this,
-      //     defaultClient = SibApiV3Sdk.ApiClient.instance;
+      var apiInstance = new this.SibApiV3Sdk.ContactsApi();
       
-      // let apiKey = defaultClient.authentications["api-key"];
-      // apiKey.apiKey = process.env.SIB;
-      
-      // let apiInstance = new SibApiV3Sdk.ContactsApi();
-      
-      // let createContact = new SibApiV3Sdk.CreateContact();
-      
-      // createContact.email = this._body.email;
-      // createContact.attributes = {};
-      
-      // var ats = this._body.attributes || {};
-      
-      // ["firstName", "lastName", "sms"].forEach(at => {
-      //   createContact.attributes[at] = ats[at];
-      // });
-      
-      // apiInstance.createContact(createContact).then(function(data) {
-      //   self.next({
-      //     data: data,
-      //     bodyProps: Object.keys(ats)
-      //   });
-      // }, function(error) {
-      //   self.error(error);
-      // });
-      
-      var apiInstance = new this.SibApiV3Sdk.ContactsApi(),
-          createContact = new this.SibApiV3Sdk.CreateContact();
-      
-      // for(var key in this._body) {
-      //   if(key !== "sms") createContact[key] = this._body[key];
-      // }
-      
-      var ats = this._body.attributes || {};
-      
-      createContact.attributes = {};
-      
-      createContact.email = this._body.email;
-      
-      ["firstName", "lastName", "OPT_IN", "sms"].forEach(at => {
-        createContact.attributes[at] = ats[at];
-      });
-      
-      apiInstance.createContact(createContact).then( (data) => {
-        this.next({
-          data: data,
-          body: this._body
-        });
+      apiInstance.createContact(this.createContact).then( (data) => {
+        this.next(data);
       }, function(error) {
         this.error(error);
       });
+    },
+    formatContactBody: function() {
+      this.createContact = new this.SibApiV3Sdk.CreateContact();
+      
+      var formats = {
+        sms: function(numb) {
+          if(!numb) return;
+          
+          var firstChar = numb.slice(0,1);
+          
+          if(firstChar !== "1") numb = "1"+numb;
+          
+          return numb;
+        }
+      };
+      
+      var attrs = this._body.attributes || {};
+      
+      for(var key in attrs) {
+        var value = attrs[key];
+        if(formats[key]) {
+          attrs[key] = formats[key](value);
+        }
+      }
+      
+      for(var prop in this._body) {
+        this.createContact[prop] = this._body[prop];
+      }
+      
+      this.next();
     },
     missingNumber: function() {
       this.next(!this._body.to);
@@ -2745,6 +2728,7 @@ global.sib = new Chain({
     switch: "toSibMethod",
     createContact: [
       "BuildSibApi",
+      "formatContactBody",
       "contactSave"
     ],
     emailHtml: [
