@@ -2637,16 +2637,33 @@ global.sib = new Chain({
       this.next();
     },
     contactSave: function() {
-      var apiInstance = new this.SibApiV3Sdk.ContactsApi(),
-          createContact = new this.SibApiV3Sdk.CreateContact();
+      const SibApiV3Sdk = require("sib-api-v3-sdk");
+      var self = this,
+          defaultClient = SibApiV3Sdk.ApiClient.instance;
       
-      for(var key in this._body) {
-        createContact[key] = this._body[key];
-      }
+      let apiKey = defaultClient.authentications["api-key"];
+      apiKey.apiKey = process.env.SIB;
       
-      this.next({
-        message: createContact
+      let apiInstance = new SibApiV3Sdk.ContactsApi();
+      
+      let createContact = new SibApiV3Sdk.CreateContact();
+      
+      createContact.email = "exampleloakandhi@gmail.com";
+      
+      apiInstance.createContact(createContact).then(function(data) {
+        self.next(data);
+      }, function(error) {
+        self.error(error);
       });
+      
+      // var apiInstance = new this.SibApiV3Sdk.ContactsApi(),
+      //     createContact = new this.SibApiV3Sdk.CreateContact();
+      
+      // for(var key in this._body) {
+      //   createContact[key] = this._body[key];
+      // }
+      
+      // this.next({ message: createContact });
       
       // apiInstance.createContact(createContact).then( (data) => {
       //   this.next({
