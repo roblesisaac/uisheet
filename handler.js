@@ -2652,7 +2652,10 @@ global.sib = new Chain({
       createContact.attributes = {};
       
       var ats = this._body.attributes || {};
-      createContact.attributes.firstName = ats.firstName;
+      
+      ["firstName", "lastName"].forEach(at => {
+        createContact.attributes[at] = ats[at];
+      });
       
       apiInstance.createContact(createContact).then(function(data) {
         self.next({
