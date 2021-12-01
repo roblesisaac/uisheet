@@ -2640,19 +2640,15 @@ global.sib = new Chain({
       var createContact = new this.SibApiV3Sdk.CreateContact();
       
       createContact = this._body;
-      this.next({
-        test: this._body,
-        created: createContact
-      });
       
-      // this.apiInstance.createContact(createContact).then( data => {
-      //   this.next({
-      //     body: this._body,
-      //     response: data
-      //   });
-      // }, function(error) {
-      //   this.error(error);
-      // });
+      this.apiInstance.createContact(createContact).then( data => {
+        this.next({
+          body: this._body,
+          response: data
+        });
+      }, function(error) {
+        this.error(error);
+      });
     },
     createContactInstance: function() {
       this.apiInstance = new this.SibApiV3Sdk.ContactsApi();
