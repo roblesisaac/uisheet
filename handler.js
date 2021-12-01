@@ -2669,9 +2669,15 @@ global.sib = new Chain({
       var apiInstance = new this.SibApiV3Sdk.ContactsApi(),
           createContact = new this.SibApiV3Sdk.CreateContact();
       
-      for(var key in this._body) {
-        if(key !== "sms") createContact[key] = this._body[key];
-      }
+      // for(var key in this._body) {
+      //   if(key !== "sms") createContact[key] = this._body[key];
+      // }
+      
+      var ats = this._body.attributes || {};
+      
+      ["firstName", "lastName"].forEach(at => {
+        createContact.attributes[at] = ats[at];
+      });
       
       apiInstance.createContact(createContact).then( (data) => {
         this.next({
