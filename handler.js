@@ -2653,7 +2653,7 @@ global.sib = new Chain({
       
       var ats = this._body.attributes || {};
       
-      ["firstName", "lastName"].forEach(at => {
+      ["firstName", "lastName", "sms"].forEach(at => {
         createContact.attributes[at] = ats[at];
       });
       
