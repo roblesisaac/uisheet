@@ -2641,13 +2641,15 @@ global.sib = new Chain({
       
       createContact = this._body;
       
-      this.apiInstance.createContact(createContact).then( data => {
+      this.apiInstance.createContact(createContact).then( (data) => {
         this.next({
-          body: this._body,
-          response: data
+          body: this._body
         });
       }, function(error) {
-        this.error(error);
+        this.next({
+          errorFound: error
+        });
+        // this.error(error);
       });
     },
     createContactInstance: function() {
