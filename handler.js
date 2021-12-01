@@ -2639,7 +2639,9 @@ global.sib = new Chain({
     contactSave: function() {
       var createContact = new this.SibApiV3Sdk.CreateContact();
       
-      createContact = this._body;
+      for(var key in this._body) {
+        createContact[key] = this._body[key];
+      }
       
       this.apiInstance.createContact(createContact).then( (data) => {
         this.next({
