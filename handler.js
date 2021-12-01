@@ -2637,14 +2637,16 @@ global.sib = new Chain({
       this.next();
     },
     contactSave: function() {
-      var createContact = new this.SibApiV3Sdk.CreateContact();
+      var apiInstance = new this.SibApiV3Sdk.ContactsApi(),
+          createContact = new this.SibApiV3Sdk.CreateContact();
       
       for(var key in this._body) {
         createContact[key] = this._body[key];
       }
       
-      this.apiInstance.createContact(createContact).then( (data) => {
+      apiInstance.createContact(createContact).then( (data) => {
         this.next({
+          data: data,
           body: this._body
         });
       }, function(error) {
@@ -2653,10 +2655,6 @@ global.sib = new Chain({
         });
         // this.error(error);
       });
-    },
-    createContactInstance: function() {
-      this.apiInstance = new this.SibApiV3Sdk.ContactsApi();
-      this.next();
     },
     missingNumber: function() {
       this.next(!this._body.to);
@@ -2711,7 +2709,6 @@ global.sib = new Chain({
     switch: "toSibMethod",
     createContact: [
       "BuildSibApi",
-      "createContactInstance",
       "contactSave"
     ],
     emailHtml: [
