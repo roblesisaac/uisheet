@@ -2680,9 +2680,6 @@ global.sib = new Chain({
       createContact.email = this._body.email;
       
       ["firstName", "lastName", "OPT_IN", "sms"].forEach(at => {
-        var value = ats[at];
-        
-        if(at == "sms") value *= 1;
         createContact.attributes[at] = ats[at];
       });
       
