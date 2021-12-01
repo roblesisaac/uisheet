@@ -2644,17 +2644,21 @@ global.sib = new Chain({
         createContact[key] = this._body[key];
       }
       
-      apiInstance.createContact(createContact).then( (data) => {
-        this.next({
-          data: data,
-          body: this._body
-        });
-      }, function(error) {
-        this.next({
-          errorFound: error
-        });
-        // this.error(error);
+      this.next({
+        message: createContact
       });
+      
+      // apiInstance.createContact(createContact).then( (data) => {
+      //   this.next({
+      //     data: data,
+      //     body: this._body
+      //   });
+      // }, function(error) {
+      //   this.next({
+      //     errorFound: error
+      //   });
+      //   // this.error(error);
+      // });
     },
     missingNumber: function() {
       this.next(!this._body.to);
