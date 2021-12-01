@@ -2637,18 +2637,22 @@ global.sib = new Chain({
       this.next();
     },
     contactSave: function() {
-      var createContact = new this.SibApiV3Sdk.CreateContact(),
-          self = this;
+      var createContact = new this.SibApiV3Sdk.CreateContact();
       
       createContact = this._body;
-      this.apiInstance.createContact(createContact).then(function(data) {
-        self.next({
-          body: self._body,
-          response: data
-        });
-      }, function(error) {
-        self.error(error);
+      this.next({
+        test: this._body,
+        created: createContact
       });
+      
+      // this.apiInstance.createContact(createContact).then( data => {
+      //   this.next({
+      //     body: this._body,
+      //     response: data
+      //   });
+      // }, function(error) {
+      //   this.error(error);
+      // });
     },
     createContactInstance: function() {
       this.apiInstance = new this.SibApiV3Sdk.ContactsApi();
