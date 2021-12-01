@@ -2637,55 +2637,50 @@ global.sib = new Chain({
       this.next();
     },
     contactSave: function() {
-      const SibApiV3Sdk = require("sib-api-v3-sdk");
-      var self = this,
-          defaultClient = SibApiV3Sdk.ApiClient.instance;
+      // const SibApiV3Sdk = require("sib-api-v3-sdk");
+      // var self = this,
+      //     defaultClient = SibApiV3Sdk.ApiClient.instance;
       
-      let apiKey = defaultClient.authentications["api-key"];
-      apiKey.apiKey = process.env.SIB;
+      // let apiKey = defaultClient.authentications["api-key"];
+      // apiKey.apiKey = process.env.SIB;
       
-      let apiInstance = new SibApiV3Sdk.ContactsApi();
+      // let apiInstance = new SibApiV3Sdk.ContactsApi();
       
-      let createContact = new SibApiV3Sdk.CreateContact();
+      // let createContact = new SibApiV3Sdk.CreateContact();
       
-      createContact.email = this._body.email;
-      createContact.attributes = {};
+      // createContact.email = this._body.email;
+      // createContact.attributes = {};
       
-      var ats = this._body.attributes || {};
+      // var ats = this._body.attributes || {};
       
-      ["firstName", "lastName", "sms"].forEach(at => {
-        createContact.attributes[at] = ats[at];
-      });
+      // ["firstName", "lastName", "sms"].forEach(at => {
+      //   createContact.attributes[at] = ats[at];
+      // });
       
-      apiInstance.createContact(createContact).then(function(data) {
-        self.next({
-          data: data,
-          bodyProps: Object.keys(ats)
-        });
-      }, function(error) {
-        self.error(error);
-      });
-      
-      // var apiInstance = new this.SibApiV3Sdk.ContactsApi(),
-      //     createContact = new this.SibApiV3Sdk.CreateContact();
-      
-      // for(var key in this._body) {
-      //   createContact[key] = this._body[key];
-      // }
-      
-      // this.next({ message: createContact });
-      
-      // apiInstance.createContact(createContact).then( (data) => {
-      //   this.next({
+      // apiInstance.createContact(createContact).then(function(data) {
+      //   self.next({
       //     data: data,
-      //     body: this._body
+      //     bodyProps: Object.keys(ats)
       //   });
       // }, function(error) {
-      //   this.next({
-      //     errorFound: error
-      //   });
-      //   // this.error(error);
+      //   self.error(error);
       // });
+      
+      var apiInstance = new this.SibApiV3Sdk.ContactsApi(),
+          createContact = new this.SibApiV3Sdk.CreateContact();
+      
+      for(var key in this._body) {
+        if(key !== "sms") createContact[key] = this._body[key];
+      }
+      
+      apiInstance.createContact(createContact).then( (data) => {
+        this.next({
+          data: data,
+          body: this._body
+        });
+      }, function(error) {
+        this.error(error);
+      });
     },
     missingNumber: function() {
       this.next(!this._body.to);
