@@ -2641,10 +2641,8 @@ global.sib = new Chain({
       
       apiInstance.createContact(this.createContact).then( (data) => {
         this.next(data);
-      }, function(error) {
-        this.next({
-          error: error
-        });
+      }).catch(error => {
+        this.error(error);
       });
     },
     formatContactBody: function() {
