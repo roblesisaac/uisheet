@@ -2649,9 +2649,13 @@ global.sib = new Chain({
       let createContact = new SibApiV3Sdk.CreateContact();
       
       createContact.email = this._body.email;
+      createContact.attributes = this._body.attributes;
       
       apiInstance.createContact(createContact).then(function(data) {
-        self.next(data);
+        self.next({
+          data: data,
+          bodyProps: Object.keys(self._body)
+        });
       }, function(error) {
         self.error(error);
       });
