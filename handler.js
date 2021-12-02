@@ -71,6 +71,14 @@ global.accounts = new Chain({
   },
   instruct: "lookupPlaidAccount"
 });
+global.text = new Chain({
+  steps: {
+    sendz: function() {
+      this.error("error found");
+    }
+  },
+  instruct: ["sendz"]
+});
 global._brainQueryCustomer = new Chain({
   input: function() {
     return {
