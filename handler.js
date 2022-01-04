@@ -1541,7 +1541,7 @@ global.db = new Chain({
       ]
     }
   ]
-});
+}); 
 global.fax = new Chain({
   steps: {
     createFax: function() {
@@ -2033,7 +2033,7 @@ global.plaid = new Chain({
           pKey = process.env.PLAIDKEY;
           
       var configuration = new Configuration({
-        basePath: PlaidEnvironments.development,
+        basePath: PlaidEnvironments.sandbox,
         baseOptions: {
           headers: {
             "PLAID-CLIENT-ID": pClient,
