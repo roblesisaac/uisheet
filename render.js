@@ -58,7 +58,7 @@ module.exports = function(page, props) {
   </script>
   
   <script type="text/javascript" src="//unpkg.com/xlsx/dist/shim.min.js"></script>
-  <script type="text/javascript" src="//cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script type="text/javascript" src="//cdn.jsdelivr.net/npm/xlsx@0.16.9/dist/xlsx.mini.min.js"></script>
   
   <script src="${windowLocation}/scripts/data/${cacheStamp}"></script>
   <script src="${windowLocation}/scripts/js/${cacheStamp}"></script>
