@@ -57,6 +57,9 @@ module.exports = function(page, props) {
     const user = ${ JSON.stringify(props.user) };
   </script>
   
+  <script type="text/javascript" src="//unpkg.com/xlsx/dist/shim.min.js"></script>
+  <script type="text/javascript" src="//cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  
   <script src="${windowLocation}/scripts/data/${cacheStamp}"></script>
   <script src="${windowLocation}/scripts/js/${cacheStamp}"></script>
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>

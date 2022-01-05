@@ -28,7 +28,7 @@
     "mongodb-client-encryption": "^1.2.4",
     "mongoose": "^5.10.3",
     "node-fetch": "^2.6.1",
-    "plaid": "^8.1.0",
+    "plaid": "^9.4.0",
     "sib-api-v3-sdk": "github:sendinblue/APIv3-nodejs-library",
     "smartsheet": "^2.101.0",
     "terser": "^5.3.4"
