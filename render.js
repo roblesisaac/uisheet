@@ -57,8 +57,7 @@ module.exports = function(page, props) {
     const user = ${ JSON.stringify(props.user) };
   </script>
   
-  <script type="text/javascript" src="//unpkg.com/xlsx/dist/shim.min.js"></script>
-  <script type="text/javascript" src="//cdn.jsdelivr.net/npm/xlsx@0.16.9/dist/xlsx.mini.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.bare.min.js" integrity="sha512-iXEZrzFoyI+s2fOrA3gZ5r4KePZ9hSgisZ9tdEpaymdsXzMTxtb4Mh+6kNTNjfDsctS745lY8JwslcDefJERJQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   
   <script src="${windowLocation}/scripts/data/${cacheStamp}"></script>
   <script src="${windowLocation}/scripts/js/${cacheStamp}"></script>
