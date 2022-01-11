@@ -49,27 +49,28 @@ const EasyPost = require("@easypost/api");
 global.accounts = new Chain({
   input: function() {
     return {
-      insId: this._arg1,
-      userId: this._arg2 || this.userid
+      accountMethod: this._arg1,
+      institutionIdId: this._arg2
     };
   },
   steps: {
     lookupPlaidAccount: function() {
       var self = this,
-          filters = {
-            institutionId: this.insId,
-            userId: this.userId
-          };
+          body = this._body;
           
-      accounts.findOne(filters, function(error, pAccount) {
+      accounts.findOne(body, function(error, pAccount) {
         if(error) return self.error(error);
-        self.next({
-          existingAccount: !!pAccount
-        });
+        self.next(pAccount);
       });
+    },
+    toAccountMethod: function() {
+      this.next(this.accountMethod);
     }
   },
-  instruct: "lookupPlaidAccount"
+  instruct: {
+    switch: "toAccountMethod",
+    lookup: "lookupPlaidAccount"
+  }
 });
 global._brainQueryCustomer = new Chain({
   input: function() {
