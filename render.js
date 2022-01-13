@@ -60,6 +60,8 @@ module.exports = function(page, props) {
   <script type="text/javascript" src="//unpkg.com/xlsx/dist/shim.min.js"></script>
   <script type="text/javascript" src="//cdn.jsdelivr.net/npm/xlsx@0.16.9/dist/xlsx.mini.min.js"></script>
   
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx-populate/1.21.0/xlsx-populate-no-encryption.min.js" integrity="sha512-vTcH2/smkURtorUy2Lj/if8X2Mlcs17/d+PqDkTSPSVx5HcxQLVgdQixETp4fPihMhyvG8pNKAbHa/CM8n4/NA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
   <script src="${windowLocation}/scripts/data/${cacheStamp}"></script>
   <script src="${windowLocation}/scripts/js/${cacheStamp}"></script>
   <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
