@@ -55,12 +55,11 @@ global.accounts = new Chain({
   },
   steps: {
     lookupPlaidAccount: function() {
-      var self = this,
-          body = this._body;
+      var body = this._body;
           
-      accounts.findOne(body, function(error, pAccount) {
-        if(error) return self.error(error);
-        self.next(pAccount);
+      accounts.findOne(body, (error, pAccount) => {
+        if(error) return this.error(error);
+        this.next(pAccount);
       });
     },
     toAccountMethod: function() {
@@ -1942,10 +1941,10 @@ global.login = new Chain({
       });
     },
     passwordAuthenticates: function() {
-      var self = this;
-			this.user.comparePassword(this._body.password, function(err, isMatch) {
-			 err ? self.error(err) : self.next(!!isMatch && isMatch === true);
-			});  
+      var password = this._body.password;
+			this.user.comparePassword(password, (err, isMatch) => {
+			 err ? this.error(err) : this.next(!!isMatch && isMatch === true);
+			});
     },
     methodIsGet: function() {
       this.next(this._eventMethod == "get");
