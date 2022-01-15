@@ -465,7 +465,10 @@ global.brain = new Chain({
       var transactions = search.transactions || {};
       var edges = transactions.edges || [];
       var transaction = edges[0] || {};
-      var response = transaction.node || ("<(-_-)> Not found, "+this._body.authCode+" transaction is...");
+      var response = transaction.node || {
+        data: data,
+        message: "<(-_-)> Not found, "+this._body.authCode+" transaction is..."
+      };
       this.next(response);
     },
     toBrainMethod: function() {
