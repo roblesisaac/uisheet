@@ -46,8 +46,6 @@ module.exports = function(page, props) {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.23.0/polyfill.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.6.3/js/foundation.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.min.js"></script>
   
   <script type="text/javascript">
     const globalScript = {};
@@ -57,11 +55,14 @@ module.exports = function(page, props) {
     const user = ${ JSON.stringify(props.user) };
   </script>
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx-populate/1.21.0/xlsx-populate-no-encryption.min.js" integrity="sha512-vTcH2/smkURtorUy2Lj/if8X2Mlcs17/d+PqDkTSPSVx5HcxQLVgdQixETp4fPihMhyvG8pNKAbHa/CM8n4/NA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  
   <script src="${windowLocation}/scripts/data/${cacheStamp}"></script>
   <script src="${windowLocation}/scripts/js/${cacheStamp}"></script>
-  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+  
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.min.js"></script>  
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx-populate/1.21.0/xlsx-populate-no-encryption.min.js" integrity="sha512-vTcH2/smkURtorUy2Lj/if8X2Mlcs17/d+PqDkTSPSVx5HcxQLVgdQixETp4fPihMhyvG8pNKAbHa/CM8n4/NA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script defer src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
   <script defer src="https://js.braintreegateway.com/web/3.72.0/js/client.min.js"></script>
   <script defer src="https://js.braintreegateway.com/web/3.72.0/js/data-collector.min.js"></script>
   <script defer src="https://js.braintreegateway.com/web/dropin/1.26.0/js/dropin.min.js"></script>
