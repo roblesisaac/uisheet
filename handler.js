@@ -1545,6 +1545,20 @@ global.db = new Chain({
     }
   ]
 }); 
+global.ebay = new Chain({
+  steps: {
+    testEbay: function() {
+      this.next({
+        ebayID: process.env.EBAYCLIENTID,
+        ebayDEVID: process.env.EBAYDEVID,
+        ebaySecret: process.env.EBAYCLIENTSECRET
+      });
+    }
+  },
+  instruct: [
+    "testEbay"
+  ]
+});
 global.fax = new Chain({
   steps: {
     createFax: function() {
