@@ -68,8 +68,8 @@ provider:
     USPSID: ${file(./variables.json):USPSID}
     EASYPOSTKEY: ${file(./variables.json):EASYPOSTKEY}
     EBAYCLIENTID: ${file(./variables.json):EBAY.CLIENTID}
-    EBAYDEVID: ${file(./variables.json):DEVID}
-    EBAYCLIENTSECRET: ${file(./variables.json):CLIENTSECRET}
+    EBAYDEVID: ${file(./variables.json):EBAY.DEVID}
+    EBAYCLIENTSECRET: ${file(./variables.json):EBAY.CLIENTSECRET}
     PLAIDCLIENT: ${file(./variables.json):PLAIDCLIENT}
     PLAIDKEY: ${file(./variables.json):PLAIDKEY}
 
