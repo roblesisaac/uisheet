@@ -1584,10 +1584,15 @@ global.ebay = new Chain({
 global.ebayNotify = new Chain({
   steps: {
     respondToEbay: function() {
-      var crypto = require('crypto');
-      var name = 'braitsch';
-      var hash = crypto.createHash('md5').update(name).digest('hex');
-      this.next(hash); // 9b74c9897bac770ffc029102a200c5de
+      var query = this._query,
+          challengeCode = query.challenge_code,
+          verificationToken = "oakandzazuliveinacabinandacageatnight",
+          crypto = require("crypto"),
+          endpoint = this._host,
+          code = challengeCode + verificationToken + endpoint,
+          hash = crypto.createHash("sha256").update(code).digest("hex");
+          
+      this.next(hash);
     }
   },
   instruct: "respondToEbay"
