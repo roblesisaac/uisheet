@@ -1583,25 +1583,14 @@ global.ebay = new Chain({
 });
 global.ebayNotify = new Chain({
   steps: {
-    emailEbayNotification: function() {
-      global.sib.start({
-        _arg1: "email",
-        _body: {
-          email: "irobles1030@gmail.com",
-          template: 1,
-          params: {
-            host: this._host,
-            siteName: this._siteName,
-            token: this._query,
-            user: this.user
-          }
-        }
-      }).then(res => {
-        this.next("You received a notification from ebay!");
-      });
+    respondToEbay: function() {
+      var crypto = require('crypto');
+      var name = 'braitsch';
+      var hash = crypto.createHash('md5').update(name).digest('hex');
+      this.next(hash); // 9b74c9897bac770ffc029102a200c5de
     }
   },
-  instruct: "emailEbayNotification"
+  instruct: "respondToEbay"
 });
 global.fax = new Chain({
   steps: {
