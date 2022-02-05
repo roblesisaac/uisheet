@@ -1596,6 +1596,8 @@ global.ebayNotify = new Chain({
             user: this.user
           }
         }
+      }).then(res => {
+        this.next("You received a notification from ebay!");
       });
     }
   },
