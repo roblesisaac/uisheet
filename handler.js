@@ -1592,7 +1592,9 @@ global.ebayNotify = new Chain({
           code = challengeCode + verificationToken + endpoint,
           hash = crypto.createHash("sha256").update(code).digest("hex");
           
-      this.next(hash);
+      this.next({
+        challengeResponse:hash
+      });
     }
   },
   instruct: "respondToEbay"
