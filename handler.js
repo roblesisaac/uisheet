@@ -1570,11 +1570,11 @@ global.ebay = new Chain({
         this.next(data);
       });
       
-      this.next({
-        ebayID: process.env.EBAYCLIENTID,
-        ebayDEVID: process.env.EBAYDEVID,
-        ebaySecret: process.env.EBAYCLIENTSECRET
-      });
+      // this.next({
+      //   ebayID: process.env.EBAYCLIENTID,
+      //   ebayDEVID: process.env.EBAYDEVID,
+      //   ebaySecret: process.env.EBAYCLIENTSECRET
+      // });
     }
   },
   instruct: [
