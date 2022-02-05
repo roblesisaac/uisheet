@@ -1548,6 +1548,28 @@ global.db = new Chain({
 global.ebay = new Chain({
   steps: {
     testEbay: function() {
+      
+      var query = this._query,
+          baseUrl = "https://api.ebay.com/",
+          endpoint = query.enpoint || "buy/browse/v1/item_summary/search",
+          url = baseUrl + endpoint;
+          
+      var token = "";
+      
+      var headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer "+ token
+      };
+          
+      var body = {
+        method: "GET",
+        headers: headers
+      };
+      
+      nodeFetch(url, body).then(res=>res.json()).then( data => {
+        this.next(data);
+      });
+      
       this.next({
         ebayID: process.env.EBAYCLIENTID,
         ebayDEVID: process.env.EBAYDEVID,
@@ -1558,6 +1580,26 @@ global.ebay = new Chain({
   instruct: [
     "testEbay"
   ]
+});
+global.ebayNotify = new Chain({
+  steps: {
+    emailEbayNotification: function() {
+      global.sib.start({
+        _arg1: "email",
+        _body: {
+          email: "irobles1030@gmail.com",
+          template: 1,
+          params: {
+            host: this._host,
+            siteName: this._siteName,
+            token: this._query,
+            user: this.user
+          }
+        }
+      });
+    }
+  },
+  instruct: "emailEbayNotification"
 });
 global.fax = new Chain({
   steps: {
