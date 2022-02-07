@@ -1554,7 +1554,7 @@ global.ebay = new Chain({
           endpoint = query.endpoint || "buy/browse/v1/item_summary/search",
           url = baseUrl + endpoint + "?category_ids=108765&q=Beatles&filter=price:[200..500]&filter=priceCurrency:USD&limit=10";
           
-      var token = "AgAAAA**AQAAAA**aAAAAA**Luz9YQ**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6AFlIWjDpWCoA+dj6x9nY+seQ**7uQGAA**AAMAAA**iFEWzpD99ileujXbsVXQWfT0pMHcEOViNxbRfY7CR84yHNErF4OHv4VHIXv57AnS/AbOpch+JxlHWPPBQfy3oyJsNn6LLldYMx7N4fm9CKNrPV+lDuSz8Enx9UVY2rVg9oHrjyIo9TlNGiXv/s0XXnMQqgMXFAwGTYouyxCnFiu80dJhtsOMPekWbqsiFz2h/+DKlTBfMZVu0s/gzV5LU3yIeJTToNPLGxsfqCbii24UyGXAD2PPU0T/cGGhLqQhJQnF8c4lC7M2iObAYmBRPxU0MFeX/+B5Re6JiP0Kd1+zjGnHVE9qioNMShgv1+dtI+olC+lZc+p5NNDlwhbCVJfLKaHOUPrcRgpHSVAhQx++tJ7iVkg/Obzstm8azrMz3iXleHD84tPQNKnAFGK33W0fCh1GqSC2P4mLDXH4t2I76ClRsBn/4aZ+GKkAlw7IeKfX1TS/BlLr7qlwrmRqf2VIXJ8YzIyX0CaYdFFcsMTva5Yqak7taaxz3mUGI6IiyljGuy1v/rbM21x0Szw1JiOWOCFTGQADwT7plY4NipBplGNDT/6XNJ4H5aQW2dYHuWz+v9oW6sDLADjWpRN3uMVmviS+ZQj3vHS8csw8FjsRHsUUljJZ1OPO9fOnkd4m2p9fl9kaXLGyPnoEKKnM995w+s/wjzJQt2r009T46hjSHMPHw4inNbhrJfWk4Q7/iFNH1/LRnp0D6eGXWZ2Es8pTpMJpMo8I+0Ll6QR7O60O7yMocheMqpoEmDYuVinC";
+      var token = query.token;
           
       var body = {
         method: "GET",
