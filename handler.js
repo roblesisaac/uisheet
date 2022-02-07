@@ -1569,6 +1569,7 @@ global.ebay = new Chain({
           ebayID: process.env.EBAYCLIENTID,
           ebayDEVID: process.env.EBAYDEVID,
           ebaySecret: process.env.EBAYCLIENTSECRET,
+          token: token,
           data
         });
       });
