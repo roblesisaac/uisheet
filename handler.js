@@ -1585,7 +1585,7 @@ global.ebayAuth = new Chain({
       });
     }
   },
-  insruct: [
+  instruct: [
     "testEbayAuth"  
   ]
 });
