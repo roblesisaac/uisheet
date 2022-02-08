@@ -1570,7 +1570,7 @@ global.ebay = new Chain({
     }
   },
   instruct: [
-    "testEbay"
+    "testEbay" //
   ]
 });
 global.ebayAuth = new Chain({
@@ -1579,10 +1579,7 @@ global.ebayAuth = new Chain({
       var q = this._query,
           code = q.code;
           
-      this.next({
-        messsage: "hi",
-        q: q
-      });
+      this.next(code);
     }
   },
   instruct: [
