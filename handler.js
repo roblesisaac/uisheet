@@ -1579,7 +1579,7 @@ global.ebayAuth = new Chain({
       var q = this._query,
           code = q.code;
           
-      this.next(code);
+      this.next({ code });
     }
   },
   instruct: [
