@@ -1573,9 +1573,22 @@ global.ebay = new Chain({
     "testEbay"
   ]
 });
-// global.ebayCode = new Chain({
-  
-// });
+global.ebayAuth = new Chain({
+  steps: {
+    testEbayAuth: function() {
+      var q = this._query,
+          code = q.code;
+          
+      this.next({
+        messsage: "hi",
+        q: q
+      });
+    }
+  },
+  insruct: [
+    "testEbayAuth"  
+  ]
+});
 global.ebayNotify = new Chain({
   steps: {
     respondToEbay: function() {
