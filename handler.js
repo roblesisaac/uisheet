@@ -1565,13 +1565,7 @@ global.ebay = new Chain({
       };
       
       nodeFetch(url, body).then(res=>res.json()).then( data => {
-        this.next({
-          ebayID: process.env.EBAYCLIENTID,
-          ebayDEVID: process.env.EBAYDEVID,
-          ebaySecret: process.env.EBAYCLIENTSECRET,
-          token: token,
-          data
-        });
+        this.next(data);
       });
     }
   },
