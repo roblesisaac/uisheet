@@ -1589,7 +1589,7 @@ global.ebayAuth = new Chain({
             },
             body: {
               "grant_type": "authorization_code",
-               "code": code,
+              "code": code,
               "redirect_uri": "isaac_robles-isaacrob-uishee-rffndtck"
             }
           };
