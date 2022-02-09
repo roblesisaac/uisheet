@@ -1584,7 +1584,6 @@ global.ebay = new Chain({
       var payload = {
         method: body.method || "GET",
         headers: {
-          "Content-Type": "application/json",
           "Accept": "application/json",
           "Authorization": `Bearer ${apiToken}`
         }
