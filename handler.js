@@ -1579,7 +1579,8 @@ global.ebayAuth = new Chain({
       var q = this._query,
           code = q.code,
           url = "https://api.ebay.com/identity/v1/oauth2/token",
-          keys = process.env.EBAYCLIENTID+":"+process.env.EBAYCLIENTSECRET,
+          pass = process.env,
+          keys = pass.EBAYCLIENTID+":"+pass.EBAYCLIENTSECRET,
           auth = "Basic " + Buffer.from(keys).toString("base64"),
           body = {
             method: "POST",
@@ -1594,9 +1595,11 @@ global.ebayAuth = new Chain({
             }
           };
           
-      nodeFetch(url, body).then(res=>res.json()).then( data => {
-        this.next(data);
-      });
+      this.next(body);
+          
+      // nodeFetch(url, body).then(res=>res.json()).then( data => {
+      //   this.next(data);
+      // });
     }
   },
   instruct: [
