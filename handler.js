@@ -1593,7 +1593,9 @@ global.ebay = new Chain({
       
       nodeFetch(url, payload).then( res => {
         // res.json();
-        this.next({done: "yes", res, props: Object.keys(res) });
+        var props = [];
+        for(var eKey in res) props.push(eKey);
+        this.next({res, props });
       }).catch(error => {
         this.next({error});
       });
