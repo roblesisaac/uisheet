@@ -1595,7 +1595,7 @@ global.ebay = new Chain({
         // res.json();
         var props = [];
         for(var eKey in res) props.push(eKey);
-        this.next({res, props });
+        this.next({res:JSON.stringify(res), props });
       }).catch(error => {
         this.next({error});
       });
