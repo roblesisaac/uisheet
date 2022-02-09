@@ -1591,9 +1591,11 @@ global.ebay = new Chain({
       
       if(body.body) payload.body = JSON.stringify(body.body);
       
-      nodeFetch(url, payload).then((res)=>res.json()).then( (data) => {
-        this.next({data});
-      });
+      this.next({url, payload});
+      
+      // nodeFetch(url, payload).then((res)=>res.json()).then( (data) => {
+      //   this.next({data});
+      // });
     },
     generateUserAuthToken: function() {
       const scopes = [
