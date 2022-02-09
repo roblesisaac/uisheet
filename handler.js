@@ -1591,7 +1591,7 @@ global.ebay = new Chain({
       
       if(body.body) payload.body = JSON.stringify(body.body);
       
-      nodeFetch(url, payload).then( res => res.text()).then(rData => {
+      nodeFetch(url, payload).then( res => res.json()).then(rData => {
         this.next({rData, message: "hi"});
       }).catch(error => {
         this.next({error});
