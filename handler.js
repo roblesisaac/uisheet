@@ -1547,6 +1547,16 @@ global.db = new Chain({
 }); 
 global.ebay = new Chain({
   steps: {
+    exchangeAuthTokenForAccessToken: function() {
+      var q = this._query,
+          code = q.code;
+          
+        this.ebayAuthToken.exchangeCodeForAccessToken("PRODUCTION", code).then(data => {
+            this.next({ data });
+        }).catch(error => {
+            this.next(error);
+        });
+    },
     generateUserAuthToken: function() {
       const scopes = [
         "https://api.ebay.com/oauth/api_scope",
@@ -1562,14 +1572,14 @@ global.ebay = new Chain({
       const authUrl = this.ebayAuthToken.generateUserAuthorizationUrl("PRODUCTION", scopes);
       this.next({ authUrl });
     },
-    getEbayToken: function() {
-      this.ebayAuthToken.getApplicationToken("PRODUCTION").then(r => {
-        this.next({
-          message: "hi",
-          responser: r
-        });
-      });
-    },
+    // getEbayToken: function() {
+    //   this.ebayAuthToken.getApplicationToken("PRODUCTION").then(r => {
+    //     this.next({
+    //       message: "hi",
+    //       responser: r
+    //     });
+    //   });
+    // },
     initEbayGateway: function() {
       var EbayAuthToken = require("ebay-oauth-nodejs-client"),
           pass = process.env;
@@ -1599,7 +1609,6 @@ global.ebay = new Chain({
       this.next(this._arg1);
     },
     testEbay: function() {
-      
       var query = this._query,
           baseUrl = "https://api.ebay.com/",
           endpoint = query.endpoint || "buy/browse/v1/item_summary/search",
@@ -1648,7 +1657,8 @@ global.ebay = new Chain({
   },
   instruct: {
     switch: "toEbayMethod",
-    auth: [
+    exchange: "exchangeAuthTokenForAccessToken",
+    generate: [
       "initEbayGateway",
       // "getEbayToken",
       "generateUserAuthToken"
