@@ -1547,60 +1547,6 @@ global.db = new Chain({
 }); 
 global.ebay = new Chain({
   steps: {
-    testEbay: function() {
-      
-      var query = this._query,
-          baseUrl = "https://api.ebay.com/",
-          endpoint = query.endpoint || "buy/browse/v1/item_summary/search",
-          url = baseUrl + endpoint + "?category_ids=108765&q=Beatles&filter=price:[200..500]&filter=priceCurrency:USD&limit=10";
-          
-      var token = query.token;
-          
-      var body = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        }
-      };
-      
-      nodeFetch(url, body).then(res=>res.json()).then( data => {
-        this.next(data);
-      });
-    }
-  },
-  instruct: [
-    "testEbay" //
-  ]
-});
-global.ebayAuth = new Chain({
-  steps: {
-    testEbayAuth1: function() {
-      var q = this._query,
-          code = q.code,
-          url = "https://api.ebay.com/identity/v1/oauth2/token",
-          pass = process.env,
-          keys = pass.EBAYCLIENTID+":"+pass.EBAYCLIENTSECRET,
-          auth = "Basic " + Buffer.from(keys).toString("base64"),
-          body = {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              "Authorization": auth,
-            },
-            body: {
-              "grant_type": "authorization_code",
-              "code": code,
-              "redirect_uri": "isaac_robles-isaacrob-uishee-rffndtck"
-            }
-          };
-          
-      this.next(body);
-          
-      // nodeFetch(url, body).then(res=>res.json()).then( data => {
-      //   this.next(data);
-      // });
-    },
     generateUserAuthToken: function() {
       const scopes = [
         "https://api.ebay.com/oauth/api_scope",
@@ -1636,16 +1582,7 @@ global.ebayAuth = new Chain({
       
       this.next();
     },
-  },
-  instruct: [
-    "initEbayGateway",
-    // "getEbayToken",
-    "generateUserAuthToken"
-  ]
-});
-global.ebayNotify = new Chain({
-  steps: {
-    respondToEbay: function() {
+    notifyToEbay: function() {
       var query = this._query,
           challengeCode = query.challenge_code,
           verificationToken = "oakandzazuliveinacabinandacageatnight",
@@ -1657,9 +1594,67 @@ global.ebayNotify = new Chain({
       this.next({
         challengeResponse:hash
       });
-    }
+    },
+    toEbayMethod: function() {
+      this.next(this._arg1);
+    },
+    testEbay: function() {
+      
+      var query = this._query,
+          baseUrl = "https://api.ebay.com/",
+          endpoint = query.endpoint || "buy/browse/v1/item_summary/search",
+          url = baseUrl + endpoint + "?category_ids=108765&q=Beatles&filter=price:[200..500]&filter=priceCurrency:USD&limit=10";
+          
+      var token = query.token;
+          
+      var body = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      };
+      
+      nodeFetch(url, body).then(res=>res.json()).then( data => {
+        this.next(data);
+      });
+    },
+    testEbayAuth1: function() {
+      var q = this._query,
+          code = q.code,
+          url = "https://api.ebay.com/identity/v1/oauth2/token",
+          pass = process.env,
+          keys = pass.EBAYCLIENTID+":"+pass.EBAYCLIENTSECRET,
+          auth = "Basic " + Buffer.from(keys).toString("base64"),
+          body = {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              "Authorization": auth,
+            },
+            body: {
+              "grant_type": "authorization_code",
+              "code": code,
+              "redirect_uri": "isaac_robles-isaacrob-uishee-rffndtck"
+            }
+          };
+          
+      this.next(body);
+          
+      // nodeFetch(url, body).then(res=>res.json()).then( data => {
+      //   this.next(data);
+      // });
+    },
   },
-  instruct: "respondToEbay"
+  instruct: {
+    switch: "toEbayMethod",
+    auth: [
+      "initEbayGateway",
+      // "getEbayToken",
+      "generateUserAuthToken"
+    ],
+    notify: "notifyToEbay"
+  }
 });
 global.fax = new Chain({
   steps: {
