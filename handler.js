@@ -2163,14 +2163,15 @@ global.logout = new Chain({
       this.cookieToken = cookie.serialize("token", "", cookieOptions);
       this.cookieUserId = cookie.serialize("userid", "", cookieOptions);
       this.cookieUserStatus = cookie.serialize("status", "", cookieOptions);
+      this.ebayToken = cookie.serialize("ebayToken", "", cookieOptions);
       this.next();     
     },
     sendLogout: function() {
       this.next({
         statusCode: 200,
   			body: {
-  			    success: true,
-  			    message: "<(-_-)> Logged out, you have become;"
+			    success: true,
+			    message: "<(-_-)> Logged out, you have become;"
   			},
   			headers: {
         	"Access-Control-Allow-Origin" : "*",
