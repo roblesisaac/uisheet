@@ -1614,7 +1614,7 @@ global.ebayAuth = new Chain({
         "https://api.ebay.com/oauth/api_scope/sell.fulfillment"
       ];
       const authUrl = this.ebayAuthToken.generateUserAuthorizationUrl("PRODUCTION", scopes);
-      this.next(authUrl);
+      this.next({ authUrl });
     },
     getEbayToken: function() {
       this.ebayAuthToken.getApplicationToken("PRODUCTION").then(r => {
