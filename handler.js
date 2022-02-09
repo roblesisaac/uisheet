@@ -1556,7 +1556,7 @@ global.ebay = new Chain({
           cookieOptions = { 
             secure: true, sameSite: true, httpOnly: true, maxAge: 60*60*10, path: "/"
           },
-      		secret = d.refresh_token,
+      		secret = this.user.password,
       		ebayToken = jwt.sign(tokenContent, secret, {	expiresIn: "10h" });
       		
       this.ebayToken = cookie.serialize("ebayToken", String(ebayToken), cookieOptions);
@@ -1572,6 +1572,9 @@ global.ebay = new Chain({
         }).catch(error => {
             this.next(error);
         });
+    },
+    extractEbayToken: function() {
+      var cookie = this._cookies;
     },
     generateUserAuthToken: function() {
       const scopes = [
@@ -1639,10 +1642,12 @@ global.ebay = new Chain({
         	"Access-Control-Allow-Origin" : "*",
         	"Access-Control-Allow-Credentials" : true,
         	"Set-Cookie": this.ebayToken
-  			},
-  		// 	multiValueHeaders: {
-    //       "Set-Cookie": [ this.ebayToken ]
-  		// 	}
+  			}
+  		});
+    },
+    verifyEbayToken: function() {
+      jwt.verify(this._cookies.ebayToken, this.user.password, (tokenErr, decoded) => {
+  			this.next(decoded);
   		});
     },
     testEbay: function() {
@@ -1700,12 +1705,17 @@ global.ebay = new Chain({
       "createEbayCookies",
       "sendEbayCookies"
     ],
-    generate: [
+    fetch: [
+      "extractEbayToken",
+      "fetchFromEbay"
+    ],
+    notify: "notifyToEbay",
+    oauth: [
       "initEbayGateway",
       // "getEbayToken",
       "generateUserAuthToken"
     ],
-    notify: "notifyToEbay"
+    verify: "verifyEbayToken"
   }
 });
 global.fax = new Chain({
