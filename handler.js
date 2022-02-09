@@ -1693,7 +1693,7 @@ global.ebay = new Chain({
       };
       
       nodeFetch(url, body).then(res=>res.json()).then( data => {
-        this.next(data);
+        this.next({data:"HI"});
       });
     },
     testEbayAuth1: function() {
