@@ -1591,7 +1591,7 @@ global.ebay = new Chain({
       
       if(body.body) payload.body = payload.body;
       
-      this.next(payload);
+      this.next({payload});
       // nodeFetch(url, payload).then(res=>res.json()).then( data => {
       //   this.next(data);
       // });
