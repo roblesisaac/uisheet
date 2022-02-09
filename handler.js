@@ -1587,7 +1587,7 @@ global.ebay = new Chain({
           challengeCode = query.challenge_code,
           verificationToken = "oakandzazuliveinacabinandacageatnight",
           crypto = require("crypto"),
-          endpoint = "https://www.uisheet.com/exhaustbarn/ebayNotify",
+          endpoint = "https://www.uisheet.com/uisheet/ebay/notify",
           code = challengeCode + verificationToken + endpoint,
           hash = crypto.createHash("sha256").update(code).digest("hex");
           
