@@ -1573,8 +1573,27 @@ global.ebay = new Chain({
             this.next(error);
         });
     },
-    extractEbayToken: function() {
-      var cookie = this._cookies;
+    fetchFromEbay: function() {
+      var token = this.decoded,
+          apiToken = token.ebayToken,
+          body = this._body,
+          baseUrl = "https://api.ebay.com/",
+          endpoint = body.url,
+          url = baseUrl + endpoint;
+          
+      var payload = {
+        method: body.method || "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiToken}`
+        }
+      };
+      
+      if(body.body) payload.body = payload.body;
+      
+      nodeFetch(url, payload).then(res=>res.json()).then( data => {
+        this.next(data);
+      });
     },
     generateUserAuthToken: function() {
       const scopes = [
@@ -1646,8 +1665,13 @@ global.ebay = new Chain({
   		});
     },
     verifyEbayToken: function() {
-      jwt.verify(this._cookies.ebayToken, this.user.password, (tokenErr, decoded) => {
-  			this.next(decoded);
+      var cookies = this._cookies,
+          token = cookies.ebayToken,
+          secret = this.user.password;
+          
+      jwt.verify(token, secret, (tokenErr, decoded) => {
+        this.decoded = decoded;
+        this.next();
   		});
     },
     testEbay: function() {
@@ -1706,7 +1730,7 @@ global.ebay = new Chain({
       "sendEbayCookies"
     ],
     fetch: [
-      "extractEbayToken",
+      "verifyEbayToken",
       "fetchFromEbay"
     ],
     notify: "notifyToEbay",
@@ -1714,8 +1738,7 @@ global.ebay = new Chain({
       "initEbayGateway",
       // "getEbayToken",
       "generateUserAuthToken"
-    ],
-    verify: "verifyEbayToken"
+    ]
   }
 });
 global.fax = new Chain({
