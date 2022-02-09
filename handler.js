@@ -1575,7 +1575,7 @@ global.ebay = new Chain({
     },
     fetchFromEbay: function() {
       var token = this.decoded,
-          apiToken = token.ebayToken,
+          apiToken = token.accessToken,
           body = this._body || {},
           baseUrl = "https://api.ebay.com/",
           endpoint = body.url,
@@ -1590,11 +1590,9 @@ global.ebay = new Chain({
       };
       
       if(body.body) payload.body = payload.body;
-      
-      this.next({token});
-      // nodeFetch(url, payload).then(res=>res.json()).then( data => {
-      //   this.next(data);
-      // });
+      nodeFetch(url, payload).then(res=>res.json()).then( data => {
+        this.next(data);
+      });
     },
     generateUserAuthToken: function() {
       const scopes = [
