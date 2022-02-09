@@ -1633,8 +1633,7 @@ global.ebay = new Chain({
       this.next({
         statusCode: 200,
   			body: {
-  			    domain: this._domain,
-  			    user: this.user
+          success: "<(-_-)> Free to use Ebay, you are. Close this page, you can."
   			},
   			headers: {
         	"Access-Control-Allow-Origin" : "*",
