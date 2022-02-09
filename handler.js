@@ -1618,6 +1618,8 @@ global.ebayAuth = new Chain({
           clientSecret: pass.EBAYCLIENTSECRET,
           redirectUri: "isaac_robles-isaacrob-uishee-rffndtck"
       });
+      
+      this.next();
     }
   },
   instruct: [
