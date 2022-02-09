@@ -1582,9 +1582,12 @@ global.ebayAuth = new Chain({
           keys = process.env.EBAYCLIENTID+":"+process.env.EBAYCLIENTSECRET,
           auth = "Basic " + Buffer.from(keys).toString("base64"),
           body = {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Authorization": auth,
-            "Body": {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              "Authorization": auth,
+            },
+            body: {
               "grant_type": "authorization_code",
                "code": code,
               "redirect_uri": "isaac_robles-isaacrob-uishee-rffndtck"
