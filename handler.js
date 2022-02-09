@@ -1547,12 +1547,28 @@ global.db = new Chain({
 }); 
 global.ebay = new Chain({
   steps: {
+    createEbayCookies: function() {
+      var data = this.accessData,
+          tokenContent = {
+    		    _id: this.user._id,
+    		    username: this.user.username,
+    		    password: this.user.password
+          },
+          cookieOptions = { secure: true, sameSite: true, httpOnly: true, maxAge: 60*60*10, path: "/" },
+      		secret = this.user.password;
+      this.token = jwt.sign(tokenContent, secret, {	expiresIn: "10h" });
+      this.cookieToken = cookie.serialize("token", String(this.token), cookieOptions);
+      this.cookieUserId = cookie.serialize("userid", String(this.user._id), cookieOptions);
+      this.userStatus = cookie.serialize("status", String(this.user.status), cookieOptions);
+      this.next();
+    },
     exchangeAuthTokenForAccessToken: function() {
       var q = this._query,
           code = q.code;
           
         this.ebayAuthToken.exchangeCodeForAccessToken("PRODUCTION", code).then(data => {
-            this.next({ data });
+          this.accessData = JSON.parse(data);
+          this.next(this.accessData);
         }).catch(error => {
             this.next(error);
         });
@@ -1664,7 +1680,8 @@ global.ebay = new Chain({
     switch: "toEbayMethod",
     exchange: [
       "initEbayGateway",
-      "exchangeAuthTokenForAccessToken"
+      "exchangeAuthTokenForAccessToken",
+      // "createEbayCookies"
     ],
     generate: [
       "initEbayGateway",
