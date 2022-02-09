@@ -1548,18 +1548,18 @@ global.db = new Chain({
 global.ebay = new Chain({
   steps: {
     createEbayCookies: function() {
-      var data = this.accessData,
+      var d = this.accessData,
           tokenContent = {
-    		    _id: this.user._id,
-    		    username: this.user.username,
-    		    password: this.user.password
+    		    accessToken: d.access_token,
+    		    refreshToken: d.refresh_token
           },
-          cookieOptions = { secure: true, sameSite: true, httpOnly: true, maxAge: 60*60*10, path: "/" },
-      		secret = this.user.password;
-      this.token = jwt.sign(tokenContent, secret, {	expiresIn: "10h" });
-      this.cookieToken = cookie.serialize("token", String(this.token), cookieOptions);
-      this.cookieUserId = cookie.serialize("userid", String(this.user._id), cookieOptions);
-      this.userStatus = cookie.serialize("status", String(this.user.status), cookieOptions);
+          cookieOptions = { 
+            secure: true, sameSite: true, httpOnly: true, maxAge: 60*60*10, path: "/"
+          },
+      		secret = d.refresh_token,
+      		ebayToken = jwt.sign(tokenContent, secret, {	expiresIn: "10h" });
+      		
+      this.ebayToken = cookie.serialize("ebayToken", String(ebayToken), cookieOptions);
       this.next();
     },
     exchangeAuthTokenForAccessToken: function() {
@@ -1629,6 +1629,23 @@ global.ebay = new Chain({
     toEbayMethod: function() {
       this.next(this._arg1);
     },
+    sendEbayCookies: function() {
+      this.next({
+        statusCode: 200,
+  			body: {
+  			    domain: this._domain,
+  			    user: this.user
+  			},
+  			headers: {
+        	"Access-Control-Allow-Origin" : "*",
+        	"Access-Control-Allow-Credentials" : true,
+        	"Set-Cookie": this.ebayToken
+  			},
+  		// 	multiValueHeaders: {
+    //       "Set-Cookie": [ this.ebayToken ]
+  		// 	}
+  		});
+    },
     testEbay: function() {
       var query = this._query,
           baseUrl = "https://api.ebay.com/",
@@ -1681,7 +1698,8 @@ global.ebay = new Chain({
     exchange: [
       "initEbayGateway",
       "exchangeAuthTokenForAccessToken",
-      // "createEbayCookies"
+      "createEbayCookies",
+      "sendEbayCookies"
     ],
     generate: [
       "initEbayGateway",
@@ -2099,7 +2117,6 @@ global.login = new Chain({
       this.next(this._eventMethod == "get");
     },
     sendCredentials: function() {
-      var self = this;
       this.next({
         statusCode: 200,
   			body: {
