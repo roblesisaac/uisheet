@@ -1581,6 +1581,11 @@ global.ebay = new Chain({
     //   });
     // },
     initEbayGateway: function() {
+      if(this.ebayAuthToken) {
+        this.next();
+        return;
+      }
+      
       var EbayAuthToken = require("ebay-oauth-nodejs-client"),
           pass = process.env;
       
@@ -1657,7 +1662,10 @@ global.ebay = new Chain({
   },
   instruct: {
     switch: "toEbayMethod",
-    exchange: "exchangeAuthTokenForAccessToken",
+    exchange: [
+      "initEbayGateway",
+      "exchangeAuthTokenForAccessToken"
+    ],
     generate: [
       "initEbayGateway",
       // "getEbayToken",
