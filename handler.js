@@ -1586,15 +1586,17 @@ global.ebay = new Chain({
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${apiToken}`,
-          "Accept-Encoding":"gzip",
-          "X-EBAY-C-MARKETPLACE-ID":"EBAY_US"
+          // "Accept-Encoding":"gzip",
+          // "X-EBAY-C-MARKETPLACE-ID":"EBAY_US"
         }
       };
       
       if(body.body) payload.body = JSON.stringify(body.body);
       
       nodeFetch(url, payload).then((res)=>res.json()).then( (data) => {
-        this.next({data});
+        this.next({message: "HI"});
+      }).catch(e => {
+        this.next({message: "errror"});
       });
     },
     generateUserAuthToken: function() {
