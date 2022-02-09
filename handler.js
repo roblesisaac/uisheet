@@ -1584,7 +1584,7 @@ global.ebayAuth = new Chain({
           body = {
             method: "POST",
             headers: {
-              "Content-Type": "x-www-form-urlencoded",
+              "Content-Type": "application/x-www-form-urlencoded",
               "Authorization": auth,
             },
             body: {
