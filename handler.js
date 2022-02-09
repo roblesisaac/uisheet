@@ -1585,16 +1585,15 @@ global.ebay = new Chain({
         method: body.method || "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiToken}`,
-          // "Accept-Encoding":"gzip",
-          // "X-EBAY-C-MARKETPLACE-ID":"EBAY_US"
+          "Authorization": `Bearer ${apiToken}`
         }
       };
       
       if(body.body) payload.body = JSON.stringify(body.body);
       
-      nodeFetch(url, payload).then((res)=>res.json()).then( (data) => {
-        this.next({message: "HI"});
+      nodeFetch(url, payload).then( res => {
+        // res.json();
+        this.next({done: "yes"});
       }).catch(error => {
         this.next({error});
       });
