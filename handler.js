@@ -1554,7 +1554,7 @@ global.ebay = new Chain({
           endpoint = query.endpoint || "buy/browse/v1/item_summary/search",
           url = baseUrl + endpoint + "?category_ids=108765&q=Beatles&filter=price:[200..500]&filter=priceCurrency:USD&limit=10";
           
-      var token = query.token || "v^1.1#i^1#r^0#I^3#f^0#p^1#t^H4sIAAAAAAAAAOVYW2wUVRju9galFC+oKBK7DGiiuLNnZnd2tyO7ydILXexl6ba1VAnO5Ux32t2Zcc7ZLksIllrA2ASJkkB90MZLfMFgE4EHCMEg4OVBfNAYASv1RYORSEQugeCZ7VK2lQDSTdzEzSab+c9//vN93///55wd0Fda9tTm+s0XKmwzCof7QF+hzcaUg7LSkiVzigrnlxSALAfbcN/ivuL+ol+WIiEeM/gWiAxdQ9C+Nh7TEJ82+qmEqfG6gFTEa0IcIh5LfCTY2MCzNOANU8e6pMcoe6jGT4k+xcNBRvZ4GZETPJBYtesxW3U/JYgy8CqsILPQ42U9PjKOUAKGNIQFDfspFrCsA5Cvr5Xx8S4PDwDt5phOyt4OTaTqGnGhARVIw+XTc80srLeGKiAETUyCUIFQsC7SHAzV1Da1LnVmxQpkdIhgASfQ5KdqXYb2diGWgLdeBqW9+UhCkiBClDMwvsLkoHzwOpi7gJ+WmpNkRpE8InAzUPL6vDmRsk434wK+NQ7LosoOJe3KQw2rOHU7RYkaYjeUcOapiYQI1ditn5UJIaYqKjT9VO2y4KpgOEwFVCQIkqmLjoSKohBiR7ilxlElSKxX9Epeh6fKrXCc6MusMx4so/KUhap1TVYtzZC9ScfLIAENp0rDZklDnJq1ZjOoYAtQlh8Lrkvo9nZaOR1PYgJHNSutME50sKcfb5+AidkYm6qYwHAiwtSBtEKkawxDlampg+lSzFTPWuSnohgbvNOZTCbppIvWzS4nCwDj7GhsiEhRGBcoy9fq9bS/evsJDjVNRSJdTPx5nDIIlrWkVAkArYsKEDI+ls3oPhlWYKr1H4Yszs7JDZGrBoEcA4DkkxUBMj5JzsleE8jUqNPCAUUh5YgLZg/ERkyQoEMidZaIQ1OVeRensC6fAh2yp0pxuKsUxSFyssfBKBACCEVRqvL9j/rkTis9AiUT4tyUeq7KPCxyoLul2t0rP9tQl+xlU+ryho7uDiPp7ly3pLNVaYvihjZY24Iak/47bYabkq+OqUSZVrJ+/vV6vY4wlKdFLyLpBgzrMVVK5VeCXaYcFkycisBYjBimRTJoGKEcbdW5ovfvdom7o53DE+q/OZ1uygpZFZtfrKz5iAQQDJW2zh9a0uNOXUhYvY6jlnlNGvW0eKvk2ppXrAnJcbaqPH7fpAllHKVRr0SbEOkJk1y16Wbr/tWq90CNHGfY1GMxaLYz027neDyBBTEG862vc1DgqpBnZy3jcbtdbs7lAdPiJaVP0jX5tiXlaCcurr6LO7Vz8h/8QEH6w/Tb9oB+20ihzQac4HFmEVhYWtRWXDR7PlIxpFVBoZHapZH/rSake2DKEFSzsNS2oZFf+W3WK4Xh1eDhiZcKZUVMedYbBrDgxkgJc8+8CpZcF4GP8ZEkg06w6MZoMfNQ8QMU+Or8UT/3DW/ubppnzm3fv39wLqiYcLLZSgqK+20F9sMbByT3hZ+NoUvXdl0ZWbFVHKu/Wtjw6tjlWu7dc8zI1SufD51oO84VrL/42xMFz/z6HPjkg9Do3j8PVe49e3LgdMucIZ4/farnvi8Pxd9gTq0/8FJg1pkrOw7Ct0fNJ8dOrL52/ty+L05/OuNlAAfCZV2z3r/Ys/P5sSO73ztWefKV5R+2bKvY+tOmE0ONlVuOPPbDTOXgH7Ndp46f2bFvu1Z+5sWDB8qPzfpr8F6z+ju5ctNHe8++Vr+R2VI27Ns+4/xI3aqZm1946377fmlgfcf3FVt3df2+bPTRo+suVG2LKCOfdSxe+PE74aIFA1y0eWYidOTQ6w/irw/veaSrd/aPl7t3Pn1pw9jo4Io3d46n72+onCA07BEAAA==";
+      var token = query.token;
           
       var body = {
         method: "GET",
@@ -1579,9 +1579,11 @@ global.ebayAuth = new Chain({
       var q = this._query,
           code = q.code,
           url = "https://api.sandbox.ebay.com/identity/v1/oauth2/token",
+          keys = process.env.EBAYCLIENTID+":"+process.env.EBAYCLIENTSECRET,
+          auth = "Basic " + Buffer.from(keys).toString("base64"),
           body = {
             "Content-Type": "application/x-www-form-urlencoded",
-            "Authorization": "Basic <B64-encoded-oauth-credentials>",
+            "Authorization": auth,
             "Body": {
               "grant_type": "authorization_code",
                "code": code,
