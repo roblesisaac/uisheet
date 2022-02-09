@@ -2178,7 +2178,7 @@ global.logout = new Chain({
         	"Access-Control-Allow-Credentials" : true
   			},
   			multiValueHeaders: {
-          "Set-Cookie": [ this.cookieToken, this.cookieUserId, this.cookieUserStatus ]
+          "Set-Cookie": [ this.cookieToken, this.cookieUserId, this.cookieUserStatus, this.ebayToken ]
   			}
   		});   
     }
