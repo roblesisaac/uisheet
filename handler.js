@@ -1686,7 +1686,9 @@ global.ebay = new Chain({
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
+          "Accept-Encoding":"gzip",
+          "X-EBAY-C-MARKETPLACE-ID":"EBAY_US"
         }
       };
       
