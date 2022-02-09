@@ -1578,7 +1578,7 @@ global.ebayAuth = new Chain({
     testEbayAuth: function() {
       var q = this._query,
           code = q.code,
-          url = "https://api.sandbox.ebay.com/identity/v1/oauth2/token",
+          url = "https://api.ebay.com/identity/v1/oauth2/token",
           keys = process.env.EBAYCLIENTID+":"+process.env.EBAYCLIENTSECRET,
           auth = "Basic " + Buffer.from(keys).toString("base64"),
           body = {
@@ -1591,11 +1591,9 @@ global.ebayAuth = new Chain({
             }
           };
           
-      this.next(body);
-          
-      // nodeFetch(url, body).then(res=>res.json()).then( data => {
-      //   this.next(data);
-      // });
+      nodeFetch(url, body).then(res=>res.json()).then( data => {
+        this.next(data);
+      });
     }
   },
   instruct: [
