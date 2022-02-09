@@ -1595,8 +1595,8 @@ global.ebay = new Chain({
       
       nodeFetch(url, payload).then((res)=>res.json()).then( (data) => {
         this.next({message: "HI"});
-      }).catch(e => {
-        this.next({message: "errror"});
+      }).catch(error => {
+        this.next({error});
       });
     },
     generateUserAuthToken: function() {
