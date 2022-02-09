@@ -1585,17 +1585,17 @@ global.ebay = new Chain({
         method: body.method || "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiToken}`
+          "Authorization": `Bearer ${apiToken}`,
+          "Accept-Encoding":"gzip",
+          "X-EBAY-C-MARKETPLACE-ID":"EBAY_US"
         }
       };
       
       if(body.body) payload.body = JSON.stringify(body.body);
       
-      this.next({url, payload});
-      
-      // nodeFetch(url, payload).then((res)=>res.json()).then( (data) => {
-      //   this.next({data});
-      // });
+      nodeFetch(url, payload).then((res)=>res.json()).then( (data) => {
+        this.next({data});
+      });
     },
     generateUserAuthToken: function() {
       const scopes = [
@@ -1688,14 +1688,12 @@ global.ebay = new Chain({
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-          "Accept-Encoding":"gzip",
-          "X-EBAY-C-MARKETPLACE-ID":"EBAY_US"
+          "Authorization": `Bearer ${token}`
         }
       };
       
       nodeFetch(url, body).then(res=>res.json()).then( data => {
-        this.next({data:"HI"});
+        this.next(data);
       });
     },
     testEbayAuth1: function() {
