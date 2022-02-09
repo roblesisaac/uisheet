@@ -1577,9 +1577,21 @@ global.ebayAuth = new Chain({
   steps: {
     testEbayAuth: function() {
       var q = this._query,
-          code = q.code;
+          code = q.code,
+          url = "https://api.sandbox.ebay.com/identity/v1/oauth2/token",
+          body = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": "Basic <B64-encoded-oauth-credentials>",
+            "Body": {
+              "grant_type": "authorization_code",
+               "code": code,
+              "redirect_uri": "isaac_robles-isaacrob-uishee-rffndtck"
+            }
+          };
           
-      this.next({ code });
+      nodeFetch(url, body).then(res=>res.json()).then( data => {
+        this.next(data);
+      });
     }
   },
   instruct: [
