@@ -1575,7 +1575,7 @@ global.ebay = new Chain({
 });
 global.ebayAuth = new Chain({
   steps: {
-    testEbayAuth: function() {
+    testEbayAuth1: function() {
       var q = this._query,
           code = q.code,
           url = "https://api.ebay.com/identity/v1/oauth2/token",
@@ -1600,10 +1600,29 @@ global.ebayAuth = new Chain({
       // nodeFetch(url, body).then(res=>res.json()).then( data => {
       //   this.next(data);
       // });
+    },
+    getEbayToken: function() {
+      this.ebayAuthToken.getApplicationToken("PRODUCTION").then(r => {
+        this.next({
+          message: "hi",
+          responser: r
+        });
+      });
+    },
+    initEbayGateway: function() {
+      var EbayAuthToken = require("ebay-oauth-nodejs-client"),
+          pass = process.env;
+      
+      this.ebayAuthToken = new EbayAuthToken({
+          clientId: pass.EBAYCLIENTID,
+          clientSecret: pass.EBAYCLIENTSECRET,
+          redirectUri: "isaac_robles-isaacrob-uishee-rffndtck"
+      });
     }
   },
   instruct: [
-    "testEbayAuth"  
+    "initEbayGateway",
+    "getEbayToken"
   ]
 });
 global.ebayNotify = new Chain({
