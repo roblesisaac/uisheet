@@ -1589,9 +1589,9 @@ global.ebay = new Chain({
         }
       };
       
-      if(body.body) payload.body = payload.body;
+      if(body.body) payload.body = JSON.stringify(body.body);
       
-      nodeFetch(url, payload).then(res=>res.json()).then( data => {
+      nodeFetch(url, payload).then((res)=>res.json()).then( (data) => {
         this.next({data});
       });
     },
