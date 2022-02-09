@@ -1593,8 +1593,8 @@ global.ebay = new Chain({
       
       nodeFetch(url, payload).then( res => {
         res.text();
-      }).then(data => {
-        this.next({data});
+      }).then(rData => {
+        this.next({rData, message: "hi"});
       }).catch(error => {
         this.next({error});
       });
