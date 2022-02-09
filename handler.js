@@ -1601,6 +1601,21 @@ global.ebayAuth = new Chain({
       //   this.next(data);
       // });
     },
+    generateUserAuthToken: function() {
+      const scopes = [
+        "https://api.ebay.com/oauth/api_scope",
+        "https://api.ebay.com/oauth/api_scope/sell.marketing.readonly",
+        "https://api.ebay.com/oauth/api_scope/sell.marketing",
+        "https://api.ebay.com/oauth/api_scope/sell.inventory.readonly",
+        "https://api.ebay.com/oauth/api_scope/sell.inventory",
+        "https://api.ebay.com/oauth/api_scope/sell.account.readonly",
+        "https://api.ebay.com/oauth/api_scope/sell.account",
+        "https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly",
+        "https://api.ebay.com/oauth/api_scope/sell.fulfillment"
+      ];
+      const authUrl = this.ebayAuthToken.generateUserAuthorizationUrl("PRODUCTION", scopes);
+      this.next(authUrl);
+    },
     getEbayToken: function() {
       this.ebayAuthToken.getApplicationToken("PRODUCTION").then(r => {
         this.next({
@@ -1620,11 +1635,12 @@ global.ebayAuth = new Chain({
       });
       
       this.next();
-    }
+    },
   },
   instruct: [
     "initEbayGateway",
-    "getEbayToken"
+    // "getEbayToken",
+    "generateUserAuthToken"
   ]
 });
 global.ebayNotify = new Chain({
