@@ -1671,7 +1671,7 @@ global.ebay = new Chain({
           
       jwt.verify(token, secret, (tokenErr, decoded) => {
         this.decoded = decoded;
-        this.next();
+        this.next(decoded);
   		});
     },
     testEbay: function() {
@@ -1738,7 +1738,8 @@ global.ebay = new Chain({
       "initEbayGateway",
       // "getEbayToken",
       "generateUserAuthToken"
-    ]
+    ],
+    verify: "verifyEbayToken"
   }
 });
 global.fax = new Chain({
