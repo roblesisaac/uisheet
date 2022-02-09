@@ -1576,7 +1576,7 @@ global.ebay = new Chain({
     fetchFromEbay: function() {
       var token = this.decoded,
           apiToken = token.ebayToken,
-          body = this._body,
+          body = this._body || {},
           baseUrl = "https://api.ebay.com/",
           endpoint = body.url,
           url = baseUrl + endpoint;
