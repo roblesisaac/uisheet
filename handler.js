@@ -1676,13 +1676,13 @@ global.ebay = new Chain({
         this.next(decoded);
   		});
     },
-    testEbay: function() {
+    testEbayFetch: function() {
       var query = this._query,
           baseUrl = "https://api.ebay.com/",
-          endpoint = query.endpoint || "buy/browse/v1/item_summary/search",
+          endpoint = "buy/browse/v1/item_summary/search",
           url = baseUrl + endpoint + "?category_ids=108765&q=Beatles&filter=price:[200..500]&filter=priceCurrency:USD&limit=10";
           
-      var token = query.token;
+      var token = "v^1.1#i^1#p^3#I^3#r^0#f^0#t^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";
           
       var body = {
         method: "GET",
@@ -1741,7 +1741,8 @@ global.ebay = new Chain({
       // "getEbayToken",
       "generateUserAuthToken"
     ],
-    verify: "verifyEbayToken"
+    verify: "verifyEbayToken",
+    test: "testEbayFetch"
   }
 });
 global.fax = new Chain({
