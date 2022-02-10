@@ -1597,6 +1597,22 @@ global.ebay = new Chain({
         this.next({error});
       });
     },
+    testEbayFetch: function() {
+      var url = "https://api.ebay.com/buy/browse/v1/item_summary/search?category_ids=108765&q=Beatles&filter=price:[200..500]&filter=priceCurrency:USD&limit=10",
+          decoded = this.decoded;
+          
+      var body = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${decoded.accessToken}`
+        }
+      };
+      
+      nodeFetch(url, body).then(res=>res.json()).then( data => {
+        this.next(data);
+      });
+    },
     generateUserAuthToken: function() {
       const scopes = [
         "https://api.ebay.com/oauth/api_scope",
@@ -1675,26 +1691,6 @@ global.ebay = new Chain({
         this.decoded = decoded;
         this.next(decoded);
   		});
-    },
-    testEbayFetch: function() {
-      var query = this._query,
-          baseUrl = "https://api.ebay.com/",
-          endpoint = "buy/browse/v1/item_summary/search",
-          url = baseUrl + endpoint + "?category_ids=108765&q=Beatles&filter=price:[200..500]&filter=priceCurrency:USD&limit=10",
-          decoded = this.decoded,
-          token = decoded.accessToken;
-          
-      var body = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        }
-      };
-      
-      nodeFetch(url, body).then(res=>res.json()).then( data => {
-        this.next(data);
-      });
     },
     testEbayAuth1: function() {
       var q = this._query,
