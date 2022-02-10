@@ -1574,25 +1574,25 @@ global.ebay = new Chain({
         });
     },
     fetchFromEbay: function() {
-      var token = this.decoded,
-          apiToken = token.accessToken,
+      var decoded = this.decoded,
           body = this._body || {},
-          baseUrl = "https://api.ebay.com/",
-          endpoint = body.url,
-          url = baseUrl + endpoint;
+          url = body.url,
+          baseUrl = "https://api.ebay.com/";
+          
+      if(url.excludes(baseUrl)) url = baseUrl + url;
           
       var payload = {
         method: body.method || "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiToken}`
+          "Authorization": `Bearer ${decoded.accessToken}`
         } 
       };
       
       if(body.body) payload.body = JSON.stringify(body.body);
       
-      nodeFetch(url, payload).then( res => res.json()).then(rData => {
-        this.next({rData, message: "hi"});
+      nodeFetch(url, payload).then( res => res.json()).then(data => {
+        this.next(data);
       }).catch(error => {
         this.next({error});
       });
