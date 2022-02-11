@@ -1592,15 +1592,10 @@ global.ebay = new Chain({
       if(body.body) payload.body = JSON.stringify(body.body);
       
       nodeFetch(url, payload).then( res => {
-        try {
-          return res.json();
-        } catch (e) {
-          try {
-            return res.text();
-          } catch(eT) {
-            return res;
-          }
-        }
+        const contentType = res.headers.get("content-type"),
+              isJson = contentType && contentType.includes("application/json");
+              
+        return isJson ? res.json() : res.text();
       }).then(data => {
         this.next(data);
       }).catch(error => {
