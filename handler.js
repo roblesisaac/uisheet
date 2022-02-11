@@ -1579,7 +1579,7 @@ global.ebay = new Chain({
           url = body.url,
           baseUrl = "https://api.ebay.com/";
           
-      if(url.excludes(baseUrl)) url = baseUrl + url;
+      if(url.excludes(baseUrl) && url.excludes("https")) url = baseUrl + url;
           
       var payload = {
         method: body.method || "GET",
