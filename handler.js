@@ -1597,6 +1597,7 @@ global.ebay = new Chain({
               
         return isJson ? res.json() : {
           contentType,
+          fullResponse: res,
           text: res.text()
         };
       }).then(data => {
