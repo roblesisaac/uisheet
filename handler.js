@@ -1595,7 +1595,10 @@ global.ebay = new Chain({
         const contentType = res.headers.get("content-type"),
               isJson = contentType && contentType.includes("application/json");
               
-        return isJson ? res.json() : res.text();
+        return isJson ? res.json() : {
+          contentType,
+          text: res.text()
+        };
       }).then(data => {
         this.next(data);
       }).catch(error => {
