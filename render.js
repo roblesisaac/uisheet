@@ -59,7 +59,7 @@ module.exports = function(page, props) {
   <script src="${windowLocation}/scripts/data/${cacheStamp}"></script>
   <!-- <script src="${windowLocation}/scripts/js/${cacheStamp}"></script> -->
   
-  <script src="https://www.uisheet.com/exhaustbarndev/scripts/js/51f66422a4b7a0f6c346a4c040700088323b3"></script>
+  <script src="https://www.uisheet.com/exhaustbarn/db/sheets/5fadb8d1dae07500085cabbb?select=ui.scripts._id"></script>
   
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.min.js"></script>  
