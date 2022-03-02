@@ -1579,28 +1579,19 @@ global.ebay = new Chain({
           url = body.url,
           baseUrl = "https://api.ebay.com/";
           
-      if(url.excludes(baseUrl) && url.excludes("https")) url = baseUrl + url;
+      if(url.excludes(baseUrl)) url = baseUrl + url;
           
       var payload = {
         method: body.method || "GET",
         headers: {
-          "Content-Type": body.contentType || "application/json",
+          "Content-Type": "application/json",
           "Authorization": `Bearer ${decoded.accessToken}`
         } 
       };
       
       if(body.body) payload.body = JSON.stringify(body.body);
       
-      nodeFetch(url, payload).then( res => {
-        const contentType = res.headers.get("content-type"),
-              isJson = contentType && contentType.includes("application/json");
-              
-        return isJson ? res.json() : {
-          contentType,
-          fullResponse: res,
-          text: res.text()
-        };
-      }).then(data => {
+      nodeFetch(url, payload).then( res => res.json()).then(data => {
         this.next(data);
       }).catch(error => {
         this.next({error});
