@@ -1547,182 +1547,54 @@ global.db = new Chain({
 }); 
 global.ebay = new Chain({
   steps: {
-    createEbayCookies: function() {
-      var d = this.accessData,
-          tokenContent = {
-    		    accessToken: d.access_token,
-    		    refreshToken: d.refresh_token
-          },
-          cookieOptions = { 
-            secure: true, sameSite: true, httpOnly: true, maxAge: 60*60*10, path: "/"
-          },
-      		secret = this.user.password,
-      		ebayToken = jwt.sign(tokenContent, secret, {	expiresIn: "10h" });
-      		
-      this.ebayToken = cookie.serialize("ebayToken", String(ebayToken), cookieOptions);
-      this.next();
-    },
-    exchangeAuthTokenForAccessToken: function() {
-      var q = this._query,
-          code = q.code;
+    testEbay: function() {
+      
+      var query = this._query,
+          baseUrl = "https://api.ebay.com/",
+          endpoint = query.endpoint || "buy/browse/v1/item_summary/search",
+          url = baseUrl + endpoint + "?category_ids=108765&q=Beatles&filter=price:[200..500]&filter=priceCurrency:USD&limit=10";
           
-        this.ebayAuthToken.exchangeCodeForAccessToken("PRODUCTION", code).then(data => {
-          this.accessData = JSON.parse(data);
-          this.next(this.accessData);
-        }).catch(error => {
-            this.next(error);
-        });
-    },
-    fetchFromEbay: function() {
-      var decoded = this.decoded,
-          body = this._body || {},
-          url = body.url,
-          baseUrl = "https://api.ebay.com/";
+      var token = "AgAAAA**AQAAAA**aAAAAA**Luz9YQ**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6AFlIWjDpWCoA+dj6x9nY+seQ**7uQGAA**AAMAAA**iFEWzpD99ileujXbsVXQWfT0pMHcEOViNxbRfY7CR84yHNErF4OHv4VHIXv57AnS/AbOpch+JxlHWPPBQfy3oyJsNn6LLldYMx7N4fm9CKNrPV+lDuSz8Enx9UVY2rVg9oHrjyIo9TlNGiXv/s0XXnMQqgMXFAwGTYouyxCnFiu80dJhtsOMPekWbqsiFz2h/+DKlTBfMZVu0s/gzV5LU3yIeJTToNPLGxsfqCbii24UyGXAD2PPU0T/cGGhLqQhJQnF8c4lC7M2iObAYmBRPxU0MFeX/+B5Re6JiP0Kd1+zjGnHVE9qioNMShgv1+dtI+olC+lZc+p5NNDlwhbCVJfLKaHOUPrcRgpHSVAhQx++tJ7iVkg/Obzstm8azrMz3iXleHD84tPQNKnAFGK33W0fCh1GqSC2P4mLDXH4t2I76ClRsBn/4aZ+GKkAlw7IeKfX1TS/BlLr7qlwrmRqf2VIXJ8YzIyX0CaYdFFcsMTva5Yqak7taaxz3mUGI6IiyljGuy1v/rbM21x0Szw1JiOWOCFTGQADwT7plY4NipBplGNDT/6XNJ4H5aQW2dYHuWz+v9oW6sDLADjWpRN3uMVmviS+ZQj3vHS8csw8FjsRHsUUljJZ1OPO9fOnkd4m2p9fl9kaXLGyPnoEKKnM995w+s/wjzJQt2r009T46hjSHMPHw4inNbhrJfWk4Q7/iFNH1/LRnp0D6eGXWZ2Es8pTpMJpMo8I+0Ll6QR7O60O7yMocheMqpoEmDYuVinC";
           
-      if(url.excludes(baseUrl)) url = baseUrl + url;
-          
-      var payload = {
-        method: body.method || "GET",
+      var body = {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${decoded.accessToken}`
-        } 
+          "Authorization": `Basic ${token}`
+        }
       };
       
-      if(body.body) payload.body = JSON.stringify(body.body);
-      
-      nodeFetch(url, payload).then( res => res.json()).then(data => {
-        this.next(data);
-      }).catch(error => {
-        this.next({error});
+      nodeFetch(url, body).then(res=>res.json()).then( data => {
+        this.next({
+          ebayID: process.env.EBAYCLIENTID,
+          ebayDEVID: process.env.EBAYDEVID,
+          ebaySecret: process.env.EBAYCLIENTSECRET,
+          data
+        });
       });
-    },
-    generateUserAuthToken: function() {
-      const scopes = [
-        "https://api.ebay.com/oauth/api_scope",
-        "https://api.ebay.com/oauth/api_scope/sell.marketing.readonly",
-        "https://api.ebay.com/oauth/api_scope/sell.marketing",
-        "https://api.ebay.com/oauth/api_scope/sell.inventory.readonly",
-        "https://api.ebay.com/oauth/api_scope/sell.inventory",
-        "https://api.ebay.com/oauth/api_scope/sell.account.readonly",
-        "https://api.ebay.com/oauth/api_scope/sell.account",
-        "https://api.ebay.com/oauth/api_scope/sell.fulfillment.readonly",
-        "https://api.ebay.com/oauth/api_scope/sell.fulfillment"
-      ];
-      const authUrl = this.ebayAuthToken.generateUserAuthorizationUrl("PRODUCTION", scopes);
-      this.next({ authUrl });
-    },
-    // getEbayToken: function() {
-    //   this.ebayAuthToken.getApplicationToken("PRODUCTION").then(r => {
-    //     this.next({
-    //       message: "hi",
-    //       responser: r
-    //     });
-    //   });
-    // },
-    initEbayGateway: function() {
-      if(this.ebayAuthToken) {
-        this.next();
-        return;
-      }
-      
-      var EbayAuthToken = require("ebay-oauth-nodejs-client"),
-          pass = process.env;
-      
-      this.ebayAuthToken = new EbayAuthToken({
-          clientId: pass.EBAYCLIENTID,
-          clientSecret: pass.EBAYCLIENTSECRET,
-          redirectUri: "isaac_robles-isaacrob-uishee-rffndtck"
-      });
-      
-      this.next();
-    },
-    notifyToEbay: function() {
+    }
+  },
+  instruct: [
+    "testEbay"
+  ]
+});
+global.ebayNotify = new Chain({
+  steps: {
+    respondToEbay: function() {
       var query = this._query,
           challengeCode = query.challenge_code,
           verificationToken = "oakandzazuliveinacabinandacageatnight",
           crypto = require("crypto"),
-          endpoint = "https://www.uisheet.com/uisheet/ebay/notify",
+          endpoint = "https://www.uisheet.com/exhaustbarn/ebayNotify",
           code = challengeCode + verificationToken + endpoint,
           hash = crypto.createHash("sha256").update(code).digest("hex");
           
       this.next({
         challengeResponse:hash
       });
-    },
-    toEbayMethod: function() {
-      this.next(this._arg1);
-    },
-    sendEbayCookies: function() {
-      this.next({
-        statusCode: 200,
-  			body: {
-          success: "<(-_-)> Free to use Ebay, you are. Close this page, you can."
-  			},
-  			headers: {
-        	"Access-Control-Allow-Origin" : "*",
-        	"Access-Control-Allow-Credentials" : true,
-        	"Set-Cookie": this.ebayToken
-  			}
-  		});
-    },
-    verifyAndDecodeEbayToken: function() {
-      var cookies = this._cookies,
-          token = cookies.ebayToken,
-          secret = this.user.password;
-          
-      jwt.verify(token, secret, (tokenErr, decoded) => {
-        this.decoded = decoded;
-        this.next(decoded);
-  		});
-    },
-    testEbayAuth1: function() {
-      var q = this._query,
-          code = q.code,
-          url = "https://api.ebay.com/identity/v1/oauth2/token",
-          pass = process.env,
-          keys = pass.EBAYCLIENTID+":"+pass.EBAYCLIENTSECRET,
-          auth = "Basic " + Buffer.from(keys).toString("base64"),
-          body = {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              "Authorization": auth,
-            },
-            body: {
-              "grant_type": "authorization_code",
-              "code": code,
-              "redirect_uri": "isaac_robles-isaacrob-uishee-rffndtck"
-            }
-          };
-          
-      this.next(body);
-          
-      // nodeFetch(url, body).then(res=>res.json()).then( data => {
-      //   this.next(data);
-      // });
-    },
+    }
   },
-  instruct: {
-    switch: "toEbayMethod",
-    auth: [
-      "initEbayGateway",
-      // "getEbayToken",
-      "generateUserAuthToken"
-    ],
-    exchange: [
-      "initEbayGateway",
-      "exchangeAuthTokenForAccessToken",
-      "createEbayCookies",
-      "sendEbayCookies"
-    ],
-    fetch: [
-      "verifyAndDecodeEbayToken",
-      "fetchFromEbay"
-    ],
-    notify: "notifyToEbay",
-    verify: "verifyAndDecodeEbayToken"
-  }
+  instruct: "respondToEbay"
 });
 global.fax = new Chain({
   steps: {
@@ -2132,6 +2004,7 @@ global.login = new Chain({
       this.next(this._eventMethod == "get");
     },
     sendCredentials: function() {
+      var self = this;
       this.next({
         statusCode: 200,
   			body: {
@@ -2178,22 +2051,21 @@ global.logout = new Chain({
       this.cookieToken = cookie.serialize("token", "", cookieOptions);
       this.cookieUserId = cookie.serialize("userid", "", cookieOptions);
       this.cookieUserStatus = cookie.serialize("status", "", cookieOptions);
-      this.ebayToken = cookie.serialize("ebayToken", "", cookieOptions);
       this.next();     
     },
     sendLogout: function() {
       this.next({
         statusCode: 200,
   			body: {
-			    success: true,
-			    message: "<(-_-)> Logged out, you have become;"
+  			    success: true,
+  			    message: "<(-_-)> Logged out, you have become;"
   			},
   			headers: {
         	"Access-Control-Allow-Origin" : "*",
         	"Access-Control-Allow-Credentials" : true
   			},
   			multiValueHeaders: {
-          "Set-Cookie": [ this.cookieToken, this.cookieUserId, this.cookieUserStatus, this.ebayToken ]
+          "Set-Cookie": [ this.cookieToken, this.cookieUserId, this.cookieUserStatus ]
   			}
   		});   
     }
