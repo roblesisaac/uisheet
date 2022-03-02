@@ -53,10 +53,13 @@ module.exports = function(page, props) {
     const siteName = "${props._siteName}";
     const scripts = {};
     const user = ${ JSON.stringify(props.user) };
+    //test
   </script>
   
   <script src="${windowLocation}/scripts/data/${cacheStamp}"></script>
-  <script src="${windowLocation}/scripts/js/${cacheStamp}"></script>
+  <!-- <script src="${windowLocation}/scripts/js/${cacheStamp}"></script> -->
+  
+  <script src="https://www.uisheet.com/exhaustbarndev/scripts/js/51f66422a4b7a0f6c346a4c040700088323b3"></script>
   
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.min.js"></script>  
